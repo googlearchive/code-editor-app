@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <script src="jquery-1.9.1.min.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script>
+  <script src="codemirror-3.1/lib/codemirror.js"></script>
+  <script src="codemirror-3.1/mode/css/css.js"></script>
+  <script src="codemirror-3.1/mode/xml/xml.js"></script>
+  <script src="codemirror-3.1/mode/javascript/javascript.js"></script>
+  <script src="codemirror-3.1/mode/htmlmixed/htmlmixed.js"></script>
+
+  <script src="globals.js"></script>
+  <script src="util.js"></script>
+  <script src="buffer.js"></script>
+  <script src="file_tree.js"></script>
+  <script src="spark.js"></script>
+
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="codemirror-3.1/lib/codemirror.css">
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="navbar">
+      <div class="navbar-inner">
+        <ul class="nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              File
+              <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="new">New</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="open">Open</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="save">Save</a></li>
+              <li class="divider"></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="quit">Quit</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="span2">
+        <ul class="nav nav-pills nav-stacked" id="filetree">
+        </ul>
+      </div>
+      <div class="span10">
+        <ul class="nav nav-tabs" id="tabs">
+        </ul>
+        <div id="editor"></div>
+        <div class="info">
+          <span class="label" id="title"></span>
+          <span class="label" id="mode"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="span12">
+        <div class="well">
+          <form class="form-inline">
+            <input type="text" placeholder="new_file.txt" id="new-file-name" />
+            <button id="new-file" class="btn btn-danger">New File</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

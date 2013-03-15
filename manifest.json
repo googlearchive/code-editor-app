@@ -1,0 +1,24 @@
+{
+  "name": "Spark",
+  "version": "0.0",
+  "manifest_version": 2,
+  "minimum_chrome_version": "26",
+  "description": "Chrome App Builder.",
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+
+  "permissions": [
+    "contextMenus",
+    "unlimitedStorage"
+  ],
+
+  "icons": {
+    "16":  "img/16x16/file_edit.png",
+    "32":  "img/32x32/file_edit.png",
+    "64":  "img/64x64/file_edit.png",
+    "128": "img/128x128/file_edit.png"
+  }
+}
