@@ -23,14 +23,18 @@ Spark = function() {
 
   this.editor.on('change', this.onEditorChange.bind(this));
 
-  $("#new-file").click(this.handleNewButton.bind(this));
-  $("#save").click(this.handleSaveButton.bind(this));
+  $("#new-button").click(this.handleNewButton.bind(this));
+  $("#run-button").click(this.handleRunButton.bind(this));
+  $("#publish-button").click(this.handlePublishButton.bind(this));
+  $("#export-button").click(this.handleExportButton.bind(this));
 
   window.addEventListener("bufferSwitch", this.onBufferSwitch.bind(this));
 
   this.currentBuffer = null;
 
   window.setInterval(this.onSaveTimer.bind(this), 2000);
+
+  $("#alert").hide();
 };
 
 Spark.prototype.onSaveTimer = function() {
@@ -57,17 +61,30 @@ Spark.prototype.onBufferSwitch = function(e) {
   this.editor.swapDoc(buffer.doc);
 };
 
+Spark.prototype.setAlert = function(text) {
+  $("#alert-text").text(text);
+  $("#alert").show();
+};
+
 Spark.prototype.handleNewButton = function(e) {
   e.preventDefault();
   var newFileName = $("#new-file-name").val();
   this.fileTree.createNewFile(newFileName);
 }
 
-Spark.prototype.handleSaveButton = function() {
-  if (this.currentBuffer) {
-    this.currentBuffer.save();
-    this.isEditorDirty = false;
-  }
+Spark.prototype.handleRunButton = function(e) {
+  e.preventDefault();
+  this.setAlert("Run isn't implemented yet.");
+}
+
+Spark.prototype.handlePublishButton = function(e) {
+  e.preventDefault();
+  this.setAlert("Publish isn't implemented yet.");
+}
+
+Spark.prototype.handleExportButton = function(e) {
+  e.preventDefault();
+  this.setAlert("Export isn't implemented yet.");
 }
 
 chrome.contextMenus.onClicked.addListener(function(info) {

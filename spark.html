@@ -24,28 +24,32 @@
 
 <body>
   <div class="container">
-    <div class="navbar">
-      <div class="navbar-inner">
-        <ul class="nav">
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              File
-              <b class="caret"></b>
-            </a>
-            <ul class="dropdown-menu">
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="new">New</a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="open">Open</a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="save">Save</a></li>
-              <li class="divider"></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="quit">Quit</a></li>
-            </ul>
-          </li>
-        </ul>
+
+    <div class="row">
+      <div class="span12">
+        <div class="well">
+          <button id="run-button" class="btn btn-primary">Run</button>
+          <button id="publish-button" class="btn">Publish</button>
+          <button id="export-button" class="btn">Export</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" id="alert">
+      <div class="span10 offset1">
+        <div class="alert">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <span id="alert-text"></span>
+        </div>
       </div>
     </div>
 
     <div class="row">
       <div class="span2">
+        <select id="project-chooser">
+          <option>Hello World</option>
+          <option>Another project</option>
+        </select>
         <ul class="nav nav-pills nav-stacked" id="filetree">
         </ul>
       </div>
@@ -54,8 +58,8 @@
         </ul>
         <div id="editor"></div>
         <div class="info">
-          <span class="label" id="title"></span>
-          <span class="label" id="mode"></span>
+          <span class="label label-success" id="title"></span>
+          <span class="label label-success" id="mode"></span>
         </div>
       </div>
     </div>
@@ -63,9 +67,10 @@
     <div class="row">
       <div class="span12">
         <div class="well">
+
           <form class="form-inline">
             <input type="text" placeholder="new_file.txt" id="new-file-name" />
-            <button id="new-file" class="btn btn-danger">New File</button>
+            <button id="new-button" class="btn btn-danger">Create File</button>
           </form>
         </div>
       </div>

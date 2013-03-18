@@ -22,6 +22,7 @@ Buffer.prototype.switchTo = function() {
   var event = new CustomEvent("bufferSwitch",
     { detail: { buffer: this }});
   window.dispatchEvent(event);
+  this.handleDocumentChange();
 };
 
 Buffer.prototype.handleDocumentChange = function() {

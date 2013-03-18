@@ -1,10 +1,14 @@
 .CodeMirror {
   border: 1px solid #eee;
-  height: 600px;
+  height: 540px;
 }
 
 .CodeMirror-scroll {
-  height: 600px;
+  height: 540px;
   overflow-y: hidden;
   overflow-x: auto;
+}
+
+#project-chooser {
+  width: 160px;
 }
