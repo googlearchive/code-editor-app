@@ -12,6 +12,7 @@
 
   "permissions": [
     "contextMenus",
+    { "fileSystem": ["write"] },
     "unlimitedStorage"
   ],
 

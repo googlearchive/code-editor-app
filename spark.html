@@ -3,6 +3,7 @@
 <head>
 
   <script src="jquery-1.9.1.min.js"></script>
+  <script src="jszip/jszip.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
   <script src="codemirror-3.1/lib/codemirror.js"></script>
   <script src="codemirror-3.1/mode/css/css.js"></script>
@@ -28,9 +29,14 @@
     <div class="row">
       <div class="span12">
         <div class="well">
-          <button id="run-button" class="btn btn-primary">Run</button>
-          <button id="publish-button" class="btn">Publish</button>
-          <button id="export-button" class="btn">Export</button>
+          <button id="run-button" class="btn btn-primary tt"
+            title="Reloads and runs the project in Chrome.">Run</button>
+          <button id="test-button" class="btn tt"
+            title="Runs the project's unit tests.">Test</button>
+          <button id="publish-button" class="btn tt"
+            title="Uploads the project's output to the Chrome Web Store.">Publish</button>
+          <button id="export-button" class="btn tt"
+            title="Exports the entire project as a zip file.">Export</button>
         </div>
       </div>
     </div>
@@ -70,7 +76,8 @@
 
           <form class="form-inline">
             <input type="text" placeholder="new_file.txt" id="new-file-name" />
-            <button id="new-button" class="btn btn-danger">Create File</button>
+            <button id="new-button" class="btn btn-danger tt"
+              title="Creates a new, empty file.">Create File</button>
           </form>
         </div>
       </div>
