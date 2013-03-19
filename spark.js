@@ -11,8 +11,6 @@ Spark = function() {
       errorHandler);
   }
 
-  this.initContextMenu();
-
   var spark = this;
   this.editor = CodeMirror(
     document.getElementById("editor"),
