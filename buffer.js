@@ -54,11 +54,6 @@ Buffer.prototype.handleDocumentChange = function() {
   document.getElementById("mode").innerHTML = modeName;
 }
 
-Buffer.prototype.setFile = function(theFileEntry, isWritable) {
-  fileEntry = theFileEntry;
-  hasWriteAccess = isWritable;
-}
-
 Buffer.prototype.open = function() {
   var buffer = this;
   buffer.fileEntry.file(function(file) {
@@ -99,32 +94,3 @@ Buffer.prototype.save = function() {
     fileWriter.truncate(0);
   }, errorHandler);
 }
-
-Buffer.prototype.onChosenFileToOpen = function(theFileEntry) {
-  setFile(theFileEntry, true);
-  readFileIntoEditor(theFileEntry);
-};
-
-Buffer.prototype.onChosenDirectoryToOpen = function(theDirectoryEntry) {
-  console.log("chosen dir");
-  directoryEntry = theDirectoryEntry;
-  directoryEntry.getFile('myFile.txt', {create: true}, onChosenFileToOpen);
-};
-
-Buffer.prototype.onWritableFileToOpen = function(theFileEntry) {
-  setFile(theFileEntry, true);
-  readFileIntoEditor(theFileEntry);
-};
-
-Buffer.prototype.onChosenFileToSave = function(theFileEntry) {
-  setFile(theFileEntry, true);
-  writeEditorToFile(theFileEntry);
-};
-
-Buffer.prototype.onActive = function() {
-
-};
-
-Buffer.prototype.onInactive = function() {
-
-};

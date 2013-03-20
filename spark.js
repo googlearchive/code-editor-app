@@ -53,12 +53,8 @@ Spark.prototype.onEditorChange = function(instance, changeObj) {
 };
 
 Spark.prototype.onBufferSwitch = function(e) {
-  if (this.currentBuffer) {
-    this.currentBuffer.onInactive();
-  }
   this.currentBuffer = e.detail.buffer;
   var buffer = this.currentBuffer;
-  buffer.onActive();
 
   $("#tabs").children().removeClass("active");
   buffer.tabElement.addClass("active");
@@ -113,38 +109,34 @@ Spark.prototype.exportProject = function(fileEntry) {
     }, errorHandler);
   }
 
+  var entries = [];
   var zipEntries = function() {
     if (entries.length) {
       var entry = entries.pop();
-      entry.file(function(file) {
-        var fileReader = new FileReader();
-        fileReader.onload = function(e) {
-          zip.file(entry.name, e.target.result);
-          zipEntries();
-        };
-        fileReader.onerror = function(e) {
-          console.log("Error while zipping: " + e.toString());
-        };
-        fileReader.readAsText(file);
-      }, errorHandler);
+      if (entry.isFile) {
+        entry.file(function(file) {
+          var fileReader = new FileReader();
+          fileReader.onload = function(e) {
+            zip.file(entry.name, e.target.result, { binary: true });
+            zipEntries();
+          };
+          fileReader.onerror = function(e) {
+            console.log("Error while zipping: " + e.toString());
+          };
+          fileReader.readAsBinaryString(file);
+        }, errorHandler);
+      } else {
+        // TODO(miket): handle directories
+        zipEntries();
+      }
     } else {
       writeZipFile();
     }
   };
-
-  var dirReader = this.fileTree.projectsDir.createReader();
-  var entries = [];
-  var readEntries = function() {
-    dirReader.readEntries(function(results) {
-      if (results.length) {
-        entries = entries.concat(toArray(results));
-        readEntries();
-      } else {
-        zipEntries();
-      }
-    }, errorHandler);
-  };
-  readEntries();
+  this.filer.ls('.', function(e) {
+    entries = e;
+    zipEntries();
+  });
 };
 
 Spark.prototype.handleExportButton = function(e) {
@@ -157,7 +149,20 @@ Spark.prototype.handleExportButton = function(e) {
 Spark.prototype.onFileSystemOpened = function(fs) {
   console.log("Obtained file system");
   this.fileSystem = fs;
-  this.fileTree = new FileTree(fs);
+  this.filer = new Filer(fs);
+  this.fileTree = new FileTree(this.filer);
+
+  var spark = this;
+  var dnd = new DnDFileController('body', function(files, e) {
+    var items = e.dataTransfer.items;
+    for (var i = 0, item; item = items[i]; ++i) {
+      spark.filer.cp(item.webkitGetAsEntry(), spark.filer.cwd, null,
+        function(entry) {
+          spark.fileTree.handleCreatedEntry(entry);
+        });
+    }
+  });
+
 };
 
 $(function() {
