@@ -16,11 +16,7 @@ Spark = function() {
     document.getElementById("editor"),
     {
       mode: {name: "javascript", json: true },
-      lineNumbers: true,
-      extraKeys: {
-        "Cmd-S": function(instance) { spark.handleSaveButton.bind(spark) },
-        "Ctrl-S": function(instance) { spark.handleSaveButton.bind(spark) },
-      }
+      lineNumbers: true
     });
 
   this.editor.on('change', this.onEditorChange.bind(this));
