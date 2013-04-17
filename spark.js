@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 Spark = function() {
-  if (false) {
-    chrome.syncFileSystem.requestFileSystem(this.onFileSystemOpened);
+  if (true) {
+    chrome.syncFileSystem.requestFileSystem(this.onSyncFileSystemOpened.bind(this));
   } else {
     webkitRequestFileSystem(window.PERSISTENT, 1024 * 1024 * 10,
       this.onFileSystemOpened.bind(this),
@@ -26,6 +26,7 @@ Spark = function() {
   $("#test-button").click(this.handleTestButton.bind(this));
   $("#publish-button").click(this.handlePublishButton.bind(this));
   $("#export-button").click(this.handleExportButton.bind(this));
+  $("#project-button").click(this.handleProjectButton.bind(this));
 
   window.addEventListener("bufferSwitch", this.onBufferSwitch.bind(this));
 
@@ -36,6 +37,48 @@ Spark = function() {
   $(".tt").tooltip({ 'placement': 'bottom' });
 
   $("#alert").hide();
+
+  var ss = $('#project-chooser');
+  // TODO(grv) : remember last loaded project name.
+  $('#project-chooser').change(this.onProjectSelect.bind(this));
+
+  this.refreshProjectList.bind(this);
+  this.refreshProjectList();
+};
+
+Spark.prototype.onProjectSelect = function(e) {
+
+  var loadProjectToSyncfsCb = function() {
+    this.fileTree.refresh();
+  }
+
+  var clearFileSystemCb = function() {
+    this.ActiveProjectName = $('#project-chooser').val();
+    console.log(this.ActiveProjectName);
+    chrome.developerPrivate.loadProjectToSyncfs(
+        this.ActiveProjectName, loadProjectToSyncfsCb.bind(this));
+  };
+
+  var exportFolderCb = function() {
+    this.fileTree.clearFileSystem(clearFileSystemCb.bind(this));
+  };
+
+  chrome.developerPrivate.exportSyncfsFolderToLocalfs(
+      this.ActiveProjectName, exportFolderCb.bind(this));
+};
+
+Spark.prototype.ActiveProjectName = 'untitled';
+
+Spark.prototype.refreshProjectList = function() {
+  $('#project-chooser').empty();
+  chrome.developerPrivate.getProjectsInfo(function(project_infos) {
+    for (var i = 0; i < project_infos.length; ++i) {
+      var name = project_infos[i];
+      $('#project-chooser').append(
+          $('<option>', { key : name["name"] }).text(name["name"]));
+    }
+  });
+
 };
 
 Spark.prototype.onSaveTimer = function() {
@@ -69,6 +112,27 @@ Spark.prototype.handleNewButton = function(e) {
   this.fileTree.createNewFile(newFileName);
 };
 
+Spark.prototype.handleProjectButton = function(e) {
+  e.preventDefault();
+
+  var clearFileSystemCb = function() {
+    this.ActiveProjectName = $('#new-project-name').val();
+    var exportCb = function() {
+      this.refreshProjectList();
+    };
+
+    chrome.developerPrivate.exportSyncfsFolderToLocalfs(
+        this.ActiveProjectName, exportCb.bind(this));
+  }
+
+  var exportFolderCb = function() {
+    this.fileTree.clearFileSystem(clearFileSystemCb.bind(this));
+  }
+
+  chrome.developerPrivate.exportSyncfsFolderToLocalfs(
+      this.ActiveProjectName, exportFolderCb.bind(this));
+};
+
 Spark.prototype.handleRunButton = function(e) {
   e.preventDefault();
   this.setAlert("Run isn't implemented yet.");
@@ -76,6 +140,11 @@ Spark.prototype.handleRunButton = function(e) {
 
 Spark.prototype.handleTestButton = function(e) {
   e.preventDefault();
+  var exportFolderCb = function() {
+    chrome.developerPrivate.loadProject(this.ActiveProjectName, function() {});
+  };
+  chrome.developerPrivate.exportSyncfsFolderToLocalfs(
+      this.ActiveProjectName, exportFolderCb.bind(this));
   this.setAlert("Test isn't implemented yet.");
 };
 
@@ -148,7 +217,7 @@ Spark.prototype.onFileSystemOpened = function(fs) {
   this.filer = new Filer(fs);
   this.fileTree = new FileTree(this.filer);
 
-  var spark = this;
+  /*var spark = this;
   var dnd = new DnDFileController('body', function(files, e) {
     var items = e.dataTransfer.items;
     for (var i = 0, item; item = items[i]; ++i) {
@@ -157,7 +226,26 @@ Spark.prototype.onFileSystemOpened = function(fs) {
           spark.fileTree.handleCreatedEntry(entry);
         });
     }
-  });
+  });*/
+
+};
+
+Spark.prototype.onSyncFileSystemOpened = function(fs) {
+  console.log("Obtained sync file system");
+  this.fileSystem = fs;
+  this.filer = new Filer(fs);
+  this.fileTree = new FileTree(this.filer);
+
+  /*var spark = this;
+  var dnd = new DnDFileController('body', function(files, e) {
+    var items = e.dataTransfer.items;
+    for (var i = 0, item; item = items[i]; ++i) {
+      spark.filer.cp(item.webkitGetAsEntry(), spark.filer.cwd, null,
+        function(entry) {
+          spark.fileTree.handleCreatedEntry(entry);
+        });
+    }
+  });*/
 
 };
 

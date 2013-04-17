@@ -15,6 +15,10 @@ Buffer = function(fileEntry) {
   this.switchTo();
 };
 
+Buffer.prototype.removeTab = function() {
+  this.tabElement.remove();
+}
+
 Buffer.prototype.markDirty = function() {
   // TODO(miket): we save so quickly that a visual indicator of unsaved work
   // would be distracting. Perhaps instead raise an alert if saving fails?

@@ -5,18 +5,19 @@
 FileTree = function(filer) {
   this.filer = filer;
   this.parentElement = $('#filetree');
-
-  var fileTree = this;
-  filer.mkdir(this.PROJECT_DIR, false, function(createdDirEntry) {
-    filer.cd(createdDirEntry.fullPath, function(dirEntry) {
-      filer.ls(dirEntry, fileTree.handleProjectsLs.bind(fileTree),
-        errorHandler);
-    });
-  });
-
+  this.refresh();
 };
 
-FileTree.prototype.PROJECT_DIR = 'projects';
+FileTree.prototype.refresh = function() {
+  var fileTree = this;
+  var reader = this.filer.fs.root.createReader();
+  var handleProjectLs = function(entries) {
+    for (var i = 0; i < entries.length; ++i) {
+      this.handleCreatedEntry(entries[i]);
+    }
+  };
+  reader.readEntries(handleProjectLs.bind(this));
+}
 
 FileTree.prototype.handleProjectsLs = function(entries) {
   var fileTree = this;
@@ -25,9 +26,33 @@ FileTree.prototype.handleProjectsLs = function(entries) {
   });
 };
 
+FileTree.prototype.clearFileSystem = function(callback) {
+  var reader = this.filer.fs.root.createReader();
+  this.removeCallback = callback;
+  var removeCb = function(entries) {
+  this.pendingRemove = entries.length;
+  // Call the callback when the filesystem is already clear.
+  if (this.pendingRemove == 0)
+    this.removeCallback();
+    for (var i = 0; i < entries.length; ++i) {
+      var fileRemove = function() {
+        this.pendingRemove--;
+        if (this.pendingRemove == 0) {
+          this.parentElement.empty();
+          console.log('file system cleared.');
+          this.removeCallback();
+        }
+      };
+      entries[i].remove(fileRemove.bind(this));
+    }
+  };
+
+  reader.readEntries(removeCb.bind(this));
+}
+
 FileTree.prototype.createNewFile = function(name) {
-  this.filer.create(name, true, this.handleCreatedEntry.bind(this),
-    errorHandler);
+  this.filer.fs.root.getFile(
+      name, {create: true}, this.handleCreatedEntry.bind(this), errorHandler);
 }
 
 FileTree.prototype.handleCreatedEntry = function(fileEntry) {
@@ -45,9 +70,11 @@ FileTree.prototype.handleCreatedEntry = function(fileEntry) {
 
   var filer = this.filer;
   deleteIcon.click(function() {
-    filer.rm(fileEntry.fullPath, function() {
+    fileEntry.remove(function() {
+      console.log(fileEntry.fullPath + ' removed.');
       fragment.remove();
-      // TODO(miket): switch to another tab, and then remove this tab
+      fileEntry.buffer.removeTab();
+      // TODO(grv): switch to another tab, and then remove this tab
     });
   });
 

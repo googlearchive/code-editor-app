@@ -39,6 +39,12 @@
             title="Uploads the project's output to the Chrome Web Store.">Publish</button>
           <button id="export-button" class="btn tt"
             title="Exports the entire project as a zip file.">Export</button>
+          <br/> <br/>
+          <form class="form-inline">
+            <input type="text" placeholder="project_name" id="new-project-name" />
+            <button id="project-button" class="btn btn-danger tt"
+              title="Creates a new project.">Add Project</button>
+          </form>
         </div>
       </div>
     </div>
@@ -55,8 +61,6 @@
     <div class="row">
       <div class="span2">
         <select id="project-chooser">
-          <option>Hello World</option>
-          <option>Another project</option>
         </select>
         <ul class="nav nav-pills nav-stacked" id="filetree">
         </ul>

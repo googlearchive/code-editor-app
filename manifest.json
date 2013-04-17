@@ -14,7 +14,9 @@
   "permissions": [
     "contextMenus",
     { "fileSystem": ["write"] },
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "syncFileSystem",
+    "developerPrivate"
   ],
 
   "icons": {
