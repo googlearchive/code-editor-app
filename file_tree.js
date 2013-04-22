@@ -11,8 +11,10 @@ FileTree = function(filer) {
 FileTree.prototype.refresh = function() {
   var fileTree = this;
   var reader = this.filer.fs.root.createReader();
+  this.entries = {};
   var handleProjectLs = function(entries) {
     for (var i = 0; i < entries.length; ++i) {
+      this.entries[entries[i].name] = entries[i];
       this.handleCreatedEntry(entries[i]);
     }
   };
@@ -26,29 +28,40 @@ FileTree.prototype.handleProjectsLs = function(entries) {
   });
 };
 
-FileTree.prototype.clearFileSystem = function(callback) {
-  var reader = this.filer.fs.root.createReader();
-  this.removeCallback = callback;
-  var removeCb = function(entries) {
-  this.pendingRemove = entries.length;
-  // Call the callback when the filesystem is already clear.
-  if (this.pendingRemove == 0)
-    this.removeCallback();
-    for (var i = 0; i < entries.length; ++i) {
-      var fileRemove = function() {
-        this.pendingRemove--;
-        if (this.pendingRemove == 0) {
-          this.parentElement.empty();
-          console.log('file system cleared.');
-          this.removeCallback();
-        }
-      };
-      entries[i].remove(fileRemove.bind(this));
-    }
-  };
-
-  reader.readEntries(removeCb.bind(this));
+FileTree.prototype.removeDeletedEntries = function() {
+  for (var fname in this.entries) {
+    if (this.entries[fname].deleted)
+      delete this.entries[fname];
+  }
 }
+
+FileTree.prototype.clearFileSystem = function(callback) {
+  this.removeDeletedEntries();
+  this.removeCallback = callback;
+  this.pendingRemove = Object.keys(this.entries).length;
+  // Call the callback when the filesystem is already clear.
+  if (this.pendingRemove == 0) {
+    this.removeCallback();
+    return;
+  }
+
+  for (var fname in this.entries) {
+    var entry = this.entries[fname];
+    if (entry.active) {
+      entry.buffer.removeTab();
+    }
+    var fileRemove = function() {
+      this.pendingRemove--;
+      if (this.pendingRemove == 0) {
+        this.parentElement.empty();
+        this.entries = {};
+        console.log('file system cleared.');
+        this.removeCallback();
+      }
+    }
+    entry.remove(fileRemove.bind(this));
+  }
+};
 
 FileTree.prototype.createNewFile = function(name) {
   this.filer.fs.root.getFile(
@@ -56,6 +69,9 @@ FileTree.prototype.createNewFile = function(name) {
 }
 
 FileTree.prototype.handleCreatedEntry = function(fileEntry) {
+  fileEntry.active = false;
+  this.entries[fileEntry.name] = fileEntry;
+
   var fragment = $('<li>');
 
   var mainIcon = $('<i>');
@@ -73,12 +89,15 @@ FileTree.prototype.handleCreatedEntry = function(fileEntry) {
     fileEntry.remove(function() {
       console.log(fileEntry.fullPath + ' removed.');
       fragment.remove();
-      fileEntry.buffer.removeTab();
+      if (fileEntry.active)
+        fileEntry.buffer.removeTab();
+      fileEntry.deleted = true;
       // TODO(grv): switch to another tab, and then remove this tab
     });
   });
 
   fragment.dblclick(function() {
+    fileEntry.active = true;
     if (!fileEntry.buffer) {
       // This feels wrong.
       fileEntry.buffer = new Buffer(fileEntry);
@@ -88,4 +107,5 @@ FileTree.prototype.handleCreatedEntry = function(fileEntry) {
   });
 
   this.parentElement.append(fragment);
+  $('#new-file-name').val('');
 };

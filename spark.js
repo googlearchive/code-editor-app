@@ -23,8 +23,8 @@ Spark = function() {
 
   $("#new-button").click(this.handleNewButton.bind(this));
   $("#run-button").click(this.handleRunButton.bind(this));
-  $("#test-button").click(this.handleTestButton.bind(this));
-  $("#publish-button").click(this.handlePublishButton.bind(this));
+  //$("#test-button").click(this.handleTestButton.bind(this));
+  //$("#publish-button").click(this.handlePublishButton.bind(this));
   $("#export-button").click(this.handleExportButton.bind(this));
   $("#project-button").click(this.handleProjectButton.bind(this));
 
@@ -43,7 +43,7 @@ Spark = function() {
   $('#project-chooser').change(this.onProjectSelect.bind(this));
 
   this.refreshProjectList.bind(this);
-  this.refreshProjectList();
+  this.refreshProjectList(this.ActiveProjectName);
 };
 
 Spark.prototype.onProjectSelect = function(e) {
@@ -54,7 +54,6 @@ Spark.prototype.onProjectSelect = function(e) {
 
   var clearFileSystemCb = function() {
     this.ActiveProjectName = $('#project-chooser').val();
-    console.log(this.ActiveProjectName);
     chrome.developerPrivate.loadProjectToSyncfs(
         this.ActiveProjectName, loadProjectToSyncfsCb.bind(this));
   };
@@ -69,7 +68,7 @@ Spark.prototype.onProjectSelect = function(e) {
 
 Spark.prototype.ActiveProjectName = 'untitled';
 
-Spark.prototype.refreshProjectList = function() {
+Spark.prototype.refreshProjectList = function(active_project) {
   $('#project-chooser').empty();
   chrome.developerPrivate.getProjectsInfo(function(project_infos) {
     for (var i = 0; i < project_infos.length; ++i) {
@@ -77,6 +76,8 @@ Spark.prototype.refreshProjectList = function() {
       $('#project-chooser').append(
           $('<option>', { key : name["name"] }).text(name["name"]));
     }
+    $('#project-chooser').val(active_project);
+    $('#new-project-name').val('');
   });
 
 };
@@ -118,7 +119,7 @@ Spark.prototype.handleProjectButton = function(e) {
   var clearFileSystemCb = function() {
     this.ActiveProjectName = $('#new-project-name').val();
     var exportCb = function() {
-      this.refreshProjectList();
+      this.refreshProjectList(this.ActiveProjectName);
     };
 
     chrome.developerPrivate.exportSyncfsFolderToLocalfs(
@@ -135,23 +136,21 @@ Spark.prototype.handleProjectButton = function(e) {
 
 Spark.prototype.handleRunButton = function(e) {
   e.preventDefault();
-  this.setAlert("Run isn't implemented yet.");
-};
-
-Spark.prototype.handleTestButton = function(e) {
-  e.preventDefault();
   var exportFolderCb = function() {
     chrome.developerPrivate.loadProject(this.ActiveProjectName, function() {});
   };
   chrome.developerPrivate.exportSyncfsFolderToLocalfs(
       this.ActiveProjectName, exportFolderCb.bind(this));
-  this.setAlert("Test isn't implemented yet.");
+};
+
+/*Spark.prototype.handleTestButton = function(e) {
+  e.preventDefault();
 };
 
 Spark.prototype.handlePublishButton = function(e) {
   e.preventDefault();
   this.setAlert("Publish isn't implemented yet.");
-};
+};*/
 
 Spark.prototype.exportProject = function(fileEntry) {
   var zip = new JSZip();
