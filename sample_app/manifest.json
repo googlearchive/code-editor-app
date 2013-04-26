@@ -1,0 +1,11 @@
+{
+  "name": "Hello Everyone",
+  "manifest_version": 2,
+  "version": "0.0.1",
+  "description": "Sample App",
+  "app": {
+    "background": {
+      "scripts": ["main.js"]
+    }
+  }
+}

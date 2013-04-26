@@ -12,11 +12,17 @@ Spark = function() {
   }
 
   var spark = this;
+
+  CodeMirror.commands.autocomplete = function(cm) {
+    CodeMirror.showHint(cm, CodeMirror.javascriptHint);
+  };
+
   this.editor = CodeMirror(
     document.getElementById("editor"),
     {
       mode: {name: "javascript", json: true },
-      lineNumbers: true
+      lineNumbers: true,
+      extraKeys: {"Ctrl-Space": "autocomplete"}
     });
 
   this.editor.on('change', this.onEditorChange.bind(this));
@@ -119,7 +125,11 @@ Spark.prototype.handleProjectButton = function(e) {
   var clearFileSystemCb = function() {
     this.ActiveProjectName = $('#new-project-name').val();
     var exportCb = function() {
-      this.refreshProjectList(this.ActiveProjectName);
+      var templateLoadCb = function() {
+        this.refreshProjectList(this.ActiveProjectName);
+        this.fileTree.refresh();
+      }
+      this.templateLoader.loadTemplate(templateLoadCb.bind(this));
     };
 
     chrome.developerPrivate.exportSyncfsFolderToLocalfs(
@@ -137,7 +147,11 @@ Spark.prototype.handleProjectButton = function(e) {
 Spark.prototype.handleRunButton = function(e) {
   e.preventDefault();
   var exportFolderCb = function() {
-    chrome.developerPrivate.loadProject(this.ActiveProjectName, function() {});
+    chrome.developerPrivate.loadProject(this.ActiveProjectName,
+        function(item_id) {
+          /*chrome.developerPrivate.launchApp(item_id, function() {
+          });*/
+        });
   };
   chrome.developerPrivate.exportSyncfsFolderToLocalfs(
       this.ActiveProjectName, exportFolderCb.bind(this));
@@ -234,6 +248,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   this.fileSystem = fs;
   this.filer = new Filer(fs);
   this.fileTree = new FileTree(this.filer);
+  this.templateLoader = new TemplateLoader(this.fileTree);
 
   /*var spark = this;
   var dnd = new DnDFileController('body', function(files, e) {
