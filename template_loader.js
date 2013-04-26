@@ -8,22 +8,30 @@ TemplateLoader = function(filetree) {
 }
 
 TemplateLoader.prototype.loadTemplate = function(callback) {
-  this.pendingWrites = 3;
+  this.pendingWrites = 8;
   this.callback = callback;
   this.readFile(chrome.runtime.getURL('sample_app/manifest.json'),
       'manifest.json');
-  this.readFile(chrome.runtime.getURL('sample_app/window.html'), 'window.html');
+  this.readFile(chrome.runtime.getURL('sample_app/index.html'), 'index.html');
   this.readFile(chrome.runtime.getURL('sample_app/main.js'), 'main.js');
+  this.readFile(chrome.runtime.getURL('sample_app/main.css'), 'main.css');
+  this.readFile(chrome.runtime.getURL('sample_app/icon_16.png'), 'icon_16.png');
+  this.readFile(chrome.runtime.getURL('sample_app/README.md'), 'README.md');
+  this.readFile(chrome.runtime.getURL('sample_app/icon_128.png'),
+      'icon_128.png');
+  this.readFile(chrome.runtime.getURL('sample_app/hello_world.png'),
+      'hello_world.png');
 }
 
 TemplateLoader.prototype.readFile = function(url, name) {
   var file = new XMLHttpRequest();
   file.open("GET", url, true);
+  file.responseType = "blob";
   var templateLoader = this;
   file.onreadystatechange = function() {
     if (file.readyState === 4)
       if (file.status === 200)
-        templateLoader.writeFile(name, file.responseText);
+        templateLoader.writeFile(name, file.response);
   }
   file.send(null);
 }
