@@ -73,6 +73,15 @@ FileTree.prototype.clearFileSystem = function(callback) {
 };
 
 FileTree.prototype.createNewFile = function(name) {
+  var entry = this.entries[name];
+  if (entry) {
+    console.log(name + ': file already exist.');
+    if (!entry.buffer)
+      entry.buffer = new Buffer(entry);
+    entry.buffer.switchTo();
+    $('#new-file-name').val('');
+    return;
+  }
   this.filer.fs.root.getFile(
       name, {create: true}, this.handleCreatedEntry.bind(this), errorHandler);
 }
