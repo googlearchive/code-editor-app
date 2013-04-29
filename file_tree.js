@@ -10,6 +10,7 @@ FileTree = function(filer) {
 
 FileTree.prototype.refresh = function() {
   var fileTree = this;
+  this.parentElement.empty();
   var reader = this.filer.fs.root.createReader();
   this.entries = {};
   var handleProjectLs = function(entries) {

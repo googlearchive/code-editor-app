@@ -66,15 +66,15 @@ Spark.prototype.onProjectSelect = function(e) {
 
 Spark.prototype.ActiveProjectName = 'untitled';
 
-Spark.prototype.refreshProjectList = function(active_project) {
+Spark.prototype.refreshProjectList = function(activeProject) {
   $('#project-chooser').empty();
-  chrome.developerPrivate.getProjectsInfo(function(project_infos) {
-    for (var i = 0; i < project_infos.length; ++i) {
-      var name = project_infos[i];
+  chrome.developerPrivate.getProjectsInfo(function(projectInfos) {
+    for (var i = 0; i < projectInfos.length; ++i) {
+      var name = projectInfos[i];
       $('#project-chooser').append(
           $('<option>', { key : name["name"] }).text(name["name"]));
     }
-    $('#project-chooser').val(active_project);
+    $('#project-chooser').val(activeProject);
     $('#new-project-name').val('');
   });
 
@@ -141,8 +141,8 @@ Spark.prototype.handleRunButton = function(e) {
   e.preventDefault();
   var exportFolderCb = function() {
     chrome.developerPrivate.loadProject(this.ActiveProjectName,
-        function(item_id) {
-          /*chrome.developerPrivate.launchApp(item_id, function() {
+        function(itemId) {
+          /*chrome.developerPrivate.launchApp(itemId, function() {
           });*/
         });
   };
@@ -217,7 +217,7 @@ Spark.prototype.handleExportButton = function(e) {
     this.exportProject.bind(this));
 };
 
-Spark.prototype.loadPrefsFile = function() {
+Spark.prototype.loadPrefsFile = function(callback) {
   var spark = this;
   var handleOpenPrefs = function(entry) {
     spark.prefsEntry = entry;
@@ -231,12 +231,13 @@ Spark.prototype.loadPrefsFile = function() {
           spark.writePrefs.bind(spark);
           spark.writePrefs();
           var templateLoadCb = function() {
-            this.refreshProjectList(this.ActiveProjectName);
+            callback();
             this.fileTree.refresh();
           }
           spark.templateLoader.loadTemplate(templateLoadCb.bind(spark));
         } else {
           spark.ActiveProjectName = ev.target.result;
+          callback();
         }
       };
     });
@@ -266,9 +267,16 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   this.fileTree = new FileTree(this.filer);
   this.templateLoader = new TemplateLoader(this.fileTree);
 
-  this.loadPrefsFile();
-  this.refreshProjectList.bind(this);
-  this.refreshProjectList(this.ActiveProjectName);
+  var loadPrefsFileCb = function() {
+    var exportFolderCb = function() {
+      this.refreshProjectList.bind(this);
+      this.refreshProjectList(this.ActiveProjectName);
+    };
+    chrome.developerPrivate.exportSyncfsFolderToLocalfs(
+        this.ActiveProjectName, exportFolderCb.bind(this));
+  };
+
+  this.loadPrefsFile(loadPrefsFileCb.bind(this));
 
   var spark = this;
   var dnd = new DnDFileController('body', function(files, e) {
