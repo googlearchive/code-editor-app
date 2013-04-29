@@ -224,25 +224,6 @@ Spark.prototype.handleExportButton = function(e) {
     this.exportProject.bind(this));
 };
 
-Spark.prototype.onFileSystemOpened = function(fs) {
-  console.log("Obtained file system");
-  this.fileSystem = fs;
-  this.filer = new Filer(fs);
-  this.fileTree = new FileTree(this.filer);
-
-  /*var spark = this;
-  var dnd = new DnDFileController('body', function(files, e) {
-    var items = e.dataTransfer.items;
-    for (var i = 0, item; item = items[i]; ++i) {
-      spark.filer.cp(item.webkitGetAsEntry(), spark.filer.cwd, null,
-        function(entry) {
-          spark.fileTree.handleCreatedEntry(entry);
-        });
-    }
-  });*/
-
-};
-
 Spark.prototype.onSyncFileSystemOpened = function(fs) {
   console.log("Obtained sync file system");
   this.fileSystem = fs;
@@ -250,16 +231,40 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   this.fileTree = new FileTree(this.filer);
   this.templateLoader = new TemplateLoader(this.fileTree);
 
-  /*var spark = this;
+  var spark = this;
   var dnd = new DnDFileController('body', function(files, e) {
     var items = e.dataTransfer.items;
     for (var i = 0, item; item = items[i]; ++i) {
-      spark.filer.cp(item.webkitGetAsEntry(), spark.filer.cwd, null,
-        function(entry) {
-          spark.fileTree.handleCreatedEntry(entry);
-        });
+      var entry = item.webkitGetAsEntry();
+      var writeendCb = function() {
+        console.log('writes done.');
+      }
+      if (entry.isDirectory) {
+        var reader = entry.createReader();
+        var handleDnDFoler = function(entries) {
+          var fileEntries = [];
+          for (var i = 0; i < entries.length; ++i) {
+            if (entries[i].isDirectory) {
+              console.log('Directories are not supported currently. Skipping'
+                + ' adding: ' + entries[i].name);
+              continue;
+            }
+            fileEntries.push(entries[i]);
+          }
+
+          spark.templateLoader.writeFiles(fileEntries, writeendCb);
+          for (var i = 0; i < fileEntries.length; ++i) {
+            spark.fileTree.createNewFile(fileEntries[i].name);
+          }
+
+        };
+        reader.readEntries(handleDnDFoler.bind(this));
+      } else {
+        spark.templateLoader.writeFiles([entry], writeendCb);
+        spark.fileTree.createNewFile(entry.name);
+      }
     }
-  });*/
+  });
 
 };
 

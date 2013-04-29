@@ -5,6 +5,7 @@
 TemplateLoader = function(filetree) {
   this.filetree = filetree;
   this.pendingWrites = 0;
+  this.callback = function() {};
 }
 
 TemplateLoader.prototype.loadTemplate = function(callback) {
@@ -34,6 +35,21 @@ TemplateLoader.prototype.readFile = function(url, name) {
         templateLoader.writeFile(name, file.response);
   }
   file.send(null);
+}
+
+TemplateLoader.prototype.writeFiles = function(entries, callback) {
+  this.callback = callback;
+  this.pendingWrites = entries.length;
+  var templateLoader = this;
+  for (var i = 0; i < entries.length; ++i) {
+    entries[i].file(function(file) {
+      var reader = new FileReader();
+      reader.readAsText(file, 'utf-8');
+      reader.onload = function(ev) {
+        templateLoader.writeFile(file.name, ev.target.result)
+      };
+   }  , function() {});
+  }
 }
 
 TemplateLoader.prototype.writeFile = function(name, content) {
