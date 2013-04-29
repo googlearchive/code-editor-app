@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-FileTree = function(filer) {
+FileTree = function(filer, spark) {
   this.filer = filer;
+  this.spark = spark;
   this.parentElement = $('#filetree');
   this.refresh();
 };
@@ -58,6 +59,8 @@ FileTree.prototype.clearFileSystem = function(callback) {
     var entry = this.entries[fname];
     if (entry.active) {
       entry.buffer.removeTab();
+      if (entry.buffer.active)
+        this.spark.editor.swapDoc(CodeMirror.Doc(''));
     }
     var fileRemove = function() {
       this.pendingRemove--;
@@ -87,6 +90,7 @@ FileTree.prototype.createNewFile = function(name) {
 }
 
 FileTree.prototype.handleCreatedEntry = function(fileEntry) {
+  var fileTree = this;
   fileEntry.active = false;
   this.entries[fileEntry.name] = fileEntry;
 
@@ -107,8 +111,11 @@ FileTree.prototype.handleCreatedEntry = function(fileEntry) {
     fileEntry.remove(function() {
       console.log(fileEntry.fullPath + ' removed.');
       fragment.remove();
-      if (fileEntry.active)
+      if (fileEntry.active) {
+        if (fileEntry.buffer.active)
+          fileTree.spark.editor.swapDoc(CodeMirror.Doc(''));
         fileEntry.buffer.removeTab();
+      }
       fileEntry.deleted = true;
       // TODO(grv): switch to another tab, and then remove this tab
     });

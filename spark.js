@@ -91,8 +91,11 @@ Spark.prototype.onEditorChange = function(instance, changeObj) {
 };
 
 Spark.prototype.onBufferSwitch = function(e) {
+  if (this.currentBuffer)
+    this.currentBuffer.active = false;
   this.currentBuffer = e.detail.buffer;
   var buffer = this.currentBuffer;
+  buffer.active = true;
 
   $("#tabs").children().removeClass("active");
   buffer.tabElement.addClass("active");
@@ -264,7 +267,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   console.log("Obtained sync file system");
   this.fileSystem = fs;
   this.filer = new Filer(fs);
-  this.fileTree = new FileTree(this.filer);
+  this.fileTree = new FileTree(this.filer, this);
   this.templateLoader = new TemplateLoader(this.fileTree);
 
   var loadPrefsFileCb = function() {
