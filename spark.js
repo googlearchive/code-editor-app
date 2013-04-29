@@ -3,13 +3,7 @@
 // found in the LICENSE file.
 
 Spark = function() {
-  if (true) {
-    chrome.syncFileSystem.requestFileSystem(this.onSyncFileSystemOpened.bind(this));
-  } else {
-    webkitRequestFileSystem(window.PERSISTENT, 1024 * 1024 * 10,
-      this.onFileSystemOpened.bind(this),
-      errorHandler);
-  }
+  chrome.syncFileSystem.requestFileSystem(this.onSyncFileSystemOpened.bind(this));
 
   var spark = this;
 
@@ -47,9 +41,6 @@ Spark = function() {
   var ss = $('#project-chooser');
   // TODO(grv) : remember last loaded project name.
   $('#project-chooser').change(this.onProjectSelect.bind(this));
-
-  this.refreshProjectList.bind(this);
-  this.refreshProjectList(this.ActiveProjectName);
 };
 
 Spark.prototype.onProjectSelect = function(e) {
@@ -60,6 +51,7 @@ Spark.prototype.onProjectSelect = function(e) {
 
   var clearFileSystemCb = function() {
     this.ActiveProjectName = $('#project-chooser').val();
+    this.writePrefs();
     chrome.developerPrivate.loadProjectToSyncfs(
         this.ActiveProjectName, loadProjectToSyncfsCb.bind(this));
   };
@@ -124,6 +116,7 @@ Spark.prototype.handleProjectButton = function(e) {
 
   var clearFileSystemCb = function() {
     this.ActiveProjectName = $('#new-project-name').val();
+    this.writePrefs();
     var exportCb = function() {
       var templateLoadCb = function() {
         this.refreshProjectList(this.ActiveProjectName);
@@ -224,12 +217,58 @@ Spark.prototype.handleExportButton = function(e) {
     this.exportProject.bind(this));
 };
 
+Spark.prototype.loadPrefsFile = function() {
+  var spark = this;
+  var handleOpenPrefs = function(entry) {
+    spark.prefsEntry = entry;
+    entry.file(function(file) {
+      var reader = new FileReader();
+      reader.readAsText(file, 'utf-8');
+      reader.onload = function(ev) {
+        // This is the first run of the editor.
+        if (!ev.target.result.length) {
+          spark.ActiveProjectName = "sample_app";
+          spark.writePrefs.bind(spark);
+          spark.writePrefs();
+          var templateLoadCb = function() {
+            this.refreshProjectList(this.ActiveProjectName);
+            this.fileTree.refresh();
+          }
+          spark.templateLoader.loadTemplate(templateLoadCb.bind(spark));
+        } else {
+          spark.ActiveProjectName = ev.target.result;
+        }
+      };
+    });
+  };
+  this.filer.fs.root.getFile('prefs', {create: true}, handleOpenPrefs);
+};
+
+Spark.prototype.writePrefs = function() {
+  var spark = this;
+  this.prefsEntry.createWriter(function(writer) {
+    writer.truncate(0);
+    writer.onwriteend = function() {
+      var blob = new Blob([spark.ActiveProjectName]);
+      var size = spark.ActiveProjectName.length;
+      writer.write(blob);
+      writer.onwriteend = function() {
+        console.log('write complete.');
+      };
+    };
+  });
+};
+
 Spark.prototype.onSyncFileSystemOpened = function(fs) {
   console.log("Obtained sync file system");
   this.fileSystem = fs;
   this.filer = new Filer(fs);
   this.fileTree = new FileTree(this.filer);
   this.templateLoader = new TemplateLoader(this.fileTree);
+
+  this.loadPrefsFile();
+  this.refreshProjectList.bind(this);
+  this.refreshProjectList(this.ActiveProjectName);
 
   var spark = this;
   var dnd = new DnDFileController('body', function(files, e) {

@@ -15,6 +15,9 @@ FileTree.prototype.refresh = function() {
   var handleProjectLs = function(entries) {
     for (var i = 0; i < entries.length; ++i) {
       this.entries[entries[i].name] = entries[i];
+      // prefs file should not be visible.
+      if (entries[i].name == 'prefs')
+        continue;
       this.handleCreatedEntry(entries[i]);
     }
   };
@@ -39,6 +42,8 @@ FileTree.prototype.clearFileSystem = function(callback) {
   this.removeDeletedEntries();
   this.removeCallback = callback;
   this.pendingRemove = Object.keys(this.entries).length;
+  // We don't remove the prefs file.
+  this.pendingRemove--;
   // Call the callback when the filesystem is already clear.
   if (this.pendingRemove == 0) {
     this.removeCallback();
@@ -46,6 +51,9 @@ FileTree.prototype.clearFileSystem = function(callback) {
   }
 
   for (var fname in this.entries) {
+    // Do not remove the prefs file.
+    if (fname == 'prefs')
+      continue;
     var entry = this.entries[fname];
     if (entry.active) {
       entry.buffer.removeTab();
