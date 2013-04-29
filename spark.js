@@ -216,7 +216,7 @@ Spark.prototype.exportProject = function(fileEntry) {
 Spark.prototype.handleExportButton = function(e) {
   e.preventDefault();
   chrome.fileSystem.chooseEntry({ "type": "saveFile",
-    "suggestedName": "project.zip" },
+    "suggestedName": this.ActiveProjectName + ".zip" },
     this.exportProject.bind(this));
 };
 
