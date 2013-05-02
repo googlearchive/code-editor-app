@@ -34,6 +34,7 @@ body {
 #tabs {
   width: auto;
   max-height: 37px;
+  min-height: 37px;
   margin-bottom: 0px;
 }
 

@@ -11,12 +11,41 @@ Spark = function() {
     CodeMirror.showHint(cm, CodeMirror.javascriptHint);
   };
 
+  CodeMirror.commands.closeBuffer = function(cm) {
+    console.log('close file');
+    if (spark.currentBuffer != null) {
+      var currentBufferIndex = spark.currentBuffer.indexInTabs();
+      var previousBuffer = null;
+      
+      // Save before closing.
+      spark.currentBuffer.save();
+      spark.currentBuffer.fileEntry.buffer = null;
+      spark.currentBuffer.fileEntry.active = false;
+      spark.currentBuffer.removeTab();
+      
+      if (currentBufferIndex > 0) {
+        console.log('will switch to ' + (currentBufferIndex - 1));
+        previousBuffer = openedTabEntries[currentBufferIndex - 1];
+      } else if (openedTabEntries.length > 0) {
+        console.log('will switch to first');
+        previousBuffer = openedTabEntries[0];
+      }
+      
+      if (previousBuffer != null) {
+        previousBuffer.switchTo();
+      } else {
+        var emptyDoc = CodeMirror.Doc('');
+        spark.editor.swapDoc(emptyDoc);
+      }
+    }
+  };
+
   this.editor = CodeMirror(
     document.getElementById("editor"),
     {
       mode: {name: "javascript", json: true },
       lineNumbers: true,
-      extraKeys: {"Ctrl-Space": "autocomplete"}
+      extraKeys: {"Ctrl-Space": "autocomplete", "Ctrl-W": "closeBuffer"}
     });
 
   this.editor.on('change', this.onEditorChange.bind(this));
