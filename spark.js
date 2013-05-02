@@ -32,7 +32,11 @@ Spark = function() {
 
   this.currentBuffer = null;
 
+  // TODO(dvh): the timer should be triggered only if there's a change.
   window.setInterval(this.onSaveTimer.bind(this), 2000);
+
+  $(window).resize(this.onWindowResize.bind(this));
+  this.onWindowResize(null);
 
   $(".tt").tooltip({ 'placement': 'bottom' });
 
@@ -42,6 +46,38 @@ Spark = function() {
   // TODO(grv) : remember last loaded project name.
   $('#project-chooser').change(this.onProjectSelect.bind(this));
 };
+
+Spark.prototype.onWindowResize = function(e) {
+  var windowWidth = $(window).innerWidth();
+  var windowHeight = $(window).innerHeight();
+  var topBarHeight = $("#top-bar").outerHeight();
+  var bottomBarHeight = $("#bottom-bar").outerHeight();
+  // Hard-coded size because it won't work on launch. (dvh)
+  topBarHeight = 45;
+  bottomBarHeight = 45;
+  
+  $("#top-bar").width(windowWidth);
+  $("#main-view").width(windowWidth);
+  var mainViewHeight = windowHeight - topBarHeight - bottomBarHeight;
+  $("#main-view").height(mainViewHeight);
+  var fileTreePaneWidth = 200;
+  var editorPaneWidth = windowWidth - fileTreePaneWidth;
+  $("#editor-pane").width(editorPaneWidth);
+  $("#editor-pane").height(mainViewHeight);
+  $("#file-tree").height(mainViewHeight);
+  $("#bottom-bar").width(windowWidth);
+  var tabsHeight = $('#tabs').outerHeight();
+  // Hard-coded size because it won't work on first launch. (dvh)
+  tabsHeight = 37;
+  // CodeMirror will add 20px to show some additional information. (dvh)
+  var editorHeight = mainViewHeight - tabsHeight - 20;
+  $("#tabs").width(editorPaneWidth);
+  $("#editor").width(windowWidth);
+  $("#editor").height(editorHeight);
+  
+  $("#editor .CodeMirror").height(windowWidth);
+  $("#editor .CodeMirror").height(editorHeight);
+}
 
 Spark.prototype.onProjectSelect = function(e) {
 

@@ -1,14 +1,71 @@
-.CodeMirror {
-  border: 1px solid #eee;
-  height: 540px;
+body {
+  margin: 0px;
 }
 
-.CodeMirror-scroll {
-  height: 540px;
-  overflow-y: hidden;
-  overflow-x: auto;
+#top-bar {
+  padding-bottom: 10px;
+  padding-top: 5px;
+  padding-left: 20px;
+  padding-right: 20px;
+  min-width: 700px;
+  overflow: hidden;
+  height: 30px;
+}
+
+#bottom-bar {
+  padding-bottom: 10px;
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  height: 30px;
+}
+
+#main-view {
+  position: relative;
+}
+
+#file-tree {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 200px;
+  height: 50px;
+}
+
+#tabs {
+  height: 37px;
+  margin-bottom: 0px;
+}
+
+#editor-pane {
+  position: absolute;
+  top: 0px;
+  left: 200px;
+  width: 50px;
+  height: 50px;
+}
+
+#alert {
+  display: none;
+}
+
+#run-button {
+  margin-left: 10px;
+}
+
+#new-project-name {
+  margin-left: 10px;
 }
 
 #project-chooser {
   width: 160px;
+  margin-bottom: 0px;
+}
+
+#new-project-name {
+  margin-bottom: 0px;
+}
+
+#new-file-name {
+  margin-bottom: 0px;
 }
