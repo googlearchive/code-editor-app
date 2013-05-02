@@ -30,31 +30,25 @@
 </head>
 
 <body>
-  <div class="container">
-
-    <div class="row">
-      <div class="span12">
-        <div class="well">
-          <button id="run-button" class="btn btn-primary tt"
-            title="Reloads and runs the project in Chrome.">Run</button>
-          <!-- <button id="test-button" class="btn tt"
-            title="Runs the project's unit tests.">Test</button>
-          <button id="publish-button" class="btn tt"
-            title="Uploads the project's output to the Chrome Web
-            Store.">Publish</button> -->
-          <button id="export-button" class="btn tt"
-            title="Exports the entire project as a zip file.">Export</button>
-          <br/> <br/>
-          <form class="form-inline">
-            <input type="text" id="new-project-name" />
-            <button id="project-button" class="btn btn-danger tt"
-              title="Creates a new project.">Add Project</button>
-          </form>
-        </div>
-      </div>
+  <div>
+    <div id="top-bar">
+      <select id="project-chooser">
+      </select>
+      <button id="run-button" class="btn btn-primary tt"
+      title="Reloads and runs the project in Chrome.">Run</button>
+      <!-- <button id="test-button" class="btn tt"
+        title="Runs the project's unit tests.">Test</button>
+        <button id="publish-button" class="btn tt"
+        title="Uploads the project's output to the Chrome Web
+        Store.">Publish</button> -->
+      <button id="export-button" class="btn tt"
+      title="Exports the entire project as a zip file.">Export</button>
+      <input type="text" placeholder="project_name" id="new-project-name"/>
+      <button id="project-button" class="btn tt"
+      title="Creates a new project.">Add Project</button>
     </div>
 
-    <div class="row" id="alert">
+    <div id="alert">
       <div class="span10 offset1">
         <div class="alert">
           <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -63,14 +57,12 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="span2">
-        <select id="project-chooser">
-        </select>
+    <div id="main-view">
+      <div id="file-tree">
         <ul class="nav nav-pills nav-stacked" id="filetree">
         </ul>
       </div>
-      <div class="span10">
+      <div id="editor-pane">
         <ul class="nav nav-tabs" id="tabs">
         </ul>
         <div id="editor"></div>
@@ -81,17 +73,10 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="span12">
-        <div class="well">
-
-          <form class="form-inline">
-            <input type="text" id="new-file-name" />
-            <button id="new-button" class="btn btn-danger tt"
-              title="Creates a new, empty file.">Create File</button>
-          </form>
-        </div>
-      </div>
+    <div id="bottom-bar">
+      <input type="text" placeholder="new_file.txt" id="new-file-name" />
+      <button id="new-button" class="btn tt"
+      title="Creates a new, empty file.">Create File</button>
     </div>
 
   </div>

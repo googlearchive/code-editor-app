@@ -19,6 +19,29 @@ FileTree.prototype.refresh = function() {
     for (var i = 0; i < entries.length; ++i) {
       this.handleCreatedEntry(entries[i]);
     }
+    
+    var opened_one = false;
+    var firstEntry = null;
+
+    // TODO(dvh): should open the last opened file on this project.
+    // Try to open the manifest file.
+    for (var i = 0; i < entries.length; ++i) {
+      if (entries[i].name == 'prefs')
+        continue;
+      if (firstEntry == null)
+        firstEntry = entries[i];
+      if (entries[i].name == 'manifest.json') {
+        opened_one = true;
+        this.openFileEntry(entries[i]);
+      }
+    }
+
+    // If manifest has not been found, open the first valid entry.
+    if (!opened_one) {
+      if (firstEntry != null) {
+        this.openFileEntry(firstEntry);
+      }
+    }
   };
   reader.readEntries(handleProjectLs.bind(this));
 }
@@ -29,6 +52,16 @@ FileTree.prototype.handleProjectsLs = function(entries) {
     fileTree.handleCreatedEntry(entry);
   });
 };
+
+FileTree.prototype.openFileEntry = function(fileEntry) {
+  fileEntry.active = true;
+  if (!fileEntry.buffer) {
+    // This feels wrong.
+    fileEntry.buffer = new Buffer(fileEntry);
+  } else {
+    fileEntry.buffer.switchTo();
+  }
+}
 
 FileTree.prototype.closeOpendTabs = function() {
   for (var fname in this.entries) {
@@ -89,13 +122,7 @@ FileTree.prototype.handleCreatedEntry = function(fileEntry) {
   });
 
   fragment.dblclick(function() {
-    fileEntry.active = true;
-    if (!fileEntry.buffer) {
-      // This feels wrong.
-      fileEntry.buffer = new Buffer(fileEntry);
-    } else {
-      fileEntry.buffer.switchTo();
-    }
+    fileTree.openFileEntry(fileEntry);
   });
 
   this.parentElement.append(fragment);

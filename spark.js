@@ -32,7 +32,11 @@ Spark = function() {
 
   this.currentBuffer = null;
 
+  // TODO(dvh): the timer should be triggered only if there's a change.
   window.setInterval(this.onSaveTimer.bind(this), 2000);
+
+  $(window).resize(this.onWindowResize.bind(this));
+  this.onWindowResize(null);
 
   $(".tt").tooltip({ 'placement': 'bottom' });
 
@@ -42,6 +46,43 @@ Spark = function() {
   // TODO(grv) : remember last loaded project name.
   $('#project-chooser').change(this.onProjectSelect.bind(this));
 };
+
+Spark.prototype.onWindowResize = function(e) {
+  var windowWidth = $(window).innerWidth();
+  var windowHeight = $(window).innerHeight();
+  var topBarHeight = $("#top-bar").outerHeight();
+  var bottomBarHeight = $("#bottom-bar").outerHeight();
+  // Hard-coded size because it won't work on launch. (dvh)
+  topBarHeight = 45;
+  bottomBarHeight = 45;
+  
+  $("#top-bar").width(windowWidth);
+  $("#main-view").width(windowWidth);
+  var mainViewHeight = windowHeight - topBarHeight - bottomBarHeight;
+  $("#main-view").height(mainViewHeight);
+  // Hard-coded size because it won't work on launch. (dvh)
+  var fileTreePaneWidth = 205;
+  // Adds a right margin.
+  var editorPaneWidth = windowWidth - fileTreePaneWidth - 5;
+  $("#editor-pane").width(editorPaneWidth);
+  $("#editor-pane").height(mainViewHeight);
+  $("#file-tree").height(mainViewHeight);
+  $("#bottom-bar").width(windowWidth);
+  var tabsHeight = $('#tabs').outerHeight();
+  // Hard-coded size because it won't work on first launch. (dvh)
+  tabsHeight = 37;
+  // CodeMirror will add 20px to show some additional information. (dvh)
+  var editorHeight = mainViewHeight - tabsHeight - 20;
+  var editorWidth = editorPaneWidth;
+  $("#tabs").width(editorWidth);
+  $("#editor").width(editorWidth);
+  $("#editor").height(editorHeight);
+  
+  $("#editor .CodeMirror").width(editorWidth);
+  $("#editor .CodeMirror").height(editorHeight);
+  $("#editor .CodeMirror-scroll").width(editorWidth);
+  $("#editor .CodeMirror-scroll").height(editorHeight);
+}
 
 Spark.prototype.onProjectSelect = function(e) {
   this.fileTree.closeOpendTabs();
