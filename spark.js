@@ -44,40 +44,26 @@ Spark = function() {
 };
 
 Spark.prototype.onProjectSelect = function(e) {
-
-  var loadProjectToSyncfsCb = function() {
-    this.fileTree.refresh();
-  }
-
-  var clearFileSystemCb = function() {
-    this.ActiveProjectName = $('#project-chooser').val();
-    this.writePrefs();
-    chrome.developerPrivate.loadProjectToSyncfs(
-        this.ActiveProjectName, loadProjectToSyncfsCb.bind(this));
-  };
-
-  var exportFolderCb = function() {
-    this.fileTree.clearFileSystem(clearFileSystemCb.bind(this));
-  };
-
-  chrome.developerPrivate.exportSyncfsFolderToLocalfs(
-      this.ActiveProjectName, exportFolderCb.bind(this));
+  this.fileTree.closeOpendTabs();
+  this.ActiveProjectName = $('#project-chooser').val();
+  this.writePrefs();
+  this.fileTree.refresh();
 };
 
 Spark.prototype.ActiveProjectName = 'untitled';
 
-Spark.prototype.refreshProjectList = function(activeProject) {
+Spark.prototype.refreshProjectList = function() {
   $('#project-chooser').empty();
-  chrome.developerPrivate.getProjectsInfo(function(projectInfos) {
-    for (var i = 0; i < projectInfos.length; ++i) {
-      var name = projectInfos[i];
-      $('#project-chooser').append(
-          $('<option>', { key : name["name"] }).text(name["name"]));
-    }
-    $('#project-chooser').val(activeProject);
-    $('#new-project-name').val('');
-  });
 
+  for (var name in this.projects) {
+    // Do not list prefs file as a project.
+    if (name == 'prefs')
+      continue;
+    $('#project-chooser').append($('<option>', { key : name }).text(name));
+  }
+
+  $('#project-chooser').val(this.ActiveProjectName);
+  $('#new-project-name').val('');
 };
 
 Spark.prototype.onSaveTimer = function() {
@@ -117,27 +103,12 @@ Spark.prototype.handleNewButton = function(e) {
 Spark.prototype.handleProjectButton = function(e) {
   e.preventDefault();
 
-  var clearFileSystemCb = function() {
-    this.ActiveProjectName = $('#new-project-name').val();
+  this.ActiveProjectName = $('#new-project-name').val();
     this.writePrefs();
-    var exportCb = function() {
-      var templateLoadCb = function() {
-        this.refreshProjectList(this.ActiveProjectName);
-        this.fileTree.refresh();
-      }
-      this.templateLoader.loadTemplate(templateLoadCb.bind(this));
+    var createProjectCb = function() {
+      this.refreshProjectList();
     };
-
-    chrome.developerPrivate.exportSyncfsFolderToLocalfs(
-        this.ActiveProjectName, exportCb.bind(this));
-  }
-
-  var exportFolderCb = function() {
-    this.fileTree.clearFileSystem(clearFileSystemCb.bind(this));
-  }
-
-  chrome.developerPrivate.exportSyncfsFolderToLocalfs(
-      this.ActiveProjectName, exportFolderCb.bind(this));
+    this.createProject(this.ActiveProjectName, createProjectCb.bind(this));
 };
 
 Spark.prototype.handleRunButton = function(e) {
@@ -220,6 +191,37 @@ Spark.prototype.handleExportButton = function(e) {
     this.exportProject.bind(this));
 };
 
+Spark.prototype.loadProjects = function(callback) {
+  var reader = this.fileSystem.root.createReader();
+  this.projects = {};
+  var handleProjectsLs = function(projects) {
+    for (var i = 0; i < projects.length; ++i) {
+      this.projects[projects[i].name] = projects[i];
+      if (projects[i].name == 'prefs')
+        continue;
+    }
+    callback();
+  };
+  reader.readEntries(handleProjectsLs.bind(this));
+};
+
+
+Spark.prototype.createProject = function(project_name, callback) {
+  var handleLoadProject = function(directory) {
+    this.activeProject = directory;
+    this.projects[project_name] = directory;
+    console.log(directory);
+    var templateLoadCb = function() {
+      this.fileTree.refresh();
+      this.refreshProjectList();
+      callback();
+    };
+    this.templateLoader.loadTemplate(templateLoadCb.bind(this));
+  };
+  this.fileSystem.root.getDirectory(project_name,{create:true},
+      handleLoadProject.bind(this), errorHandler);
+};
+
 Spark.prototype.loadPrefsFile = function(callback) {
   var spark = this;
   var handleOpenPrefs = function(entry) {
@@ -233,11 +235,12 @@ Spark.prototype.loadPrefsFile = function(callback) {
           spark.ActiveProjectName = "sample_app";
           spark.writePrefs.bind(spark);
           spark.writePrefs();
-          var templateLoadCb = function() {
+
+          var createProjectCb = function() {
             callback();
-            this.fileTree.refresh();
-          }
-          spark.templateLoader.loadTemplate(templateLoadCb.bind(spark));
+          };
+
+          spark.createProject("sample_app", createProjectCb.bind(this));
         } else {
           spark.ActiveProjectName = ev.target.result;
           callback();
@@ -257,7 +260,7 @@ Spark.prototype.writePrefs = function() {
       var size = spark.ActiveProjectName.length;
       writer.write(blob);
       writer.onwriteend = function() {
-        console.log('write complete.');
+        console.log('prefs file write complete.');
       };
     };
   });
@@ -268,18 +271,19 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   this.fileSystem = fs;
   this.filer = new Filer(fs);
   this.fileTree = new FileTree(this.filer, this);
-  this.templateLoader = new TemplateLoader(this.fileTree);
+  this.templateLoader = new TemplateLoader(this.fileTree, this);
+  this.activeProject = this.fileSystem.root;
 
   var loadPrefsFileCb = function() {
-    var exportFolderCb = function() {
-      this.refreshProjectList.bind(this);
-      this.refreshProjectList(this.ActiveProjectName);
-    };
-    chrome.developerPrivate.exportSyncfsFolderToLocalfs(
-        this.ActiveProjectName, exportFolderCb.bind(this));
+    this.refreshProjectList();
+    this.fileTree.refresh();
   };
 
-  this.loadPrefsFile(loadPrefsFileCb.bind(this));
+  var loadProjectsCb = function() {
+    this.loadPrefsFile(loadPrefsFileCb.bind(this));
+  };
+
+  this.loadProjects(loadProjectsCb.bind(this));
 
   var spark = this;
   var dnd = new DnDFileController('body', function(files, e) {

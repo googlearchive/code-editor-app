@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-TemplateLoader = function(filetree) {
+TemplateLoader = function(filetree, spark) {
+  this.spark = spark;
   this.filetree = filetree;
   this.pendingWrites = 0;
   this.callback = function() {};
@@ -54,7 +55,8 @@ TemplateLoader.prototype.writeFiles = function(entries, callback) {
 
 TemplateLoader.prototype.writeFile = function(name, content) {
   var templateLoader = this;
-  this.filetree.filer.fs.root.getFile(
+  var activeProject = this.spark.projects[this.spark.ActiveProjectName];
+  activeProject.getFile(
       name, {create: true},
       function(entry) {
         entry.createWriter(function(writer) {

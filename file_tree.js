@@ -6,20 +6,17 @@ FileTree = function(filer, spark) {
   this.filer = filer;
   this.spark = spark;
   this.parentElement = $('#filetree');
-  this.refresh();
+  this.entries = [];
 };
 
 FileTree.prototype.refresh = function() {
+  this.entries = [];
   var fileTree = this;
-  this.parentElement.empty();
-  var reader = this.filer.fs.root.createReader();
-  this.entries = {};
+  var reader =
+      this.spark.projects[this.spark.ActiveProjectName].createReader();
   var handleProjectLs = function(entries) {
+    this.parentElement.empty();
     for (var i = 0; i < entries.length; ++i) {
-      this.entries[entries[i].name] = entries[i];
-      // prefs file should not be visible.
-      if (entries[i].name == 'prefs')
-        continue;
       this.handleCreatedEntry(entries[i]);
     }
   };
@@ -33,27 +30,8 @@ FileTree.prototype.handleProjectsLs = function(entries) {
   });
 };
 
-FileTree.prototype.removeDeletedEntries = function() {
+FileTree.prototype.closeOpendTabs = function() {
   for (var fname in this.entries) {
-    if (this.entries[fname].deleted)
-      delete this.entries[fname];
-  }
-}
-
-FileTree.prototype.clearFileSystem = function(callback) {
-  this.removeDeletedEntries();
-  this.removeCallback = callback;
-  this.pendingRemove = Object.keys(this.entries).length;
-  // We don't remove the prefs file.
-  this.pendingRemove--;
-  // Call the callback when the filesystem is already clear.
-  if (this.pendingRemove == 0) {
-    this.removeCallback();
-    return;
-  }
-
-  for (var fname in this.entries) {
-    // Do not remove the prefs file.
     if (fname == 'prefs')
       continue;
     var entry = this.entries[fname];
@@ -62,16 +40,6 @@ FileTree.prototype.clearFileSystem = function(callback) {
       if (entry.buffer.active)
         this.spark.editor.swapDoc(CodeMirror.Doc(''));
     }
-    var fileRemove = function() {
-      this.pendingRemove--;
-      if (this.pendingRemove == 0) {
-        this.parentElement.empty();
-        this.entries = {};
-        console.log('file system cleared.');
-        this.removeCallback();
-      }
-    }
-    entry.remove(fileRemove.bind(this));
   }
 };
 
@@ -116,7 +84,6 @@ FileTree.prototype.handleCreatedEntry = function(fileEntry) {
           fileTree.spark.editor.swapDoc(CodeMirror.Doc(''));
         fileEntry.buffer.removeTab();
       }
-      fileEntry.deleted = true;
       // TODO(grv): switch to another tab, and then remove this tab
     });
   });
