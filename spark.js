@@ -60,8 +60,10 @@ Spark.prototype.onWindowResize = function(e) {
   $("#main-view").width(windowWidth);
   var mainViewHeight = windowHeight - topBarHeight - bottomBarHeight;
   $("#main-view").height(mainViewHeight);
-  var fileTreePaneWidth = 200;
-  var editorPaneWidth = windowWidth - fileTreePaneWidth;
+  // Hard-coded size because it won't work on launch. (dvh)
+  var fileTreePaneWidth = 205;
+  // Adds a right margin.
+  var editorPaneWidth = windowWidth - fileTreePaneWidth - 5;
   $("#editor-pane").width(editorPaneWidth);
   $("#editor-pane").height(mainViewHeight);
   $("#file-tree").height(mainViewHeight);
@@ -71,12 +73,15 @@ Spark.prototype.onWindowResize = function(e) {
   tabsHeight = 37;
   // CodeMirror will add 20px to show some additional information. (dvh)
   var editorHeight = mainViewHeight - tabsHeight - 20;
-  $("#tabs").width(editorPaneWidth);
-  $("#editor").width(windowWidth);
+  var editorWidth = editorPaneWidth;
+  $("#tabs").width(editorWidth);
+  $("#editor").width(editorWidth);
   $("#editor").height(editorHeight);
   
-  $("#editor .CodeMirror").height(windowWidth);
+  $("#editor .CodeMirror").width(editorWidth);
   $("#editor .CodeMirror").height(editorHeight);
+  $("#editor .CodeMirror-scroll").width(editorWidth);
+  $("#editor .CodeMirror-scroll").height(editorHeight);
 }
 
 Spark.prototype.onProjectSelect = function(e) {
