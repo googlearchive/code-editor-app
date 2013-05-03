@@ -121,7 +121,7 @@ FileTree.prototype.handleCreatedEntry = function(fileEntry) {
     });
   });
 
-  fragment.dblclick(function() {
+  fragment.click(function() {
     fileTree.openFileEntry(fileEntry);
   });
 
