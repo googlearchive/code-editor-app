@@ -186,8 +186,7 @@ Spark.prototype.handleRunButton = function(e) {
   var exportFolderCb = function() {
     chrome.developerPrivate.loadProject(this.ActiveProjectName,
         function(itemId) {
-          /*chrome.developerPrivate.launchApp(itemId, function() {
-          });*/
+          chrome.management.launchApp(itemId, function(){});
         });
   };
   chrome.developerPrivate.exportSyncfsFolderToLocalfs(
