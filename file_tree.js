@@ -17,7 +17,7 @@ FileTree.prototype.refresh = function() {
   var handleProjectLs = function(entries) {
     this.parentElement.empty();
     for (var i = 0; i < entries.length; ++i) {
-      this.handleCreatedEntry(entries[i]);
+      this.handleCreatedEntry(false, entries[i]);
     }
     
     var opened_one = false;
@@ -49,7 +49,7 @@ FileTree.prototype.refresh = function() {
 FileTree.prototype.handleProjectsLs = function(entries) {
   var fileTree = this;
   entries.forEach(function(entry, i) {
-    fileTree.handleCreatedEntry(entry);
+    fileTree.handleCreatedEntry(false, entry);
   });
 };
 
@@ -85,10 +85,10 @@ FileTree.prototype.createNewFile = function(name) {
     return;
   }
   this.spark.projects[this.spark.ActiveProjectName].getFile(
-      name, {create: true}, this.handleCreatedEntry.bind(this), errorHandler);
+      name, {create: true}, this.handleCreatedEntry.bind(this, true), errorHandler);
 }
 
-FileTree.prototype.handleCreatedEntry = function(fileEntry) {
+FileTree.prototype.handleCreatedEntry = function(switchToBufferEnabled, fileEntry) {
   var fileTree = this;
   fileEntry.active = false;
   this.entries[fileEntry.name] = fileEntry;
@@ -122,7 +122,9 @@ FileTree.prototype.handleCreatedEntry = function(fileEntry) {
 
   this.parentElement.append(fragment);
   
-  fileEntry.buffer = new Buffer(fileEntry);
-  fileEntry.buffer.switchTo();
-  $('#new-file-name').val('');
+  if (switchToBufferEnabled) {
+    fileEntry.buffer = new Buffer(fileEntry);
+    fileEntry.buffer.switchTo();
+    $('#new-file-name').val('');
+  }
 };
