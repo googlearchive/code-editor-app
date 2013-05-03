@@ -86,7 +86,7 @@ FileTree.prototype.createNewFile = function(name) {
     $('#new-file-name').val('');
     return;
   }
-  this.filer.fs.root.getFile(
+  this.spark.projects[this.spark.ActiveProjectName].getFile(
       name, {create: true}, this.handleCreatedEntry.bind(this), errorHandler);
 }
 
