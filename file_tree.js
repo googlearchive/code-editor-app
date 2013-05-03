@@ -113,7 +113,6 @@ FileTree.prototype.handleCreatedEntry = function(fileEntry) {
       if (fileEntry.buffer != null) {
         fileEntry.buffer.userRemoveTab();
       }
-      // TODO(grv): switch to another tab, and then remove this tab
     });
   });
 
@@ -122,5 +121,8 @@ FileTree.prototype.handleCreatedEntry = function(fileEntry) {
   });
 
   this.parentElement.append(fragment);
+  
+  fileEntry.buffer = new Buffer(fileEntry);
+  fileEntry.buffer.switchTo();
   $('#new-file-name').val('');
 };
