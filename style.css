@@ -39,10 +39,25 @@ body {
   overflow: hidden;
 }
 
-#editor-pane {
+#editor-placeholder {
+  background-color: white;
+}
+
+#editor-placeholder div {
+  text-align: center;
+  vertical-align: middle;
+  font-size: 30px;
+  color: #ddd;
+}
+
+#editor-pane, #editor-placeholder {
   position: absolute;
   top: 0px;
   left: 205px;
+}
+
+#editor-image {
+  background-color: white;
 }
 
 #alert {

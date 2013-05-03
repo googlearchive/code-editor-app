@@ -20,11 +20,26 @@ Buffer = function(fileEntry) {
   $("#tabs").append(this.tabElement);
   openedTabEntries.push(this);
 
+  var pattern = /\.(jpg|jpeg|png|gif)$/i;
+  this.isImage = pattern.test(fileEntry.name);
+  
   this.doc = CodeMirror.Doc('<loading>');
 
   this.open();
   this.switchTo();
 };
+
+Buffer.showEmptyBuffer = function() {
+  var buffer = this;
+  var event = new CustomEvent("emptyBuffer");
+  window.dispatchEvent(event);
+}
+
+Buffer.showImageBuffer = function() {
+  var buffer = this;
+  var event = new CustomEvent("imageBuffer");
+  window.dispatchEvent(event);
+}
 
 Buffer.prototype.userRemoveTab = function() {
   var buffer = this;
@@ -38,7 +53,6 @@ Buffer.prototype.indexInTabs = function() {
   var foundValue = -1;
   openedTabEntries.forEach(function(value, i) {
     if (value == buffer) {
-      console.log('found at index ' + i);
       foundValue = i;
       return;
     }
@@ -83,6 +97,8 @@ Buffer.prototype.handleDocumentChange = function() {
     } else if (title.match(/.css$/)) {
       mode = "css";
       modeName = "CSS";
+    } else if (this.isImage) {
+      modeName = "Image";
     }
   } else {
     document.getElementById("title").innerHTML = "[no document loaded]";
@@ -97,8 +113,16 @@ Buffer.prototype.open = function() {
     var fileReader = new FileReader();
 
     fileReader.onload = function(e) {
-      buffer.doc.setValue(e.target.result);
-      buffer.handleDocumentChange(buffer.fileEntry.name);
+      if (!buffer.hasImageData) {
+        buffer.doc.setValue(e.target.result);
+        buffer.handleDocumentChange(buffer.fileEntry.name);
+      } else {
+        buffer.imageData = e.target.result;
+        buffer.doc.setValue('<image>');
+        var event = new CustomEvent("imageLoaded",
+        { detail: { buffer: buffer }});
+        window.dispatchEvent(event);
+      }
       buffer.isDirty = false;
     };
 
@@ -106,12 +130,22 @@ Buffer.prototype.open = function() {
       console.log("Read failed: " + e.toString());
     };
 
-    fileReader.readAsText(file);
+    if (buffer.isImage) {
+      buffer.isImage = true;
+      buffer.hasImageData = true;
+      fileReader.readAsDataURL(file);
+    } else {
+      buffer.isImage = false;
+      buffer.hasImageData = false;
+      fileReader.readAsText(file);
+    }
   }, errorHandler);
 }
 
 Buffer.prototype.save = function() {
   if (!this.isDirty)
+    return;
+  if (this.hasImageData)
     return;
 
   var buffer = this;

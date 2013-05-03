@@ -36,6 +36,11 @@ Spark = function() {
 
   window.addEventListener("bufferSwitch", this.onBufferSwitch.bind(this));
   window.addEventListener("removeBuffer", this.onRemoveBuffer.bind(this));
+  window.addEventListener("emptyBuffer", this.onEmptyBuffer.bind(this));
+  window.addEventListener("imageBuffer", this.onImageBuffer.bind(this));
+  window.addEventListener("imageLoaded", this.onImageLoaded.bind(this));
+  
+  Buffer.showEmptyBuffer();
 
   this.currentBuffer = null;
 
@@ -53,6 +58,29 @@ Spark = function() {
   // TODO(grv) : remember last loaded project name.
   $('#project-chooser').change(this.onProjectSelect.bind(this));
 };
+
+Spark.prototype.onEmptyBuffer = function(e) {
+  $("#editor-pane").hide();
+  $("#editor").hide();
+  $("#editor-placeholder").show();
+  $("#editor-image").hide();
+}
+
+Spark.prototype.onImageBuffer = function(e) {
+  $("#editor-pane").show();
+  $("#editor").hide();
+  $("#editor-placeholder").hide();
+  $("#editor-image").show();
+}
+
+Spark.prototype.onImageLoaded = function(e) {
+  if (e.detail.buffer != this.currentBuffer) {
+    return;
+  }
+  if (this.currentBuffer.hasImageData) {
+    $("#edited-image").get(0).src = this.currentBuffer.imageData;
+  }
+}
 
 Spark.prototype.onRemoveBuffer = function(e) {
   this.closeBufferTab(e.detail.buffer);
@@ -86,6 +114,7 @@ Spark.prototype.closeBufferTab = function(buffer) {
     } else {
       var emptyDoc = CodeMirror.Doc('');
       spark.editor.swapDoc(emptyDoc);
+      Buffer.showEmptyBuffer();
     }
   } else {
     this.closeBuffer(buffer);
@@ -122,6 +151,11 @@ Spark.prototype.onWindowResize = function(e) {
   $("#tabs").width(editorWidth);
   $("#editor").width(editorWidth);
   $("#editor").height(editorHeight);
+  $("#editor-placeholder").width(editorPaneWidth);
+  $("#editor-placeholder").height(mainViewHeight);
+  $("#editor-placeholder div").css('line-height', mainViewHeight + 'px');
+  $("#editor-image").width(editorWidth);
+  $("#editor-image").height(editorHeight);
   
   $("#editor .CodeMirror").width(editorWidth);
   $("#editor .CodeMirror").height(editorHeight);
@@ -171,6 +205,20 @@ Spark.prototype.onBufferSwitch = function(e) {
 
   $("#tabs").children().removeClass("active");
   buffer.tabElement.addClass("active");
+  
+  if (this.currentBuffer.isImage) {
+    Buffer.showImageBuffer();
+    if (this.currentBuffer.hasImageData) {
+      $("#edited-image").get(0).src = this.currentBuffer.imageData;
+    } else {
+      $("#edited-image").get(0).src = "";
+    }
+  } else {
+    $("#editor-pane").show();
+    $("#editor").show();
+    $("#editor-placeholder").hide();
+    $("#editor-image").hide();
+  }
 
   this.editor.swapDoc(buffer.doc);
 };
