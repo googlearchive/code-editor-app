@@ -173,6 +173,7 @@ Spark.prototype.handleNewButton = function(e) {
 Spark.prototype.handleProjectButton = function(e) {
   e.preventDefault();
 
+  this.fileTree.closeOpendTabs();
   this.ActiveProjectName = $('#new-project-name').val();
     this.writePrefs();
     var createProjectCb = function() {
