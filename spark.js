@@ -77,8 +77,20 @@ Spark.prototype.onImageLoaded = function(e) {
   if (e.detail.buffer != this.currentBuffer) {
     return;
   }
-  if (this.currentBuffer.hasImageData) {
-    $("#edited-image").get(0).src = this.currentBuffer.imageData;
+  this.updateImage();
+}
+
+Spark.prototype.updateImage = function() {
+  if (this.currentBuffer == null) {
+    $("#edited-image").hide();
+  } else if (this.currentBuffer.hasImageData) {
+    $("#edited-image").show();
+    $("#edited-image").one("load", function() {
+      $("#edited-image").css('left', ($("#editor-image").width() - $("#edited-image").width()) / 2);
+      $("#edited-image").css('top', ($("#editor-image").height() - $("#edited-image").height()) / 2);
+    }).attr("src", this.currentBuffer.imageData);
+  } else {
+    $("#edited-image").hide();
   }
 }
 
@@ -156,6 +168,8 @@ Spark.prototype.onWindowResize = function(e) {
   $("#editor-placeholder div").css('line-height', mainViewHeight + 'px');
   $("#editor-image").width(editorWidth);
   $("#editor-image").height(editorHeight);
+  $("#edited-image").css('left', (editorWidth - $("#edited-image").width()) / 2);
+  $("#edited-image").css('top', (editorHeight - $("#edited-image").height()) / 2);
   
   $("#editor .CodeMirror").width(editorWidth);
   $("#editor .CodeMirror").height(editorHeight);
@@ -208,11 +222,7 @@ Spark.prototype.onBufferSwitch = function(e) {
   
   if (this.currentBuffer.isImage) {
     Buffer.showImageBuffer();
-    if (this.currentBuffer.hasImageData) {
-      $("#edited-image").get(0).src = this.currentBuffer.imageData;
-    } else {
-      $("#edited-image").get(0).src = "";
-    }
+    this.updateImage();
   } else {
     $("#editor-pane").show();
     $("#editor").show();

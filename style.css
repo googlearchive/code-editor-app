@@ -57,7 +57,12 @@ body {
 }
 
 #editor-image {
+  position: relative;
   background-color: white;
+}
+
+#edited-image {
+  position: absolute;
 }
 
 #alert {
