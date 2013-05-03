@@ -13,7 +13,7 @@ TemplateLoader.prototype.loadTemplate = function(callback) {
   this.pendingWrites = 8;
   this.callback = callback;
   this.readFile(chrome.runtime.getURL('sample_app/manifest_2.json'),
-      'manifest_2.json');
+      'manifest.json');
   this.readFile(chrome.runtime.getURL('sample_app/index.html'), 'index.html');
   this.readFile(chrome.runtime.getURL('sample_app/main.js'), 'main.js');
   this.readFile(chrome.runtime.getURL('sample_app/main.css'), 'main.css');
