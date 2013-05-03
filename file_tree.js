@@ -68,10 +68,8 @@ FileTree.prototype.closeOpendTabs = function() {
     if (fname == 'prefs')
       continue;
     var entry = this.entries[fname];
-    if (entry.active) {
-      entry.buffer.removeTab();
-      if (entry.buffer.active)
-        this.spark.editor.swapDoc(CodeMirror.Doc(''));
+    if (entry.buffer != null) {
+      entry.buffer.userRemoveTab();
     }
   }
 };
@@ -112,10 +110,8 @@ FileTree.prototype.handleCreatedEntry = function(fileEntry) {
     fileEntry.remove(function() {
       console.log(fileEntry.fullPath + ' removed.');
       fragment.remove();
-      if (fileEntry.active) {
-        if (fileEntry.buffer.active)
-          fileTree.spark.editor.swapDoc(CodeMirror.Doc(''));
-        fileEntry.buffer.removeTab();
+      if (fileEntry.buffer != null) {
+        fileEntry.buffer.userRemoveTab();
       }
       // TODO(grv): switch to another tab, and then remove this tab
     });

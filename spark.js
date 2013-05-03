@@ -12,31 +12,8 @@ Spark = function() {
   };
 
   CodeMirror.commands.closeBuffer = function(cm) {
-    console.log('close file');
     if (spark.currentBuffer != null) {
-      var currentBufferIndex = spark.currentBuffer.indexInTabs();
-      var previousBuffer = null;
-      
-      // Save before closing.
-      spark.currentBuffer.save();
-      spark.currentBuffer.fileEntry.buffer = null;
-      spark.currentBuffer.fileEntry.active = false;
-      spark.currentBuffer.removeTab();
-      
-      if (currentBufferIndex > 0) {
-        console.log('will switch to ' + (currentBufferIndex - 1));
-        previousBuffer = openedTabEntries[currentBufferIndex - 1];
-      } else if (openedTabEntries.length > 0) {
-        console.log('will switch to first');
-        previousBuffer = openedTabEntries[0];
-      }
-      
-      if (previousBuffer != null) {
-        previousBuffer.switchTo();
-      } else {
-        var emptyDoc = CodeMirror.Doc('');
-        spark.editor.swapDoc(emptyDoc);
-      }
+      spark.currentBuffer.userRemoveTab();
     }
   };
 
@@ -58,6 +35,7 @@ Spark = function() {
   $("#project-button").click(this.handleProjectButton.bind(this));
 
   window.addEventListener("bufferSwitch", this.onBufferSwitch.bind(this));
+  window.addEventListener("removeBuffer", this.onRemoveBuffer.bind(this));
 
   this.currentBuffer = null;
 
@@ -75,6 +53,44 @@ Spark = function() {
   // TODO(grv) : remember last loaded project name.
   $('#project-chooser').change(this.onProjectSelect.bind(this));
 };
+
+Spark.prototype.onRemoveBuffer = function(e) {
+  this.closeBufferTab(e.detail.buffer);
+};
+
+Spark.prototype.closeBuffer = function(buffer) {
+  // Save before closing.
+  buffer.save();
+  buffer.fileEntry.buffer = null;
+  buffer.fileEntry.active = false;
+  buffer.removeTab();
+}
+
+Spark.prototype.closeBufferTab = function(buffer) {
+  var spark = this;
+  
+  if (buffer == spark.currentBuffer) {
+    var currentBufferIndex = spark.currentBuffer.indexInTabs();
+    var previousBuffer = null;
+  
+    this.closeBuffer(buffer);
+  
+    if (currentBufferIndex > 0) {
+      previousBuffer = openedTabEntries[currentBufferIndex - 1];
+    } else if (openedTabEntries.length > 0) {
+      previousBuffer = openedTabEntries[0];
+    }
+  
+    if (previousBuffer != null) {
+      previousBuffer.switchTo();
+    } else {
+      var emptyDoc = CodeMirror.Doc('');
+      spark.editor.swapDoc(emptyDoc);
+    }
+  } else {
+    this.closeBuffer(buffer);
+  }
+}
 
 Spark.prototype.onWindowResize = function(e) {
   var windowWidth = $(window).innerWidth();
@@ -99,7 +115,7 @@ Spark.prototype.onWindowResize = function(e) {
   $("#bottom-bar").width(windowWidth);
   var tabsHeight = $('#tabs').outerHeight();
   // Hard-coded size because it won't work on first launch. (dvh)
-  tabsHeight = 37;
+  tabsHeight = 31;
   // CodeMirror will add 20px to show some additional information. (dvh)
   var editorHeight = mainViewHeight - tabsHeight - 20;
   var editorWidth = editorPaneWidth;

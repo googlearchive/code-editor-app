@@ -7,8 +7,16 @@ var openedTabEntries = new Array();
 Buffer = function(fileEntry) {
   this.fileEntry = fileEntry;
 
-  this.tabElement = $("<li><a href='#'>" + fileEntry.name + "</a></li>");
+  // TODO(dvh): needs to be refactored to remove UI from this class.
+  this.tabElement = $("<li><a href='#'>" +
+    "<span class=\"close-buffer-button\">&#215;</span>" +
+    fileEntry.name + "</a></li>");
   this.tabElement.click(this.switchTo.bind(this));
+  var matches = this.tabElement.children().children();
+  
+  var buffer = this;
+  matches.click(this.userRemoveTab.bind(this))
+  
   $("#tabs").append(this.tabElement);
   openedTabEntries.push(this);
 
@@ -17,6 +25,13 @@ Buffer = function(fileEntry) {
   this.open();
   this.switchTo();
 };
+
+Buffer.prototype.userRemoveTab = function() {
+  var buffer = this;
+  var event = new CustomEvent("removeBuffer",
+    { detail: { buffer: buffer }});
+  window.dispatchEvent(event);
+}
 
 Buffer.prototype.indexInTabs = function() {
   var buffer = this;
