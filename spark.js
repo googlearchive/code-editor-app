@@ -261,7 +261,15 @@ Spark.prototype.handleRunButton = function(e) {
   var exportFolderCb = function() {
     chrome.developerPrivate.loadProject(this.ActiveProjectName,
         function(itemId) {
-          chrome.management.launchApp(itemId, function(){});
+          setTimeout(function() {
+            if (!itemId) {
+              console.log('invalid itemId');
+              return;
+            }
+            // Since the API doesn't wait for the item to load,may return
+            // before it has fully loaded. Delay the launch event.
+            chrome.management.launchApp(itemId, function(){});
+            }, 500);
         });
   };
   chrome.developerPrivate.exportSyncfsFolderToLocalfs(
