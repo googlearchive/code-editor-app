@@ -89,6 +89,9 @@ Spark.prototype.onButtonRemoveClicked = function(e) {
   })
 }
 
+// Buffers callback.
+// TODO(dvh): needs to be refactored using callbacks instead of events.
+
 Spark.prototype.onEmptyBuffer = function(e) {
   $("#editor-pane").hide();
   $("#editor").hide();
@@ -162,6 +165,8 @@ Spark.prototype.closeBufferTab = function(buffer) {
     this.closeBuffer(buffer);
   }
 }
+
+// Window resize handler.
 
 Spark.prototype.onWindowResize = function(e) {
   var windowWidth = $(window).innerWidth();
@@ -514,11 +519,7 @@ Spark.prototype.fileViewControllerTreeUpdated = function(entries) {
 }
 
 Spark.prototype.filesListViewControllerSelectionChanged = function(selectedEntries) {
-  /*
-  if (selectedEntries.length == 1) {
-    this.fileTree.openFileEntry(selectedEntries[0]);
-  }
-  */
+  // Do nothing.
 }
 
 Spark.prototype.filesListViewControllerDoubleClicked = function(selectedEntries) {
