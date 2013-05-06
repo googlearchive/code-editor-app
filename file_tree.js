@@ -20,8 +20,10 @@ FileTree.prototype.refresh = function() {
       this.handleCreatedEntry(false, entries[i]);
     }
     
-    var opened_one = false;
+    var openedOne = false;
     var firstEntry = null;
+    var selectedItemIndex = -1;
+    var filteredEntries = new Array();
 
     // TODO(dvh): should open the last opened file on this project.
     // Try to open the manifest file.
@@ -31,16 +33,24 @@ FileTree.prototype.refresh = function() {
       if (firstEntry == null)
         firstEntry = entries[i];
       if (entries[i].name == 'manifest.json') {
-        opened_one = true;
+        openedOne = true;
+        selectedItemIndex = i;
         this.openFileEntry(entries[i]);
       }
+      filteredEntries.push(entries[i]);
     }
 
     // If manifest has not been found, open the first valid entry.
-    if (!opened_one) {
+    if (!openedOne) {
       if (firstEntry != null) {
+        selectedItemIndex = 0;
         this.openFileEntry(firstEntry);
       }
+    }
+    
+    this.spark.fileViewControllerTreeUpdated(filteredEntries);
+    if (openedOne) {
+      this.spark.fileViewControllerSetSelection([entries[selectedItemIndex]]);
     }
   };
   reader.readEntries(handleProjectLs.bind(this));

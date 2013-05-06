@@ -40,6 +40,7 @@ Spark = function() {
   window.addEventListener("imageBuffer", this.onImageBuffer.bind(this));
   window.addEventListener("imageLoaded", this.onImageLoaded.bind(this));
   
+  $('#editor-placeholder-string').html('No file selected');
   Buffer.showEmptyBuffer();
 
   this.currentBuffer = null;
@@ -57,6 +58,8 @@ Spark = function() {
   var ss = $('#project-chooser');
   // TODO(grv) : remember last loaded project name.
   $('#project-chooser').change(this.onProjectSelect.bind(this));
+  
+  this.filesListViewController = new FilesListViewController($('#files-listview'), this);
 };
 
 Spark.prototype.onEmptyBuffer = function(e) {
@@ -153,6 +156,7 @@ Spark.prototype.onWindowResize = function(e) {
   $("#editor-pane").width(editorPaneWidth);
   $("#editor-pane").height(mainViewHeight);
   $("#file-tree").height(mainViewHeight);
+  $("#files-listview").height(mainViewHeight);
   $("#bottom-bar").width(windowWidth);
   var tabsHeight = $('#tabs').outerHeight();
   // Hard-coded size because it won't work on first launch. (dvh)
@@ -471,8 +475,21 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
       }
     }
   });
-
 };
+
+Spark.prototype.fileViewControllerSetSelection = function(selectedEntries) {
+  this.filesListViewController.setSelection(selectedEntries);
+}
+
+Spark.prototype.fileViewControllerTreeUpdated = function(entries) {
+  this.filesListViewController.updateEntries(entries);
+}
+
+Spark.prototype.filesListViewControllerSelectionChanged = function(selectedEntries) {
+  if (selectedEntries.length == 1) {
+    this.fileTree.openFileEntry(selectedEntries[0]);
+  }
+}
 
 $(function() {
   var spark = new Spark();

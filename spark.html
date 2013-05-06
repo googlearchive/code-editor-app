@@ -21,6 +21,9 @@
   <script src="file_tree.js"></script>
   <script src="template_loader.js"></script>
   <script src="spark.js"></script>
+  <script src="set.js"></script>
+  <script src="listview.js"></script>
+  <script src="files_list_view_controller.js"></script>
 
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="codemirror-3.1/lib/codemirror.css">
@@ -62,6 +65,8 @@
         <ul class="nav nav-pills nav-stacked" id="filetree">
         </ul>
       </div>
+      <div id="files-listview">
+      </div>
       <div id="editor-pane">
         <ul class="nav nav-tabs" id="tabs">
         </ul>
@@ -73,7 +78,7 @@
         </div>
       </div>
       <div id="editor-placeholder">
-        <div>No file selected</div>
+        <div id="editor-placeholder-string">No file selected</div>
       </div>
     </div>
 

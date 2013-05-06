@@ -25,6 +25,7 @@ body {
 }
 
 #file-tree {
+  display: block;
   position: absolute;
   top: 0px;
   left: 0px;
@@ -105,4 +106,16 @@ body {
 .nav-tabs li a {
   padding-top: 0px;
   padding-bottom: 0px;
+}
+
+#files-listview {
+  display: none;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 200px;
+}
+
+.file-item {
+  padding-left: 5px;
 }
