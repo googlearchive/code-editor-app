@@ -35,6 +35,15 @@ FilesListViewController.prototype.setSelection = function(selectedEntries) {
   this.listView.setSelectedRows(rowIndexes);
 }
 
+FilesListViewController.prototype.selection = function() {
+  var result = new Array();
+  var controller = this;
+  this.listView.selectedRows().forEach(function(rowIndex, i) {
+    result.push(controller.entries[rowIndex]);
+  });
+  return result;
+}
+
 // Callbacks for ListView.
 FilesListViewController.prototype.listViewNumberOfRows = function() {
   if (this.entries == null) {
@@ -64,3 +73,15 @@ FilesListViewController.prototype.listViewSelectionChanged = function(rowIndexes
   this.delegate.filesListViewControllerSelectionChanged(selectedEntries);
 }
 
+FilesListViewController.prototype.listViewDoubleClicked = function(rowIndexes) {
+  if (this.entries == null) {
+    return;
+  }
+  var controller = this;
+  var selectedEntries = new Array();
+  rowIndexes.forEach(function(rowIndex, i) {
+    var entry = controller.entries[rowIndex];
+    selectedEntries.push(entry);
+  });
+  this.delegate.filesListViewControllerDoubleClicked(selectedEntries);
+}

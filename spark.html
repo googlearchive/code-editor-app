@@ -65,17 +65,21 @@
         <ul class="nav nav-pills nav-stacked" id="filetree">
         </ul>
       </div>
-      <div id="files-listview">
+      <div id="files-listview-container">
+        <div id="files-listview">
+        </div>
+        <div id="files-listview-actions">
+          <div class="btn-group">
+            <button class="btn" id="file-button-add">+</button>
+            <button class="btn" id="file-button-remove">-</button>
+          </div>
+        </div>
       </div>
       <div id="editor-pane">
         <ul class="nav nav-tabs" id="tabs">
         </ul>
         <div id="editor"></div>
         <div id="editor-image"><img id="edited-image"></img></div>
-        <div class="info">
-          <span class="label label-success" id="title"></span>
-          <span class="label label-success" id="mode"></span>
-        </div>
       </div>
       <div id="editor-placeholder">
         <div id="editor-placeholder-string">No file selected</div>

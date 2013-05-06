@@ -22,7 +22,7 @@ Spark = function() {
     {
       mode: {name: "javascript", json: true },
       lineNumbers: true,
-      extraKeys: {"Ctrl-Space": "autocomplete", "Ctrl-W": "closeBuffer"}
+      extraKeys: {"Ctrl-Space": "autocomplete", "Ctrl-W": "closeBuffer"},
     });
 
   this.editor.on('change', this.onEditorChange.bind(this));
@@ -59,8 +59,35 @@ Spark = function() {
   // TODO(grv) : remember last loaded project name.
   $('#project-chooser').change(this.onProjectSelect.bind(this));
   
+  $('#file-button-add').click(this.onButtonAddClicked.bind(this));
+  $('#file-button-remove').click(this.onButtonRemoveClicked.bind(this));
+  
   this.filesListViewController = new FilesListViewController($('#files-listview'), this);
 };
+
+// Buttons actions
+
+Spark.prototype.onButtonAddClicked = function(e) {
+  
+}
+
+Spark.prototype.onButtonRemoveClicked = function(e) {
+  var count = 0;
+  var spark = this;
+  this.filesListViewController.selection().forEach(function(entry, i) {
+    if (entry.buffer != null) {
+      entry.buffer.userRemoveTab();
+    }
+    count ++;
+    entry.remove(function() {
+      // deleted.
+      count --;
+      if (count == 0) {
+        spark.fileTree.refresh(false);
+      }
+    });
+  })
+}
 
 Spark.prototype.onEmptyBuffer = function(e) {
   $("#editor-pane").hide();
@@ -152,17 +179,18 @@ Spark.prototype.onWindowResize = function(e) {
   // Hard-coded size because it won't work on launch. (dvh)
   var fileTreePaneWidth = 205;
   // Adds a right margin.
-  var editorPaneWidth = windowWidth - fileTreePaneWidth - 5;
+  var editorPaneWidth = windowWidth - fileTreePaneWidth;
   $("#editor-pane").width(editorPaneWidth);
   $("#editor-pane").height(mainViewHeight);
   $("#file-tree").height(mainViewHeight);
-  $("#files-listview").height(mainViewHeight);
+  $("#files-listview-container").height(mainViewHeight);
+  var filesContainerHeight = $("#files-listview-actions").outerHeight();
+  $("#files-listview").height(mainViewHeight - filesContainerHeight);
   $("#bottom-bar").width(windowWidth);
   var tabsHeight = $('#tabs').outerHeight();
   // Hard-coded size because it won't work on first launch. (dvh)
   tabsHeight = 31;
-  // CodeMirror will add 20px to show some additional information. (dvh)
-  var editorHeight = mainViewHeight - tabsHeight - 20;
+  var editorHeight = mainViewHeight - tabsHeight;
   var editorWidth = editorPaneWidth;
   $("#tabs").width(editorWidth);
   $("#editor").width(editorWidth);
@@ -185,7 +213,7 @@ Spark.prototype.onProjectSelect = function(e) {
   this.fileTree.closeOpendTabs();
   this.ActiveProjectName = $('#project-chooser').val();
   this.writePrefs();
-  this.fileTree.refresh();
+  this.fileTree.refresh(true);
 };
 
 Spark.prototype.ActiveProjectName = 'untitled';
@@ -368,7 +396,7 @@ Spark.prototype.createProject = function(project_name, callback) {
     this.projects[project_name] = directory;
     console.log(directory);
     var templateLoadCb = function() {
-      this.fileTree.refresh();
+      this.fileTree.refresh(true);
       this.refreshProjectList();
       callback();
     };
@@ -432,7 +460,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
 
   var loadPrefsFileCb = function() {
     this.refreshProjectList();
-    this.fileTree.refresh();
+    this.fileTree.refresh(true);
   };
 
   var loadProjectsCb = function() {
@@ -486,6 +514,14 @@ Spark.prototype.fileViewControllerTreeUpdated = function(entries) {
 }
 
 Spark.prototype.filesListViewControllerSelectionChanged = function(selectedEntries) {
+  /*
+  if (selectedEntries.length == 1) {
+    this.fileTree.openFileEntry(selectedEntries[0]);
+  }
+  */
+}
+
+Spark.prototype.filesListViewControllerDoubleClicked = function(selectedEntries) {
   if (selectedEntries.length == 1) {
     this.fileTree.openFileEntry(selectedEntries[0]);
   }

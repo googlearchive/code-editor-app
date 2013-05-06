@@ -86,8 +86,8 @@ Buffer.prototype.handleDocumentChange = function() {
   var modeName = "JavaScript";
   if (title) {
     title = title.match(/[^/]+$/)[0];
-    document.getElementById("title").innerHTML = title;
-    document.title = title;
+    //document.getElementById("title").innerHTML = title;
+    //document.title = title;
     if (title.match(/.json$/)) {
       mode = {name: "javascript", json: true};
       modeName = "JavaScript (JSON)";
@@ -101,10 +101,10 @@ Buffer.prototype.handleDocumentChange = function() {
       modeName = "Image";
     }
   } else {
-    document.getElementById("title").innerHTML = "[no document loaded]";
+    //document.getElementById("title").innerHTML = "[no document loaded]";
   }
   this.doc.getEditor().setOption("mode", mode);
-  document.getElementById("mode").innerHTML = modeName;
+  //document.getElementById("mode").innerHTML = modeName;
 }
 
 Buffer.prototype.open = function() {

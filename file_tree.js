@@ -9,7 +9,7 @@ FileTree = function(filer, spark) {
   this.entries = [];
 };
 
-FileTree.prototype.refresh = function() {
+FileTree.prototype.refresh = function(selectItemEnabled) {
   this.entries = [];
   var fileTree = this;
   var reader =
@@ -35,7 +35,7 @@ FileTree.prototype.refresh = function() {
       if (entries[i].name == 'manifest.json') {
         openedOne = true;
         selectedItemIndex = i;
-        this.openFileEntry(entries[i]);
+        firstEntry = entries[i];
       }
       filteredEntries.push(entries[i]);
     }
@@ -44,13 +44,15 @@ FileTree.prototype.refresh = function() {
     if (!openedOne) {
       if (firstEntry != null) {
         selectedItemIndex = 0;
-        this.openFileEntry(firstEntry);
       }
     }
     
     this.spark.fileViewControllerTreeUpdated(filteredEntries);
-    if (openedOne) {
-      this.spark.fileViewControllerSetSelection([entries[selectedItemIndex]]);
+    if (selectItemEnabled) {
+      if (openedOne) {
+        this.openFileEntry(firstEntry);
+        this.spark.fileViewControllerSetSelection([entries[selectedItemIndex]]);
+      }
     }
   };
   reader.readEntries(handleProjectLs.bind(this));

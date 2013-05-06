@@ -25,7 +25,7 @@ body {
 }
 
 #file-tree {
-  display: block;
+  display: none;
   position: absolute;
   top: 0px;
   left: 0px;
@@ -41,7 +41,10 @@ body {
 }
 
 #editor-placeholder {
+  border-left: solid 1px #eee;
   background-color: white;
+  border-top: solid 1px #eee;
+  border-bottom: solid 1px #eee;
 }
 
 #editor-placeholder div {
@@ -57,7 +60,14 @@ body {
   left: 205px;
 }
 
+#editor {
+  border-left: solid 1px #eee;
+  border-bottom: solid 1px #eee;
+}
+
 #editor-image {
+  border-left: solid 1px #eee;
+  border-bottom: solid 1px #eee;
   position: relative;
   background-color: white;
 }
@@ -108,12 +118,30 @@ body {
   padding-bottom: 0px;
 }
 
-#files-listview {
-  display: none;
+#files-listview-container {
   position: absolute;
   top: 0px;
   left: 0px;
   width: 200px;
+  border-top: solid 1px #eee;
+  border-right: solid 1px #eee;
+  border-bottom: solid 1px #eee;
+}
+
+#files-listview {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 200px;
+}
+
+#files-listview-actions {
+  border-top: solid 1px #eee;
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+  width: 200px;
+  padding: 5px;
 }
 
 .file-item {

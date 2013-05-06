@@ -25,6 +25,10 @@ ListViewDelegate.prototype.listViewSelectionChanged = function(rowIndexes) {
   // Do nothing.
 }
 
+ListViewDelegate.prototype.listViewDoubleClicked = function(rowIndexes) {
+  // Do nothing.
+}
+
 // ListViewCell
 
 var ListViewCell = function() {
@@ -70,13 +74,18 @@ ListView.prototype.reloadData = function() {
   this.cells = new Array();
   var count = this.delegate.listViewNumberOfRows();
   var y = 0;
+  var updatedSelectedRowsSet = new Set();
   for (var i = 0 ; i < count ; ++i) {
     var cell = new ListViewCell();
     this.cells.push(cell);
     cell.y = y;
     cell.height = this.delegate.listViewHeightForRow(i);
     y += cell.height;
+    if (this.selectedRowsSet.contains(i)) {
+      updatedSelectedRowsSet.add(i);
+    }
   }
+  this.selectedRowsSet = updatedSelectedRowsSet;
   this.innerElement.height(y);
   this._updateScrollArea();
 }
@@ -134,12 +143,25 @@ ListView.prototype.setSelectedRow = function(rowIndex) {
   this.setSelectedRows([rowIndex]);
 }
 
+ListView.prototype._handleRowDoubleClicked = function(rowIndex, e) {
+  this.delegate.listViewDoubleClicked(this.selectedRowsSet.allObjects());
+}
+
 ListView.prototype._handleRowClicked = function(rowIndex, e) {
   //console.log('select ' + rowIndex + ' ' + e);
   if (e.ctrlKey || e.metaKey) {
-    var selection = this.selectedRows();
-    selection.push(rowIndex);
-    this.setSelectedRows(selection);
+    if (this.selectedRowsSet.contains(rowIndex)) {
+      var newSelection = new Set();
+      this.selectedRows().forEach(function(rowIndex, i) {
+        newSelection.add(rowIndex);
+      });
+      newSelection.remove(rowIndex);
+      this.setSelectedRows(newSelection.allObjects());
+    } else {
+      var selection = this.selectedRows();
+      selection.push(rowIndex);
+      this.setSelectedRows(selection);
+    }
   } else if (e.shiftKey) {
     if (this.lastSelectedRow != -1) {
       var min;
@@ -161,8 +183,8 @@ ListView.prototype._handleRowClicked = function(rowIndex, e) {
     }
   } else {
     this.setSelectedRow(rowIndex);
-    this.delegate.listViewSelectionChanged(this.selectedRowsSet.allObjects());
   }
+  this.delegate.listViewSelectionChanged(this.selectedRowsSet.allObjects());
 }
 
 ListView.prototype._updateScrollArea = function() {
@@ -187,6 +209,7 @@ ListView.prototype._updateScrollArea = function() {
     }
     elt.append(this.delegate.listViewElementForRow(i));
     elt.click(this._handleRowClicked.bind(this, i));
+    elt.dblclick(this._handleRowDoubleClicked.bind(this, i));
     this.cells[i].element = elt;
     this.innerElement.append(elt);
   }
