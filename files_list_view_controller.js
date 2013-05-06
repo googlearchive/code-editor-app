@@ -1,10 +1,14 @@
+// Copyright (c) 2013 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // Callbacks for the controller
 
 var FilesListViewControllerDelegate = function() {
 }
 
 FilesListViewControllerDelegate.prototype.filesListViewControllerSelectionChanged = function(entries) {
-  
+
 }
 
 var FilesListViewController = function(element, delegate) {
@@ -24,7 +28,7 @@ FilesListViewController.prototype.setSelection = function(selectedEntries) {
   this.entries.forEach(function(entry, i) {
     indexes[entry.name] = i;
   });
-  
+
   var rowIndexes = new Array();
   selectedEntries.forEach(function(entry, i) {
     var idx = indexes[entry.name]
