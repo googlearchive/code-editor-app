@@ -8,7 +8,11 @@ var FilesListViewControllerDelegate = function() {
 }
 
 FilesListViewControllerDelegate.prototype.filesListViewControllerSelectionChanged = function(entries) {
+  // Do nothing.
+}
 
+FilesListViewControllerDelegate.prototype.filesListViewControllerSelectionChanged = function(entries) {
+  // Do nothing.
 }
 
 var FilesListViewController = function(element, delegate) {
@@ -41,6 +45,9 @@ FilesListViewController.prototype.setSelection = function(selectedEntries) {
 
 FilesListViewController.prototype.selection = function() {
   var result = new Array();
+  if (this.entries == null) {
+    return result;
+  }
   var controller = this;
   this.listView.selectedRows().forEach(function(rowIndex, i) {
     result.push(controller.entries[rowIndex]);
@@ -65,27 +72,9 @@ FilesListViewController.prototype.listViewHeightForRow = function(rowIndex) {
 }
 
 FilesListViewController.prototype.listViewSelectionChanged = function(rowIndexes) {
-  if (this.entries == null) {
-    return;
-  }
-  var controller = this;
-  var selectedEntries = new Array();
-  rowIndexes.forEach(function(rowIndex, i) {
-    var entry = controller.entries[rowIndex];
-    selectedEntries.push(entry);
-  });
-  this.delegate.filesListViewControllerSelectionChanged(selectedEntries);
+  this.delegate.filesListViewControllerSelectionChanged(this.selection());
 }
 
 FilesListViewController.prototype.listViewDoubleClicked = function(rowIndexes) {
-  if (this.entries == null) {
-    return;
-  }
-  var controller = this;
-  var selectedEntries = new Array();
-  rowIndexes.forEach(function(rowIndex, i) {
-    var entry = controller.entries[rowIndex];
-    selectedEntries.push(entry);
-  });
-  this.delegate.filesListViewControllerDoubleClicked(selectedEntries);
+  this.delegate.filesListViewControllerDoubleClicked(this.selection());
 }

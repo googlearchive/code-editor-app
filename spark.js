@@ -52,20 +52,92 @@ Spark = function() {
   this.filesListViewController = new FilesListViewController($('#files-listview'), this);
   
   // Add project modal configuration.
+  $('#AddProjectModal').on('show', function () {
+    spark.modalShown = true;
+  });
+  $('#AddProjectModal').on('hide', function () {
+    spark.modalShown = false;
+  });
   $('#AddProjectModal').on('shown', function () {
     $('#new-project-name').val('');
     $('#new-project-name').focus();
   })
+  $('#AddFileModal').on('show', function () {
+    spark.modalShown = true;
+  });
+  $('#AddFileModal').on('hide', function () {
+    spark.modalShown = false;
+  });
   $('#AddFileModal').on('shown', function () {
     $('#new-file-name').val('');
     $('#new-file-name').focus();
+  })
+  $('#RemoveFilesModal').on('show', function () {
+    spark.modalShown = true;
+  });
+  $('#RemoveFilesModal').on('hide', function () {
+    spark.modalShown = false;
+  });
+  $('#RemoveFilesModal').on('shown', function () {
+    spark.modalShown = true;
   })
   
   $('#new-file-name').keypress(this.onAddFileModalKeyPress.bind(this));
   $('#new-project-name').keypress(this.onAddProjectModalKeyPress.bind(this));
   $('#AddFileModal .btn-primary').click(this.onAddFileModalClicked.bind(this));
   $('#AddProjectModal .btn-primary').click(this.onAddProjectModalClicked.bind(this));
+  
+  $('#RemoveFilesModal .btn-primary').click(this.onConfirmDeletion.bind(this));
+  
+  $(document).keydown(this.keyDown.bind(this));
 };
+
+Spark.prototype.keyDown = function(e) {
+  if (this.modalShown) {
+    return;
+  }
+  var focused = $(':focus');
+  if (focused.size() != 0) {
+    return;
+  }
+  if (e.keyCode == 8) {
+    e.preventDefault();
+    var selection = this.filesListViewController.selection();
+    
+    if (selection.length == 0) {
+      return;
+    }
+    
+    if (selection.length == 1) {
+      $('#delete-modal-title').text('Delete ' + selection[0].name + '?');
+      $('#delete-modal-description').text('Do you really want to delete ' + selection[0].name + '?');
+    } else {
+      $('#delete-modal-title').text('Delete ' + selection.length + ' files?');
+      $('#delete-modal-description').text('Do you really want to delete ' + selection.length + ' files?');
+    }
+    
+    $('#RemoveFilesModal').modal('show');
+  }
+}
+
+Spark.prototype.onConfirmDeletion = function(e) {
+  var count = 0;
+  var spark = this;
+  this.filesListViewController.selection().forEach(function(entry, i) {
+    if (entry.buffer != null) {
+      entry.buffer.userRemoveTab();
+    }
+    count ++;
+    entry.remove(function() {
+      // deleted.
+      count --;
+      if (count == 0) {
+        spark.fileTree.refresh(false);
+      }
+    });
+  });
+  $('#RemoveFilesModal').modal('hide');
+}
 
 // Buttons actions
 
@@ -103,26 +175,6 @@ Spark.prototype.onAddProjectModalClicked = function(e) {
   };
   this.createProject(this.ActiveProjectName, createProjectCb.bind(this));
 }
-
-/*
-Spark.prototype.onButtonRemoveClicked = function(e) {
-  var count = 0;
-  var spark = this;
-  this.filesListViewController.selection().forEach(function(entry, i) {
-    if (entry.buffer != null) {
-      entry.buffer.userRemoveTab();
-    }
-    count ++;
-    entry.remove(function() {
-      // deleted.
-      count --;
-      if (count == 0) {
-        spark.fileTree.refresh(false);
-      }
-    });
-  })
-}
-*/
 
 // Buffers callback.
 // TODO(dvh): needs to be refactored using callbacks instead of events.
@@ -519,7 +571,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   });
 };
 
-// filewViewController callbacks.
+// FileTree callbacks.
 
 Spark.prototype.fileViewControllerSetSelection = function(selectedEntries) {
   this.filesListViewController.setSelection(selectedEntries);
@@ -528,6 +580,8 @@ Spark.prototype.fileViewControllerSetSelection = function(selectedEntries) {
 Spark.prototype.fileViewControllerTreeUpdated = function(entries) {
   this.filesListViewController.updateEntries(entries);
 }
+
+// FilesListViewController callback
 
 Spark.prototype.filesListViewControllerSelectionChanged = function(selectedEntries) {
   // Do nothing.
