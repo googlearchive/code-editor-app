@@ -33,14 +33,6 @@ body {
   position: relative;
 }
 
-#tabs {
-  width: auto;
-  max-height: 31px;
-  min-height: 31px;
-  margin-bottom: 0px;
-  overflow: hidden;
-}
-
 #editor-placeholder {
   border-left: solid 1px #eee;
   background-color: white;
@@ -93,6 +85,32 @@ body {
 
 .close-buffer-button:hover {
   opacity: 1.0;
+}
+
+#bottom-line-nav-tabs {
+  position: absolute;
+  top: 31px;
+  height: 1px;
+  width: 100%;
+  background-color: #eee;
+  z-index: 10;
+}
+
+#tabs {
+  position: absolute;
+  top: 0px;
+  height: 0px;
+  z-index: 100;
+  width: auto;
+  max-height: 33px;
+  min-height: 33px;
+  margin-bottom: 0px;
+  overflow: hidden;
+  border-bottom: none;
+}
+
+.nav-tabs li.active a {
+  border-bottom: solid 1px white;
 }
 
 .nav-tabs li a {
