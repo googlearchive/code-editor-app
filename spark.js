@@ -74,9 +74,11 @@ Spark = function() {
   })
   $('#RemoveFilesModal').on('show', function () {
     spark.modalShown = true;
+    spark.removeFilesModalShown = true;
   });
   $('#RemoveFilesModal').on('hide', function () {
     spark.modalShown = false;
+    spark.removeFilesModalShown = false;
   });
   $('#RemoveFilesModal').on('shown', function () {
     spark.modalShown = true;
@@ -94,12 +96,19 @@ Spark = function() {
 
 Spark.prototype.keyDown = function(e) {
   if (this.modalShown) {
+    if (this.removeFilesModalShown) {
+      if (e.keyCode == 13) {
+        e.preventdefault;
+        this.onConfirmDeletion(null);
+      }
+    }
     return;
   }
   var focused = $(':focus');
   if (focused.size() != 0) {
     return;
   }
+  
   if (e.keyCode == 8) {
     e.preventDefault();
     var selection = this.filesListViewController.selection();
@@ -166,7 +175,7 @@ Spark.prototype.onAddFileModalClicked = function(e) {
 
 Spark.prototype.onAddProjectModalClicked = function(e) {
   var projectName = $('#new-project-name').val();
-  this.fileTree.closeOpendTabs();
+  this.fileTree.closeOpenedTabs();
   this.ActiveProjectName = projectName;
   this.writePrefs();
   var createProjectCb = function() {
@@ -322,7 +331,7 @@ Spark.prototype.refreshProjectList = function() {
 
 Spark.prototype.onProjectSelect = function(projectName, e) {
   // TODO(dvh) : remember last loaded project name.
-  this.fileTree.closeOpendTabs();
+  this.fileTree.closeOpenedTabs();
   this.ActiveProjectName = projectName;
   this.writePrefs();
   this.fileTree.refresh(true);

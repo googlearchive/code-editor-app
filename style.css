@@ -181,3 +181,10 @@ body {
   content: "\002713";
 }
 
+#new-project-name {
+  width: 400px;
+}
+
+#new-file-name {
+  width: 400px;
+}

@@ -75,7 +75,7 @@ FileTree.prototype.openFileEntry = function(fileEntry) {
   }
 }
 
-FileTree.prototype.closeOpendTabs = function() {
+FileTree.prototype.closeOpenedTabs = function() {
   for (var fname in this.entries) {
     if (fname == 'prefs')
       continue;
@@ -90,8 +90,9 @@ FileTree.prototype.createNewFile = function(name, callback) {
   var entry = this.entries[name];
   if (entry) {
     console.log(name + ': file already exist.');
-    if (!entry.buffer)
+    if (!entry.buffer) {
       entry.buffer = new Buffer(entry);
+    }
     entry.buffer.switchTo();
     $('#new-file-name').val('');
     return;
