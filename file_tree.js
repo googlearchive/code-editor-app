@@ -9,7 +9,7 @@ FileTree = function(filer, spark) {
   this.entries = [];
 };
 
-FileTree.prototype.refresh = function(selectItemEnabled) {
+FileTree.prototype.refresh = function(selectItemEnabled, callback) {
   this.entries = [];
   var fileTree = this;
   var reader =
@@ -40,6 +40,12 @@ FileTree.prototype.refresh = function(selectItemEnabled) {
       filteredEntries.push(entries[i]);
     }
 
+    filteredEntries.sort(function(a, b) {
+      return a.name.localeCompare(b.name, [], {
+        sensitivity: "base",
+      });
+    });
+
     // If manifest has not been found, open the first valid entry.
     if (!openedOne) {
       if (firstEntry != null) {
@@ -53,6 +59,10 @@ FileTree.prototype.refresh = function(selectItemEnabled) {
         this.openFileEntry(firstEntry);
         this.spark.fileViewControllerSetSelection([entries[selectedItemIndex]]);
       }
+    }
+    
+    if (callback != null) {
+      callback(filteredEntries);
     }
   };
   reader.readEntries(handleProjectLs.bind(this));

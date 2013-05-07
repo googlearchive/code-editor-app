@@ -43,6 +43,22 @@ FilesListViewController.prototype.setSelection = function(selectedEntries) {
   this.listView.setSelectedRows(rowIndexes);
 }
 
+FilesListViewController.prototype.setSelectionByNames = function(names) {
+  var indexes = new Object();
+  this.entries.forEach(function(entry, i) {
+    indexes[entry.name] = i;
+  });
+
+  var rowIndexes = new Array();
+  names.forEach(function(name, i) {
+    var idx = indexes[name];
+    if (idx != null) {
+      rowIndexes.push(idx);
+    }
+  });
+  this.listView.setSelectedRows(rowIndexes);
+}
+
 FilesListViewController.prototype.selection = function() {
   var result = new Array();
   if (this.entries == null) {

@@ -141,7 +141,8 @@ Spark.prototype.onConfirmDeletion = function(e) {
       // deleted.
       count --;
       if (count == 0) {
-        spark.fileTree.refresh(false);
+        spark.filesListViewController.setSelection([]);
+        spark.fileTree.refresh(false, null);
       }
     });
   });
@@ -168,7 +169,10 @@ Spark.prototype.onAddFileModalClicked = function(e) {
   var filename = $('#new-file-name').val();
   var spark = this;
   this.fileTree.createNewFile(filename, function() {
-    spark.fileTree.refresh();
+    spark.fileTree.refresh(false, function() {
+      console.log('select ' + filename);
+      spark.filesListViewController.setSelectionByNames([filename]);
+    });
   });
   $('#AddFileModal').modal('hide')
 }
@@ -334,7 +338,7 @@ Spark.prototype.onProjectSelect = function(projectName, e) {
   this.fileTree.closeOpenedTabs();
   this.ActiveProjectName = projectName;
   this.writePrefs();
-  this.fileTree.refresh(true);
+  this.fileTree.refresh(true, null);
   
   this.refreshProjectList();
 };
@@ -471,7 +475,7 @@ Spark.prototype.createProject = function(project_name, callback) {
     this.projects[project_name] = directory;
     console.log(directory);
     var templateLoadCb = function() {
-      this.fileTree.refresh(true);
+      this.fileTree.refresh(true, null);
       this.refreshProjectList();
       callback();
     };
@@ -535,7 +539,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
 
   var loadPrefsFileCb = function() {
     this.refreshProjectList();
-    this.fileTree.refresh(true);
+    this.fileTree.refresh(true, null);
   };
 
   var loadProjectsCb = function() {
