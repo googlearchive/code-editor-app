@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 var openedTabEntries = new Array();
+var openedTabHash = new Object();
 
 Buffer = function(fileEntry) {
   this.fileEntry = fileEntry;
@@ -19,6 +20,7 @@ Buffer = function(fileEntry) {
   
   $("#tabs").append(this.tabElement);
   openedTabEntries.push(this);
+  openedTabHash[fileEntry.name] = this;
 
   var pattern = /\.(jpg|jpeg|png|gif)$/i;
   this.isImage = pattern.test(fileEntry.name);
@@ -62,6 +64,7 @@ Buffer.prototype.indexInTabs = function() {
 
 Buffer.prototype.removeTab = function() {
   var index = this.indexInTabs();
+  delete openedTabHash[openedTabEntries[index].fileEntry.name];
   openedTabEntries.splice(index, 1);
   this.tabElement.remove();
 }

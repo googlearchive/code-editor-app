@@ -202,6 +202,7 @@ ListView.prototype._updateScrollArea = function() {
     }
     var elt = $('<div></div>');
     elt.css('position', 'absolute');
+    elt.css('overflow', 'hidden');
     elt.css('width', '100%');
     elt.css('top', this.cells[i].y + 'px');
     elt.css('height', this.cells[i].height + 'px');

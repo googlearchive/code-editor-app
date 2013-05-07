@@ -57,6 +57,7 @@ Spark = function() {
   });
   $('#AddProjectModal').on('hide', function () {
     spark.modalShown = false;
+    $('#new-project-name').blur();
   });
   $('#AddProjectModal').on('shown', function () {
     $('#new-project-name').val('');
@@ -67,6 +68,7 @@ Spark = function() {
   });
   $('#AddFileModal').on('hide', function () {
     spark.modalShown = false;
+    $('#new-file-name').blur();
   });
   $('#AddFileModal').on('shown', function () {
     $('#new-file-name').val('');
@@ -133,8 +135,8 @@ Spark.prototype.onConfirmDeletion = function(e) {
   var count = 0;
   var spark = this;
   this.filesListViewController.selection().forEach(function(entry, i) {
-    if (entry.buffer != null) {
-      entry.buffer.userRemoveTab();
+    if (openedTabHash[entry.name] != null) {
+      openedTabHash[entry.name].userRemoveTab();
     }
     count ++;
     entry.remove(function() {

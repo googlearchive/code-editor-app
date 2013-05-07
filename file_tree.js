@@ -77,11 +77,12 @@ FileTree.prototype.handleProjectsLs = function(entries) {
 
 FileTree.prototype.openFileEntry = function(fileEntry) {
   fileEntry.active = true;
-  if (!fileEntry.buffer) {
+  var buffer = openedTabHash[fileEntry.name];
+  if (!buffer) {
     // This feels wrong.
     fileEntry.buffer = new Buffer(fileEntry);
   } else {
-    fileEntry.buffer.switchTo();
+    buffer.switchTo();
   }
 }
 
@@ -90,8 +91,9 @@ FileTree.prototype.closeOpenedTabs = function() {
     if (fname == 'prefs')
       continue;
     var entry = this.entries[fname];
-    if (entry.buffer != null) {
-      entry.buffer.userRemoveTab();
+    var buffer = openedTabHash[entry.name];
+    if (buffer != null) {
+      buffer.userRemoveTab();
     }
   }
 };
@@ -100,10 +102,11 @@ FileTree.prototype.createNewFile = function(name, callback) {
   var entry = this.entries[name];
   if (entry) {
     console.log(name + ': file already exist.');
-    if (!entry.buffer) {
-      entry.buffer = new Buffer(entry);
+    var buffer = openedTabHash[entry.name];
+    if (buffer == null) {
+      buffer = new Buffer(entry);
     }
-    entry.buffer.switchTo();
+    buffer.switchTo();
     $('#new-file-name').val('');
     return;
   }
