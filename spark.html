@@ -15,6 +15,7 @@
   <script src="ebidel/dnd.js"></script>
   <script src="ebidel/filer.min.js"></script>
 
+  <script src="htmlencode.js"></script>
   <script src="globals.js"></script>
   <script src="util.js"></script>
   <script src="buffer.js"></script>
@@ -35,44 +36,70 @@
 <body>
   <div>
     <div id="top-bar">
-      <select id="project-chooser">
-      </select>
-      <button id="run-button" class="btn btn-primary tt"
-      title="Reloads and runs the project in Chrome.">Run</button>
-      <!-- <button id="test-button" class="btn tt"
-        title="Runs the project's unit tests.">Test</button>
-        <button id="publish-button" class="btn tt"
-        title="Uploads the project's output to the Chrome Web
-        Store.">Publish</button> -->
-      <button id="export-button" class="btn tt"
-      title="Exports the entire project as a zip file.">Export</button>
-      <input type="text" placeholder="project_name" id="new-project-name"/>
-      <button id="project-button" class="btn tt"
-      title="Creates a new project.">Add Project</button>
-    </div>
-
-    <div id="alert">
-      <div class="span10 offset1">
-        <div class="alert">
-          <button type="button" class="close" data-dismiss="alert">&times;</button>
-          <span id="alert-text"></span>
+      <div class="btn-group" id="create-button">
+        <a class="btn btn-danger dropdown-toggle" data-toggle="dropdown" href="#">
+          Create
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a tabindex="-1" data-toggle="modal" href="#AddProjectModal">Add Project</a></li>
+          <li><a tabindex="-1" data-toggle="modal" href="#AddFileModal">Add File</a></li>
+        </ul>
+      </div>
+      
+      <div id="right-buttons">
+        <button id="run-button" class="btn btn-primary tt"
+        title="Reloads and runs the project in Chrome.">Run</button>
+        <button id="export-button" class="btn tt"
+        title="Exports the entire project as a zip file.">Export</button>
+      </div>
+      
+      <!-- Modal Add Project -->
+      <div id="AddProjectModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="myModalLabel">New project</h3>
+        </div>
+        <div class="modal-body">
+          <p>Please enter the name your project:</p>
+          <input type="text" placeholder="New_project" id="new-project-name"/>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+          <button class="btn btn-primary">Create</button>
+        </div>
+      </div>
+      
+      <!-- Modal Add File -->
+      <div id="AddFileModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="myModalLabel">Add file</h3>
+        </div>
+        <div class="modal-body">
+          <p>Add a new file in the project.</p>
+          <p>Please enter the name of the file:</p>
+          <input type="text" placeholder="New_file.txt" id="new-file-name"/>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+          <button class="btn btn-primary">Add</button>
         </div>
       </div>
     </div>
 
     <div id="main-view">
-      <div id="file-tree">
-        <ul class="nav nav-pills nav-stacked" id="filetree">
-        </ul>
-      </div>
       <div id="files-listview-container">
-        <div id="files-listview">
+        <div class="btn-group" id="project-selector">
+          <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+            <span id="project-name">
+            </span>
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+          </ul>
         </div>
-        <div id="files-listview-actions">
-          <div class="btn-group">
-            <button class="btn" id="file-button-add">+</button>
-            <button class="btn" id="file-button-remove">-</button>
-          </div>
+        <div id="files-listview">
         </div>
       </div>
       <div id="editor-pane">
@@ -85,13 +112,6 @@
         <div id="editor-placeholder-string">No file selected</div>
       </div>
     </div>
-
-    <div id="bottom-bar">
-      <input type="text" placeholder="new_file.txt" id="new-file-name" />
-      <button id="new-button" class="btn tt"
-      title="Creates a new, empty file.">Create File</button>
-    </div>
-
   </div>
 </body>
 </html>

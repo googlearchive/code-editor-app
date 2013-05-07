@@ -3,33 +3,34 @@ body {
 }
 
 #top-bar {
-  padding-bottom: 10px;
-  padding-top: 5px;
-  padding-left: 20px;
-  padding-right: 20px;
-  min-width: 700px;
-  overflow: hidden;
-  height: 30px;
+  border-top: solid 1px #e5e5e5;
+  border-bottom: solid 1px #e5e5e5;
+  background-color: #f1f1f1;
+  min-height: 50px;
+  max-height: 50px;
+  margin-bottom: 20px;
 }
 
-#bottom-bar {
-  padding-bottom: 10px;
-  padding-top: 10px;
-  padding-left: 20px;
-  padding-right: 20px;
-  height: 30px;
+#top-bar .btn {
+  outline: none;
+}
+
+#create-button {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  display: inline-block;
+}
+
+#right-buttons {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: inline-block;
 }
 
 #main-view {
   position: relative;
-}
-
-#file-tree {
-  display: none;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 200px;
 }
 
 #tabs {
@@ -76,29 +77,8 @@ body {
   position: absolute;
 }
 
-#alert {
-  display: none;
-}
-
 #run-button {
   margin-left: 10px;
-}
-
-#new-project-name {
-  margin-left: 10px;
-}
-
-#project-chooser {
-  width: 160px;
-  margin-bottom: 0px;
-}
-
-#new-project-name {
-  margin-bottom: 0px;
-}
-
-#new-file-name {
-  margin-bottom: 0px;
 }
 
 .close-buffer-button {
@@ -116,6 +96,7 @@ body {
 .nav-tabs li a {
   padding-top: 0px;
   padding-bottom: 0px;
+  font-weight: bold;
 }
 
 #files-listview-container {
@@ -123,9 +104,6 @@ body {
   top: 0px;
   left: 0px;
   width: 200px;
-  border-top: solid 1px #eee;
-  border-right: solid 1px #eee;
-  border-bottom: solid 1px #eee;
 }
 
 #files-listview {
@@ -145,5 +123,59 @@ body {
 }
 
 .file-item {
-  padding-left: 5px;
+  padding-left: 20px;
 }
+
+#project-selector {
+ position: absolute;
+ left: 20px;
+ top: 7px;
+ display: inline-block;
+ max-width: 180px;
+ font-size: 14px;
+}
+
+#project-selector a {
+  border: none;
+  -webkit-box-shadow: none;
+  outline: none;
+  text-decoration: none;
+}
+
+#project-selector a #project-name {
+  color: black;
+}
+
+#project-selector a:hover #project-name {
+  color: #888;
+}
+
+#project-selector a:hover .caret {
+  border-top: 4px solid #888;
+}
+
+#project-selector a .caret {
+  position: relative;
+  margin-top: 8px;
+}
+
+#project-name {
+  font-weight: bold;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+  max-width: 160px;
+  display: inline-block;
+}
+
+.menu-checkmark:before {
+  display: inline-block;
+  position: relative;
+  font-size: 14px;
+  margin-left: -15px;
+  padding-right: 5px;
+  top: 1px;
+  width: 10px;
+  content: "\002713";
+}
+

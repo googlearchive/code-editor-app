@@ -4,6 +4,6 @@
 
 chrome.app.runtime.onLaunched.addListener(function() {
   chrome.app.window.create('spark.html', {
-    frame: 'chrome', width: 940, height: 860
+    frame: 'chrome', width: 940, height: 860, minWidth: 600, minHeight: 350
   });
 });

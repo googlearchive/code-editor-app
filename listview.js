@@ -61,6 +61,8 @@ var ListView = function(element, delegate) {
   });
 }
 
+ListView.selectedColor = '#d7d4f0';
+
 ListView.prototype.reloadData = function() {
   if (this.cleanupTimer != null) {
     window.clearTimeout(this.cleanupTimer);
@@ -129,7 +131,7 @@ ListView.prototype.setSelectedRows = function(rowIndexes) {
   });
   this.selectedRowsSet.allObjects().forEach(function(rowIndex, i) {
     if (listview.cells[rowIndex].element != null) {
-      listview.cells[rowIndex].element.css('background-color', '#aaf');
+      listview.cells[rowIndex].element.css('background-color', ListView.selectedColor);
     }
   });
 }
@@ -148,7 +150,6 @@ ListView.prototype._handleRowDoubleClicked = function(rowIndex, e) {
 }
 
 ListView.prototype._handleRowClicked = function(rowIndex, e) {
-  //console.log('select ' + rowIndex + ' ' + e);
   if (e.ctrlKey || e.metaKey) {
     if (this.selectedRowsSet.contains(rowIndex)) {
       var newSelection = new Set();
@@ -205,7 +206,7 @@ ListView.prototype._updateScrollArea = function() {
     elt.css('top', this.cells[i].y + 'px');
     elt.css('height', this.cells[i].height + 'px');
     if (this.selectedRowsSet.contains(i)) {
-      elt.css('background-color', '#88f');
+      elt.css('background-color', ListView.selectedColor);
     }
     elt.append(this.delegate.listViewElementForRow(i));
     elt.click(this._handleRowClicked.bind(this, i));

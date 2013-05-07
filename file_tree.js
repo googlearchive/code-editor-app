@@ -17,7 +17,7 @@ FileTree.prototype.refresh = function(selectItemEnabled) {
   var handleProjectLs = function(entries) {
     this.parentElement.empty();
     for (var i = 0; i < entries.length; ++i) {
-      this.handleCreatedEntry(false, entries[i]);
+      this.handleCreatedEntry(false, null, entries[i]);
     }
     
     var openedOne = false;
@@ -61,7 +61,7 @@ FileTree.prototype.refresh = function(selectItemEnabled) {
 FileTree.prototype.handleProjectsLs = function(entries) {
   var fileTree = this;
   entries.forEach(function(entry, i) {
-    fileTree.handleCreatedEntry(false, entry);
+    fileTree.handleCreatedEntry(false, null, entry);
   });
 };
 
@@ -86,7 +86,7 @@ FileTree.prototype.closeOpendTabs = function() {
   }
 };
 
-FileTree.prototype.createNewFile = function(name) {
+FileTree.prototype.createNewFile = function(name, callback) {
   var entry = this.entries[name];
   if (entry) {
     console.log(name + ': file already exist.');
@@ -97,46 +97,21 @@ FileTree.prototype.createNewFile = function(name) {
     return;
   }
   this.spark.projects[this.spark.ActiveProjectName].getFile(
-      name, {create: true}, this.handleCreatedEntry.bind(this, true), errorHandler);
+      name, {create: true}, this.handleCreatedEntry.bind(this, true, callback), errorHandler);
 }
 
-FileTree.prototype.handleCreatedEntry = function(switchToBufferEnabled, fileEntry) {
+FileTree.prototype.handleCreatedEntry = function(switchToBufferEnabled, callback, fileEntry) {
   var fileTree = this;
   fileEntry.active = false;
   this.entries[fileEntry.name] = fileEntry;
-
-  var fragment = $('<li>');
-
-  var mainIcon = $('<i>');
-  if (fileEntry.isDirectory)
-    mainIcon.addClass("icon-folder-close");
-  else
-    mainIcon.addClass("icon-file");
-  var deleteIcon = $('<i>').addClass("icon-trash");
-  fragment.append(mainIcon);
-  fragment.append(['<span>', fileEntry.name, '</span>'].join(''));
-  fragment.append(deleteIcon);
-
-  var filer = this.filer;
-  deleteIcon.click(function() {
-    fileEntry.remove(function() {
-      console.log(fileEntry.fullPath + ' removed.');
-      fragment.remove();
-      if (fileEntry.buffer != null) {
-        fileEntry.buffer.userRemoveTab();
-      }
-    });
-  });
-
-  fragment.click(function() {
-    fileTree.openFileEntry(fileEntry);
-  });
-
-  this.parentElement.append(fragment);
   
   if (switchToBufferEnabled) {
     fileEntry.buffer = new Buffer(fileEntry);
     fileEntry.buffer.switchTo();
     $('#new-file-name').val('');
+  }
+  
+  if (callback != null) {
+    callback();
   }
 };
