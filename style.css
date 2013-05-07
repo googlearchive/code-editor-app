@@ -135,11 +135,13 @@ body {
  font-size: 14px;
 }
 
-#project-selector a {
+#project-selector #main-project-button {
   border: none;
   -webkit-box-shadow: none;
   outline: none;
   text-decoration: none;
+  width: 180px;
+  display: inline-block;
 }
 
 #project-selector a #project-name {
