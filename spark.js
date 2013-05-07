@@ -290,7 +290,7 @@ Spark.prototype.onWindowResize = function(e) {
   $("#file-tree").height(mainViewHeight);
   $("#files-listview-container").height(mainViewHeight);
   var filesContainerHeight = $("#files-listview-actions").outerHeight();
-  $("#files-listview").css('top', '50px');
+  $("#files-listview").css('top', '40px');
   $("#files-listview").height(mainViewHeight - filesContainerHeight - 50);
   var tabsHeight = $('#tabs').outerHeight();
   // Hard-coded size because it won't work on first launch. (dvh)
@@ -299,12 +299,14 @@ Spark.prototype.onWindowResize = function(e) {
   var editorWidth = editorPaneWidth;
   $("#tabs").width(editorWidth);
   $("#editor").css('position', 'absolute');
-  $("#editor").css('top', '50px');
+  $("#editor").css('top', '40px');
   $("#editor").width(editorWidth);
   $("#editor").height(editorHeight);
+  $("#editor-placeholder").css('top', '40px');
   $("#editor-placeholder").width(editorPaneWidth);
   $("#editor-placeholder").height(mainViewHeight);
   $("#editor-placeholder div").css('line-height', mainViewHeight + 'px');
+  $("#editor-image").css('top', '40px');
   $("#editor-image").width(editorWidth);
   $("#editor-image").height(editorHeight);
   $("#edited-image").css('left', (editorWidth - $("#edited-image").width()) / 2);

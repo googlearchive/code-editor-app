@@ -80,11 +80,12 @@ FilesListViewController.prototype.listViewNumberOfRows = function() {
 }
 
 FilesListViewController.prototype.listViewElementForRow = function(rowIndex) {
-  return $("<div class=\"file-item\">" + this.entries[rowIndex].name + "</div>");
+  var image = "<img src=\"img/file-regular.png\"/>"
+  return $("<div class=\"file-item\">" + image + this.entries[rowIndex].name + "</div>");
 }
 
 FilesListViewController.prototype.listViewHeightForRow = function(rowIndex) {
-  return 20.;
+  return 25.;
 }
 
 FilesListViewController.prototype.listViewSelectionChanged = function(rowIndexes) {

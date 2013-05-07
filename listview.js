@@ -61,7 +61,7 @@ var ListView = function(element, delegate) {
   });
 }
 
-ListView.selectedColor = '#d7d4f0';
+ListView.selectedColor = '#eee';
 
 ListView.prototype.reloadData = function() {
   if (this.cleanupTimer != null) {
