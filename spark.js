@@ -304,8 +304,8 @@ Spark.prototype.onWindowResize = function(e) {
   $("#editor").height(editorHeight);
   $("#editor-placeholder").css('top', '40px');
   $("#editor-placeholder").width(editorPaneWidth);
-  $("#editor-placeholder").height(mainViewHeight);
-  $("#editor-placeholder div").css('line-height', mainViewHeight + 'px');
+  $("#editor-placeholder").height(editorHeight);
+  $("#editor-placeholder div").css('line-height', editorHeight + 'px');
   $("#editor-image").css('top', '40px');
   $("#editor-image").width(editorWidth);
   $("#editor-image").height(editorHeight);
