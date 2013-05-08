@@ -45,7 +45,7 @@ TemplateLoader.prototype.writeFiles = function(entries, callback) {
   for (var i = 0; i < entries.length; ++i) {
     entries[i].file(function(file) {
       var reader = new FileReader();
-      reader.readAsText(file, 'utf-8');
+      reader.readAsArrayBuffer(file);
       reader.onload = function(ev) {
         templateLoader.writeFile(file.name, ev.target.result)
       };
@@ -63,7 +63,6 @@ TemplateLoader.prototype.writeFile = function(name, content) {
           writer.truncate(0);
           writer.onwriteend = function() {
             var blob = new Blob([content]);
-            var size = content.length;
             writer.write(blob);
             writer.onwriteend = function() {
               templateLoader.pendingWrites--;

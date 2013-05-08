@@ -641,10 +641,19 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   var spark = this;
   var dnd = new DnDFileController('body', function(files, e) {
     var items = e.dataTransfer.items;
+    var entries = new Array();
+    var pendingCount = 0;
     for (var i = 0, item; item = items[i]; ++i) {
       var entry = item.webkitGetAsEntry();
+      entries.push(entry);
       var writeendCb = function() {
         console.log('writes done.');
+        pendingCount --;
+        if (pendingCount == 0) {
+          spark.fileTree.refresh(false, function() {
+            spark.filesListViewController.setSelection(entries);
+          });
+        }
       }
       if (entry.isDirectory) {
         var reader = entry.createReader();
@@ -659,16 +668,13 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
             fileEntries.push(entries[i]);
           }
 
+          pendingCount ++
           spark.templateLoader.writeFiles(fileEntries, writeendCb);
-          for (var i = 0; i < fileEntries.length; ++i) {
-            spark.fileTree.createNewFile(fileEntries[i].name, function() {});
-          }
-
         };
         reader.readEntries(handleDnDFoler.bind(this));
       } else {
+        pendingCount ++
         spark.templateLoader.writeFiles([entry], writeendCb);
-        spark.fileTree.createNewFile(entry.name, function() {});
       }
     }
   });
