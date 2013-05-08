@@ -131,6 +131,7 @@ Spark.prototype.setupModalDialogs = function() {
 Spark.prototype.hideFileMenu = function() {
   $('#files-menu').css('display', 'none');
   $('html').unbind('click', this.onClickFileMenuHandler);
+  $('.caret', this.currentFileMenuElement).css('opacity', '');
 }
 
 Spark.prototype.onClickHideFileMenu = function(e) {
@@ -706,10 +707,12 @@ Spark.prototype.filesListViewControllerShowContextMenuForElement = function(elem
     
   // Move the files context menu to the location of the caret.
   var x = getAbsoluteX(element.get(0));
-  var y = getAbsoluteY(element.get(0)) - $('#files-menu').outerHeight() + 5;
+  var y = getAbsoluteY(element.get(0)) + element.outerHeight()+ 5;
   $('#files-menu').css('display', 'block');
   $('#files-menu').css('top', y + 'px');
   $('#files-menu').css('left', x + 'px');
+  this.currentFileMenuElement = element;
+  $('.caret', this.currentFileMenuElement).css('opacity', '1.0');
     
   event.preventDefault();
   event.stopPropagation();
