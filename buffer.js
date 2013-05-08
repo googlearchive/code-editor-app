@@ -118,6 +118,7 @@ Buffer.prototype.open = function() {
     fileReader.onload = function(e) {
       if (!buffer.hasImageData) {
         buffer.doc.setValue(e.target.result);
+        buffer.doc.clearHistory();
         buffer.handleDocumentChange(buffer.fileEntry.name);
       } else {
         buffer.imageData = e.target.result;
