@@ -53,15 +53,8 @@ Spark = function() {
   
   this.setupModalDialogs();
   
-  $('#new-file-name').keypress(this.onAddFileModalKeyPress.bind(this));
-  $('#new-project-name').keypress(this.onAddProjectModalKeyPress.bind(this));
-  $('#AddFileModal .btn-primary').click(this.onAddFileModalClicked.bind(this));
-  $('#AddProjectModal .btn-primary').click(this.onAddProjectModalClicked.bind(this));
-  $('#RemoveFilesModal .btn-primary').click(this.onConfirmDeletion.bind(this));
-  $('#RenameFilesModal .btn-primary').click(this.onConfirmRename.bind(this));
-  
   this.setupFileMenu();
-  
+
   $(document).keydown(this.keyDown.bind(this));
 }
 
@@ -126,6 +119,13 @@ Spark.prototype.setupModalDialogs = function() {
   $('#RenameFilesModal').on('shown', function () {
     $('#rename-file-name').focus();
   })
+  
+  $('#new-file-name').keypress(this.onAddFileModalKeyPress.bind(this));
+  $('#new-project-name').keypress(this.onAddProjectModalKeyPress.bind(this));
+  $('#AddFileModal .btn-primary').click(this.onAddFileModalClicked.bind(this));
+  $('#AddProjectModal .btn-primary').click(this.onAddProjectModalClicked.bind(this));
+  $('#RemoveFilesModal .btn-primary').click(this.onConfirmDeletion.bind(this));
+  $('#RenameFilesModal .btn-primary').click(this.onConfirmRename.bind(this));
 }
 
 Spark.prototype.hideFileMenu = function() {
