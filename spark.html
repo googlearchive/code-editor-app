@@ -25,6 +25,7 @@
   <script src="set.js"></script>
   <script src="listview.js"></script>
   <script src="files_list_view_controller.js"></script>
+  <script src="absolutepos.js"></script>
 
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="codemirror-3.1/lib/codemirror.css">
@@ -53,7 +54,9 @@
         <button id="export-button" class="btn tt"
         title="Exports the entire project as a zip file.">Export</button>
       </div>
-      
+    </div>
+    
+    <div id="modals">
       <!-- Modal Add Project -->
       <div id="AddProjectModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-header">
@@ -86,23 +89,45 @@
           <button class="btn btn-primary">Add</button>
         </div>
       </div>
+      
+      <!-- Modal Remove Files -->
+      <div id="RemoveFilesModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="delete-modal-title">Delete</h3>
+        </div>
+        <div class="modal-body">
+          <p id="delete-modal-description">Do you really want to delete those files?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">No</button>
+          <button class="btn btn-primary">Yes</button>
+        </div>
+      </div>
+
+      <!-- Modal Rename File -->
+      <div id="RenameFilesModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="delete-modal-title">Rename</h3>
+        </div>
+        <div class="modal-body">
+          <p>Please enter the new name of the file:</p>
+          <input type="text" placeholder="New_name.txt" id="rename-file-name"/>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+          <button class="btn btn-primary">Rename</button>
+        </div>
+      </div>
     </div>
 
-    <!-- Modal Add Project -->
-    <div id="RemoveFilesModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
-        <h3 id="delete-modal-title">Delete file(s)?</h3>
-      </div>
-      <div class="modal-body">
-        <p id="delete-modal-description">Do you really want to delete those files?</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">No</button>
-        <button class="btn btn-primary">Yes</button>
-      </div>
+    <div>
+      <ul id="files-menu" class="dropdown-menu" role="menu" style="position: fixed; top: 0px; left: 0px;">
+        <li><a tabindex="-1" id="files-menu-remove" href="#">Delete</a></li>
+        <li><a tabindex="-1" id="files-menu-rename" href="#">Rename</a></li>
+      </ul>
     </div>
-    
     <div id="main-view">
       <div id="files-listview-container">
         <div class="btn-group" id="project-selector">
@@ -125,6 +150,8 @@
         <div id="editor-image"><img id="edited-image"></img></div>
       </div>
       <div id="editor-placeholder">
+        <div class="dropdown">
+        </div>
         <div id="editor-placeholder-string">No file selected</div>
       </div>
     </div>

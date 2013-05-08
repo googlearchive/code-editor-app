@@ -51,6 +51,23 @@ Spark = function() {
 
   this.filesListViewController = new FilesListViewController($('#files-listview'), this);
   
+  this.setupModalDialogs();
+  
+  $('#new-file-name').keypress(this.onAddFileModalKeyPress.bind(this));
+  $('#new-project-name').keypress(this.onAddProjectModalKeyPress.bind(this));
+  $('#AddFileModal .btn-primary').click(this.onAddFileModalClicked.bind(this));
+  $('#AddProjectModal .btn-primary').click(this.onAddProjectModalClicked.bind(this));
+  $('#RemoveFilesModal .btn-primary').click(this.onConfirmDeletion.bind(this));
+  $('#RenameFilesModal .btn-primary').click(this.onConfirmRename.bind(this));
+  
+  this.setupFileMenu();
+  
+  $(document).keydown(this.keyDown.bind(this));
+}
+
+Spark.prototype.setupModalDialogs = function() {
+  var spark = this;
+  
   // Add project modal configuration.
   $('#AddProjectModal').on('show', function () {
     spark.modalShown = true;
@@ -75,6 +92,18 @@ Spark = function() {
     $('#new-file-name').focus();
   })
   $('#RemoveFilesModal').on('show', function () {
+    var selection = spark.filesListViewController.selection();
+    
+    if (selection.length == 0) {
+      return;
+    }
+    
+    if (selection.length == 1) {
+      $('#delete-modal-description').text('Do you really want to delete ' + selection[0].name + '?');
+    } else {
+      $('#delete-modal-description').text('Do you really want to delete ' + selection.length + ' files?');
+    }
+    
     spark.modalShown = true;
     spark.removeFilesModalShown = true;
   });
@@ -85,16 +114,56 @@ Spark = function() {
   $('#RemoveFilesModal').on('shown', function () {
     spark.modalShown = true;
   })
-  
-  $('#new-file-name').keypress(this.onAddFileModalKeyPress.bind(this));
-  $('#new-project-name').keypress(this.onAddProjectModalKeyPress.bind(this));
-  $('#AddFileModal .btn-primary').click(this.onAddFileModalClicked.bind(this));
-  $('#AddProjectModal .btn-primary').click(this.onAddProjectModalClicked.bind(this));
-  
-  $('#RemoveFilesModal .btn-primary').click(this.onConfirmDeletion.bind(this));
-  
-  $(document).keydown(this.keyDown.bind(this));
+  $('#RenameFilesModal').on('show', function () {
+    spark.modalShown = true;
+    spark.renameFilesModalShown = true;
+  });
+  $('#RenameFilesModal').on('hide', function () {
+    spark.modalShown = false;
+    spark.renameFilesModalShown = false;
+    $('#rename-file-name').blur();
+  });
+  $('#RenameFilesModal').on('shown', function () {
+    $('#rename-file-name').focus();
+  })
+}
+
+Spark.prototype.hideFileMenu = function() {
+  $('#files-menu').css('display', 'none');
+  $('html').unbind('click', this.onClickFileMenuHandler);
+}
+
+Spark.prototype.onClickHideFileMenu = function(e) {
+  // If that's in the menu, don't hide it and perform the action instead.
+  if ($(e.target).parent().parent().get(0) == $('#files-menu').get(0)) {
+    return;
+  }
+  this.hideFileMenu();
+   e.preventDefault();
+   e.stopPropagation();
 };
+
+Spark.prototype.setupFileMenu = function() {
+  var spark = this;
+  $('#files-menu-remove').click(function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    spark.hideFileMenu();
+    $('#RemoveFilesModal').modal('show');
+  });
+  $('#files-menu-rename').click(function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    spark.hideFileMenu();
+    
+    var selection = spark.filesListViewController.selection();
+    $('#rename-file-name').val(selection[0].name);
+    
+    $('#RenameFilesModal').modal('show');
+  });
+}
 
 Spark.prototype.keyDown = function(e) {
   if (this.modalShown) {
@@ -102,6 +171,12 @@ Spark.prototype.keyDown = function(e) {
       if (e.keyCode == 13) {
         e.preventdefault;
         this.onConfirmDeletion(null);
+      }
+    }
+    else if (this.renameFilesModalShown) {
+      if (e.keyCode == 13) {
+        e.preventdefault;
+        this.onConfirmRename(null);
       }
     }
     return;
@@ -113,20 +188,6 @@ Spark.prototype.keyDown = function(e) {
   
   if (e.keyCode == 8) {
     e.preventDefault();
-    var selection = this.filesListViewController.selection();
-    
-    if (selection.length == 0) {
-      return;
-    }
-    
-    if (selection.length == 1) {
-      $('#delete-modal-title').text('Delete ' + selection[0].name + '?');
-      $('#delete-modal-description').text('Do you really want to delete ' + selection[0].name + '?');
-    } else {
-      $('#delete-modal-title').text('Delete ' + selection.length + ' files?');
-      $('#delete-modal-description').text('Do you really want to delete ' + selection.length + ' files?');
-    }
-    
     $('#RemoveFilesModal').modal('show');
   }
 }
@@ -149,6 +210,30 @@ Spark.prototype.onConfirmDeletion = function(e) {
     });
   });
   $('#RemoveFilesModal').modal('hide');
+}
+
+Spark.prototype.onConfirmRename = function(e) {
+  var count = 0;
+  var spark = this;
+  var selection = this.filesListViewController.selection();
+  var entry = selection[0];
+  var buffer = openedTabHash[entry.name];
+  if (buffer != null) {
+    buffer.userRemoveTab();
+  }
+  
+  var enteredName = $('#rename-file-name').val();
+  newFullPath = entry.fullPath.substring(0, entry.fullPath.length - entry.name.length);
+  newFullPath = newFullPath + enteredName;
+  /*
+  console.log('full path' + entry.fullPath + ' ' + newFullPath);
+  entry.moveTo(this.activeProject, newFullPath1, function () {
+    spark.filesListViewController.setSelection([]);
+    spark.fileTree.refresh(false, null);
+  });
+  */
+  // rename not implemented yet..
+  $('#RenameFilesModal').modal('hide');
 }
 
 // Buttons actions
@@ -608,6 +693,30 @@ Spark.prototype.filesListViewControllerDoubleClicked = function(selectedEntries)
   if (selectedEntries.length == 1) {
     this.fileTree.openFileEntry(selectedEntries[0]);
   }
+}
+
+Spark.prototype.filesListViewControllerShowContextMenuForElement = function(element, event) {
+  // Disable rename if number of selected files is not 1.
+  if (this.filesListViewController.selection().length == 1) {
+    $('#files-menu-rename').parent().removeClass('disabled');
+  }
+  else {
+    $('#files-menu-rename').parent().addClass('disabled');
+  }
+    
+  // Move the files context menu to the location of the caret.
+  var x = getAbsoluteX(element.get(0));
+  var y = getAbsoluteY(element.get(0)) - $('#files-menu').outerHeight() + 5;
+  $('#files-menu').css('display', 'block');
+  $('#files-menu').css('top', y + 'px');
+  $('#files-menu').css('left', x + 'px');
+    
+  event.preventDefault();
+  event.stopPropagation();
+
+  this.onClickFileMenuHandler = this.onClickHideFileMenu.bind(this);
+  // When the user will click anywhere in the page, it will hide the menu.
+  $('html').bind('click', this.onClickFileMenuHandler);
 }
 
 $(function() {

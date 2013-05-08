@@ -11,7 +11,11 @@ FilesListViewControllerDelegate.prototype.filesListViewControllerSelectionChange
   // Do nothing.
 }
 
-FilesListViewControllerDelegate.prototype.filesListViewControllerSelectionChanged = function(entries) {
+FilesListViewControllerDelegate.prototype.filesListViewControllerDoubleClicked = function(entries) {
+  // Do nothing.
+}
+
+FilesListViewControllerDelegate.prototype.filesListViewControllerShowContextMenuForElement = function(element) {
   // Do nothing.
 }
 
@@ -80,8 +84,40 @@ FilesListViewController.prototype.listViewNumberOfRows = function() {
 }
 
 FilesListViewController.prototype.listViewElementForRow = function(rowIndex) {
-  var image = "<img src=\"img/file-regular.png\"/>"
-  return $("<div class=\"file-item\">" + image + this.entries[rowIndex].name + "</div>");
+  var fileicon = $('<img src="img/file-regular.png"/>');
+  var text = $('<span class="file-item-text">' + htmlEncode(this.entries[rowIndex].name) + '</span>');
+  var caret = $('<span class="caret"></span>');
+  var dropdown = $('<div></div>');
+  var link = $('<a href="#"></a>');
+  link.append(caret);
+  dropdown.append(link);
+  
+  var listitem =  $("<div class=\"file-item\"></div>");
+  listitem.append(fileicon);
+  listitem.append(text);
+  listitem.append(dropdown);
+  var controller = this;
+  
+  link.click(function(e) {
+    if ($('#files-menu').css('display') == 'block') {
+      return;
+    }
+    
+    // Select item if not selected.
+    var isSelected = false;
+    controller.listView.selectedRows().forEach(function(currentRowIndex, i) {
+      if (currentRowIndex == rowIndex) {
+        isSelected = true;
+      }
+    });
+    if (!isSelected) {
+      controller.listView.setSelectedRow(rowIndex);
+    }
+    
+    controller.delegate.filesListViewControllerShowContextMenuForElement(link, e);
+  });
+  
+  return listitem;
 }
 
 FilesListViewController.prototype.listViewHeightForRow = function(rowIndex) {
