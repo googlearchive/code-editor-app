@@ -50,7 +50,7 @@ Spark = function() {
   $(".tt").tooltip({ 'placement': 'bottom' });
 
   this.filesListViewController = new FilesListViewController($('#files-listview'), this);
-  
+
   this.setupModalDialogs();
   
   this.setupFileMenu();
@@ -122,6 +122,8 @@ Spark.prototype.setupModalDialogs = function() {
   
   $('#new-file-name').keypress(this.onAddFileModalKeyPress.bind(this));
   $('#new-project-name').keypress(this.onAddProjectModalKeyPress.bind(this));
+  $('#rename-file-name').keypress(this.onRenameFileModalKeyPress.bind(this));
+  $('#RemoveFilesModal').keydown(this.modalDeleteDialogkeyDown.bind(this));
   $('#AddFileModal .btn-primary').click(this.onAddFileModalClicked.bind(this));
   $('#AddProjectModal .btn-primary').click(this.onAddProjectModalClicked.bind(this));
   $('#RemoveFilesModal .btn-primary').click(this.onConfirmDeletion.bind(this));
@@ -166,30 +168,10 @@ Spark.prototype.setupFileMenu = function() {
   });
 }
 
-Spark.prototype.keyDown = function(e) {
-  if (this.modalShown) {
-    if (this.removeFilesModalShown) {
-      if (e.keyCode == 13) {
-        e.preventdefault;
-        this.onConfirmDeletion(null);
-      }
-    }
-    else if (this.renameFilesModalShown) {
-      if (e.keyCode == 13) {
-        e.preventdefault;
-        this.onConfirmRename(null);
-      }
-    }
-    return;
-  }
-  var focused = $(':focus');
-  if (focused.size() != 0) {
-    return;
-  }
-  
-  if (e.keyCode == 8) {
-    e.preventDefault();
-    $('#RemoveFilesModal').modal('show');
+Spark.prototype.modalDeleteDialogkeyDown = function(e) {
+  if (e.keyCode == 13) {
+    e.preventdefault;
+    this.onConfirmDeletion(null);
   }
 }
 
@@ -268,6 +250,13 @@ Spark.prototype.onAddProjectModalKeyPress = function(e) {
   if (e.keyCode == 13) {
     e.preventDefault();
     this.onAddProjectModalClicked(e);
+  }
+}
+
+Spark.prototype.onRenameFileModalKeyPress = function(e) {
+  if (e.keyCode == 13) {
+    e.preventDefault();
+    this.onConfirmRename(e);
   }
 }
 

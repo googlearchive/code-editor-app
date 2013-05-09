@@ -24,6 +24,14 @@ var FilesListViewController = function(element, delegate) {
   this.listView = new ListView(element, this);
   this.listView.reloadData();
   this.delegate = delegate;
+  element.keydown(this.keyDown.bind(this));
+}
+
+FilesListViewController.prototype.keyDown = function(e) {
+  if (e.keyCode == 8) {
+    e.preventDefault();
+    $('#RemoveFilesModal').modal('show');
+  }
 }
 
 FilesListViewController.prototype.updateEntries = function(entries) {

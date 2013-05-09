@@ -137,6 +137,7 @@ body {
   top: 0px;
   left: 0px;
   width: 200px;
+  outline: none;
 }
 
 #files-listview-actions {
@@ -242,8 +243,6 @@ body {
   width: 16px;
   height: 16px;
   content: url(img/check.png);
-  /*content: "\002713";*/
-  /*content: "<img src=\"img/check.png\"/>";*/
 }
 
 #new-project-name {
