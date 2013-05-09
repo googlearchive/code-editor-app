@@ -54,8 +54,6 @@ Spark = function() {
   this.setupModalDialogs();
   
   this.setupFileMenu();
-
-  $(document).keydown(this.keyDown.bind(this));
 }
 
 Spark.prototype.setupModalDialogs = function() {
