@@ -5,8 +5,9 @@
 var openedTabEntries = new Array();
 var openedTabHash = new Object();
 
-Buffer = function(fileEntry) {
+Buffer = function(fileEntry, spark) {
   this.fileEntry = fileEntry;
+  this.spark = spark;
 
   // TODO(dvh): needs to be refactored to remove UI from this class.
   this.tabElement = $("<li><a href='#'>" +
@@ -159,6 +160,9 @@ Buffer.prototype.save = function() {
       fileWriter.write(blob);
       fileWriter.onwriteend = function(e) {
         buffer.isDirty = false;
+        chrome.developerPrivate.exportSyncfsFolderToLocalfs(
+            buffer.spark.ActiveProjectName,
+            function(){});
       }
     };
 

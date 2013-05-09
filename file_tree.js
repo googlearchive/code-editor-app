@@ -80,7 +80,7 @@ FileTree.prototype.openFileEntry = function(fileEntry) {
   var buffer = openedTabHash[fileEntry.name];
   if (!buffer) {
     // This feels wrong.
-    fileEntry.buffer = new Buffer(fileEntry);
+    fileEntry.buffer = new Buffer(fileEntry, this.spark);
   } else {
     buffer.switchTo();
   }
@@ -104,7 +104,7 @@ FileTree.prototype.createNewFile = function(name, callback) {
     console.log(name + ': file already exist.');
     var buffer = openedTabHash[entry.name];
     if (buffer == null) {
-      buffer = new Buffer(entry);
+      buffer = new Buffer(entry, this.spark);
     }
     buffer.switchTo();
     $('#new-file-name').val('');
@@ -120,7 +120,7 @@ FileTree.prototype.handleCreatedEntry = function(switchToBufferEnabled, callback
   this.entries[fileEntry.name] = fileEntry;
   
   if (switchToBufferEnabled) {
-    fileEntry.buffer = new Buffer(fileEntry);
+    fileEntry.buffer = new Buffer(fileEntry, this.spark);
     fileEntry.buffer.switchTo();
     $('#new-file-name').val('');
   }
