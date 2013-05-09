@@ -473,18 +473,26 @@ Spark.prototype.onBufferSwitch = function(e) {
 
 Spark.prototype.handleRunButton = function(e) {
   e.preventDefault();
+  var spark = this;
   var exportFolderCb = function() {
-    chrome.developerPrivate.loadProject(this.ActiveProjectName,
+    chrome.developerPrivate.loadProject(spark.ActiveProjectName,
         function(itemId) {
-          setTimeout(function() {
-            if (!itemId) {
-              console.log('invalid itemId');
-              return;
-            }
-            // Since the API doesn't wait for the item to load,may return
-            // before it has fully loaded. Delay the launch event.
-            chrome.management.launchApp(itemId, function(){});
-            }, 500);
+          // loadProject may return before the app is actually loaded returning
+          // garbage item_id. However, a second call should succeed.
+          // TODO (grv): Listen to loadProject event and return when the app
+          // is loaded.
+          chrome.developerPrivate.loadProject(spark.ActiveProjectName,
+            function(itemId) {
+              setTimeout(function() {
+                if (!itemId) {
+                  console.log('invalid itemId');
+                  return;
+                }
+              // Since the API doesn't wait for the item to load,may return
+              // before it has fully loaded. Delay the launch event.
+              chrome.management.launchApp(itemId, function(){});
+              }, 500);
+            });
         });
   };
   chrome.developerPrivate.exportSyncfsFolderToLocalfs(
