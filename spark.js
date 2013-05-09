@@ -562,6 +562,10 @@ Spark.prototype.loadProjects = function(callback) {
   this.projects = {};
   var handleProjectsLs = function(projects) {
     for (var i = 0; i < projects.length; ++i) {
+      // Skip showing files as projects.
+      if (!projects[i].isDirectory) {
+        continue;
+      }
       this.projects[projects[i].name] = projects[i];
       if (projects[i].name == 'prefs')
         continue;
