@@ -224,17 +224,35 @@ Spark.prototype.onConfirmRename = function(e) {
   }
   
   var enteredName = $('#rename-file-name').val();
-  newFullPath = entry.fullPath.substring(0, entry.fullPath.length - entry.name.length);
-  newFullPath = newFullPath + enteredName;
-  /*
-  console.log('full path' + entry.fullPath + ' ' + newFullPath);
-  entry.moveTo(this.activeProject, newFullPath1, function () {
-    spark.filesListViewController.setSelection([]);
-    spark.fileTree.refresh(false, null);
-  });
-  */
-  // rename not implemented yet..
-  $('#RenameFilesModal').modal('hide');
+  
+  entry.file(function(file) {
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onload = function(ev) {
+      spark.projects[spark.ActiveProjectName].getFile(
+        enteredName, {create: true},
+        function(createdEntry) {
+          console.log("write " + createdEntry.name);
+          createdEntry.createWriter(function(writer) {
+            writer.truncate(0);
+            writer.onwriteend = function() {
+              console.log(ev.target.result);
+              var blob = new Blob([ev.target.result]);
+              writer.write(blob);
+              writer.onwriteend = function() {
+                entry.remove(function() {
+                  spark.fileTree.refresh(false, function() {
+                    spark.filesListViewController.setSelection([createdEntry]);
+                  });
+                  $('#RenameFilesModal').modal('hide');
+                  // Done
+                });
+              };
+            };
+          });
+        });
+      };
+    }, function() {});
 }
 
 // Buttons actions
