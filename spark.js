@@ -637,12 +637,31 @@ Spark.prototype.writePrefs = function() {
 };
 
 Spark.prototype.onSyncFileSystemOpened = function(fs) {
+  var spark = this;
   console.log("Obtained sync file system");
   this.fileSystem = fs;
   this.filer = new Filer(fs);
   this.fileTree = new FileTree(this.filer, this);
   this.templateLoader = new TemplateLoader(this.fileTree, this);
   this.activeProject = this.fileSystem.root;
+
+  chrome.syncFileSystem.setConflictResolutionPolicy('last_write_win');
+
+  chrome.syncFileSystem.onFileStatusChanged.addListener(
+      function(detail) {
+        if (detail.direction == 'remote_to_local') {
+          spark.loadProjects(function() {spark.refreshProjectList();});
+          var buffer = openedTabHash[detail.fileEntry.name];
+          if (buffer && buffer.fileEntry.fullPath == detail.fileEntry.fullPath) {
+            buffer.fileEntry = detail.fileEntry;
+            buffer.open();
+            if (spark.currentBuffer.fileEntry.fullPath
+                    == detail.fileEntry.fullPath) {
+              spark.editor.swapDoc(buffer.doc);
+            }
+          }
+        }
+      });
 
   var loadPrefsFileCb = function() {
     this.refreshProjectList();
@@ -652,7 +671,6 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   var loadProjectsCb = function() {
     this.loadPrefsFile(loadPrefsFileCb.bind(this));
   };
-
   this.loadProjects(loadProjectsCb.bind(this));
 
   var spark = this;
