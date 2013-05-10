@@ -481,18 +481,20 @@ Spark.prototype.handleRunButton = function(e) {
           // garbage item_id. However, a second call should succeed.
           // TODO (grv): Listen to loadProject event and return when the app
           // is loaded.
-          chrome.developerPrivate.loadProject(spark.ActiveProjectName,
-            function(itemId) {
-              setTimeout(function() {
-                if (!itemId) {
-                  console.log('invalid itemId');
-                  return;
-                }
-              // Since the API doesn't wait for the item to load,may return
-              // before it has fully loaded. Delay the launch event.
-              chrome.management.launchApp(itemId, function(){});
-              }, 500);
-            });
+          setTimeout(function() {
+            chrome.developerPrivate.loadProject(spark.ActiveProjectName,
+              function(itemId) {
+                setTimeout(function() {
+                  if (!itemId) {
+                    console.log('invalid itemId');
+                    return;
+                  }
+                // Since the API doesn't wait for the item to load,may return
+                // before it has fully loaded. Delay the launch event.
+                chrome.management.launchApp(itemId, function(){});
+                }, 500);
+              });
+          }, 500);
         });
   };
   chrome.developerPrivate.exportSyncfsFolderToLocalfs(
