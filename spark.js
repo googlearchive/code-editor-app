@@ -546,7 +546,7 @@ Spark.prototype.exportProject = function(fileEntry) {
       writeZipFile();
     }
   };
-  this.filer.ls('.', function(e) {
+  this.filer.ls(this.ActiveProjectName, function(e) {
     entries = e;
     zipEntries();
   });
