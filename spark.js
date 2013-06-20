@@ -41,10 +41,6 @@ Spark = function() {
   };
 
 
-  /*chrome.experimental.devtools.console.onMessageAdded.addListener(function(ConsoleMessage message) {
-    console.log('wuppyfsadfsadf');
-  });*/
-
   $('#editor-placeholder-string').html('No file selected');
   Buffer.showEmptyBuffer();
 
@@ -224,34 +220,17 @@ Spark.prototype.onConfirmRename = function(e) {
 
   var enteredName = $('#rename-file-name').val();
 
-  entry.file(function(file) {
-    var reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.onload = function(ev) {
-      spark.projects[spark.ActiveProjectName].getFile(
-        enteredName, {create: true},
-        function(createdEntry) {
-          console.log("write " + createdEntry.name);
-          createdEntry.createWriter(function(writer) {
-            writer.truncate(0);
-            writer.onwriteend = function() {
-              console.log(ev.target.result);
-              var blob = new Blob([ev.target.result]);
-              writer.write(blob);
-              writer.onwriteend = function() {
-                entry.remove(function() {
-                  spark.fileTree.refresh(false, function() {
-                    spark.filesListViewController.setSelection([createdEntry]);
-                  });
-                  $('#RenameFilesModal').modal('hide');
-                  // Done
-                });
-              };
-            };
-          });
-        });
-      };
-    }, function() {});
+  console.log(entry.fullPath);
+
+  var renameCallback = function(fileEntry) {
+    spark.fileTree.refresh(false, function() {
+      console.log(entry);
+      spark.filesListViewController.setSelection([fileEntry]);
+    });
+    $('#RenameFilesModal').modal('hide');
+  };
+
+  this.fileOperations.renameFile(entry, enteredName, renameCallback);
 }
 
 // Buttons actions

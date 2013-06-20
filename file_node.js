@@ -150,7 +150,18 @@ FileOperations.prototype = {
   /**
    *
    */
-  renameFile: function() {
+  renameFile: function(entry, newName, callback) {
+    var file_node = fileEntryMap[entry.fullPath];
+    entry.moveTo(file_node.pnt.node, newName);
+    file_node.pnt.node.getFile(newName, {create: true},
+        function(createdEntry) {
+      delete file_node.pnt.childrens[entry.fullPath];
+      file_node = new FileNode(createdEntry, file_node.pnt);
+      fileEntryMap[createdEntry.fullPath] = file_node;
+      file_node.pnt.childrens[createdEntry.fullPath] = createdEntry;
+      callback(createdEntry);
+      console.log(createdEntry);
+    });
   },
 
   /**
