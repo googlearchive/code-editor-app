@@ -174,9 +174,6 @@ FileOperations.prototype = {
    *
    */
   writeFile: function(fileEntry, content, onwriteend) {
-    console.log(fileEntry);
-    console.log(content);
-    console.log(onwriteend);
     fileEntry.node.createWriter(function(writer) {
       writer.truncate(0);
       writer.onwriteend = function() {

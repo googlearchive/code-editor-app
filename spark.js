@@ -628,18 +628,10 @@ Spark.prototype.loadPrefsFile = function(callback) {
 };
 
 Spark.prototype.writePrefs = function() {
-  var spark = this;
-  this.prefsEntry.createWriter(function(writer) {
-    writer.truncate(0);
-    writer.onwriteend = function() {
-      var blob = new Blob([spark.ActiveProjectName]);
-      var size = spark.ActiveProjectName.length;
-      writer.write(blob);
-      writer.onwriteend = function() {
+  this.fileOperations.writeFile(fileEntryMap[this.prefsEntry.fullPath],
+      [this.ActiveProjectName], function() {
         console.log('prefs file write complete.');
-      };
-    };
-  });
+      });
 };
 
 var tries = 4;
@@ -671,7 +663,6 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
 
   chrome.syncFileSystem.onFileStatusChanged.addListener(
       function(detail) {
-        console.log(detail);
         if (detail.direction == 'remote_to_local') {
           spark.loadProjects(function() {spark.refreshProjectList();});
           var buffer = openedTabHash[detail.fileEntry.name];
