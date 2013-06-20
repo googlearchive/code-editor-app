@@ -30,30 +30,30 @@ TemplateLoader.prototype.readFile = function(url, name) {
   file.open("GET", url, true);
   file.responseType = "blob";
   var templateLoader = this;
+  var spark = templateLoader.spark;
   file.onreadystatechange = function() {
     if (file.readyState === 4)
-      if (file.status === 200)
-        templateLoader.writeFile(name, file.response);
+      if (file.status === 200) {
+        var createFileCb = function(fileEntry, is_created) {
+          var onwriteend = function() {
+            templateLoader.pendingWrites--;
+            console.log(templateLoader.pendingWrites);
+            if (!templateLoader.pendingWrites) {
+              templateLoader.callback();
+              console.log('writes done.');
+            }
+          };
+          spark.fileOperations.writeFile(fileEntry, file.response, onwriteend);
+        }
+        var root = fileEntryMap[spark.getAbsolutePath(spark.ActiveProjectName)];
+        console.log(root);
+        spark.fileOperations.createFile(name, root, createFileCb);
+        }
   }
   file.send(null);
 }
 
-TemplateLoader.prototype.writeFiles = function(entries, callback) {
-  this.callback = callback;
-  this.pendingWrites = entries.length;
-  var templateLoader = this;
-  for (var i = 0; i < entries.length; ++i) {
-    entries[i].file(function(file) {
-      var reader = new FileReader();
-      reader.readAsArrayBuffer(file);
-      reader.onload = function(ev) {
-        templateLoader.writeFile(file.name, ev.target.result)
-      };
-   }  , function() {});
-  }
-}
-
-TemplateLoader.prototype.writeFile = function(name, content) {
+/*TemplateLoader.prototype.writeFile = function(name, content) {
   var templateLoader = this;
   var activeProject = this.spark.projects[this.spark.ActiveProjectName];
   activeProject.getFile(
@@ -61,6 +61,7 @@ TemplateLoader.prototype.writeFile = function(name, content) {
       function(entry) {
         entry.createWriter(function(writer) {
           writer.truncate(0);
+          console.log(entry);
           writer.onwriteend = function() {
             var blob = new Blob([content]);
             writer.write(blob);
@@ -72,5 +73,5 @@ TemplateLoader.prototype.writeFile = function(name, content) {
           };
         });
       });
-}
+}*/
 

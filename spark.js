@@ -35,7 +35,16 @@ Spark = function() {
   window.addEventListener("emptyBuffer", this.onEmptyBuffer.bind(this));
   window.addEventListener("imageBuffer", this.onImageBuffer.bind(this));
   window.addEventListener("imageLoaded", this.onImageLoaded.bind(this));
-  
+  window.onerror = function(e) {
+    console.log('wljfjksdlfjlfl');
+    console.log(e);
+  };
+
+
+  /*chrome.experimental.devtools.console.onMessageAdded.addListener(function(ConsoleMessage message) {
+    console.log('wuppyfsadfsadf');
+  });*/
+
   $('#editor-placeholder-string').html('No file selected');
   Buffer.showEmptyBuffer();
 
@@ -52,13 +61,13 @@ Spark = function() {
   this.filesListViewController = new FilesListViewController($('#files-listview'), this);
 
   this.setupModalDialogs();
-  
+
   this.setupFileMenu();
 }
 
 Spark.prototype.setupModalDialogs = function() {
   var spark = this;
-  
+
   // Add project modal configuration.
   $('#AddProjectModal').on('show', function () {
     spark.modalShown = true;
@@ -84,17 +93,17 @@ Spark.prototype.setupModalDialogs = function() {
   })
   $('#RemoveFilesModal').on('show', function () {
     var selection = spark.filesListViewController.selection();
-    
+
     if (selection.length == 0) {
       return;
     }
-    
+
     if (selection.length == 1) {
       $('#delete-modal-description').text('Do you really want to delete ' + selection[0].name + '?');
     } else {
       $('#delete-modal-description').text('Do you really want to delete ' + selection.length + ' files?');
     }
-    
+
     spark.modalShown = true;
     spark.removeFilesModalShown = true;
   });
@@ -144,24 +153,32 @@ Spark.prototype.onClickHideFileMenu = function(e) {
    e.stopPropagation();
 };
 
+Spark.prototype.getAbsolutePath = function(name) {
+  return '/' + name;
+};
+
+Spark.prototype.getActiveProject = function() {
+  return fileEntryMap[this.getAbsolutePath(this.ActiveProjectName)];
+};
+
 Spark.prototype.setupFileMenu = function() {
   var spark = this;
   $('#files-menu-remove').click(function(e) {
     e.preventDefault();
     e.stopPropagation();
-    
+
     spark.hideFileMenu();
     $('#RemoveFilesModal').modal('show');
   });
   $('#files-menu-rename').click(function(e) {
     e.preventDefault();
     e.stopPropagation();
-    
+
     spark.hideFileMenu();
-    
+
     var selection = spark.filesListViewController.selection();
     $('#rename-file-name').val(selection[0].name);
-    
+
     $('#RenameFilesModal').modal('show');
   });
 }
@@ -181,15 +198,17 @@ Spark.prototype.onConfirmDeletion = function(e) {
       openedTabHash[entry.name].userRemoveTab();
     }
     count ++;
-    entry.remove(function() {
+    var callback = function() {
       // deleted.
       count --;
       if (count == 0) {
         spark.filesListViewController.setSelection([]);
         spark.fileTree.refresh(false, null);
       }
-    });
+    };
+    spark.fileOperations.deleteFile(entry, callback);
   });
+
   $('#RemoveFilesModal').modal('hide');
 }
 
@@ -202,9 +221,9 @@ Spark.prototype.onConfirmRename = function(e) {
   if (buffer != null) {
     buffer.userRemoveTab();
   }
-  
+
   var enteredName = $('#rename-file-name').val();
-  
+
   entry.file(function(file) {
     var reader = new FileReader();
     reader.readAsArrayBuffer(file);
@@ -261,11 +280,17 @@ Spark.prototype.onRenameFileModalKeyPress = function(e) {
 Spark.prototype.onAddFileModalClicked = function(e) {
   var filename = $('#new-file-name').val();
   var spark = this;
-  this.fileTree.createNewFile(filename, function() {
-    spark.fileTree.refresh(false, function() {
-      console.log('select ' + filename);
-      spark.filesListViewController.setSelectionByNames([filename]);
-    });
+  console.log('flsadlkfksadlfjksadl');
+  console.log(filename);
+  var root = fileEntryMap[spark.getAbsolutePath(this.ActiveProjectName)];
+  console.log(root);
+  this.fileOperations.createFile(filename, root, function(fileNode, isCreated) {
+    if (!isCreated) {
+      spark.fileTree.refresh(false, function() {
+        console.log('select ' + filename);
+        spark.filesListViewController.setSelectionByNames([filename]);
+      });
+    }
   });
   $('#AddFileModal').modal('hide')
 }
@@ -334,19 +359,19 @@ Spark.prototype.closeBuffer = function(buffer) {
 
 Spark.prototype.closeBufferTab = function(buffer) {
   var spark = this;
-  
+
   if (buffer == spark.currentBuffer) {
     var currentBufferIndex = spark.currentBuffer.indexInTabs();
     var previousBuffer = null;
-  
+
     this.closeBuffer(buffer);
-  
+
     if (currentBufferIndex > 0) {
       previousBuffer = openedTabEntries[currentBufferIndex - 1];
     } else if (openedTabEntries.length > 0) {
       previousBuffer = openedTabEntries[0];
     }
-  
+
     if (previousBuffer != null) {
       previousBuffer.switchTo();
     } else {
@@ -367,7 +392,7 @@ Spark.prototype.onWindowResize = function(e) {
   var topBarHeight = $("#top-bar").outerHeight();
   // Hard-coded size because it won't work on launch. (dvh)
   topBarHeight = 45;
-  
+
   $("#top-bar").width(windowWidth);
   $("#main-view").width(windowWidth);
   var mainViewHeight = windowHeight - topBarHeight;
@@ -402,7 +427,7 @@ Spark.prototype.onWindowResize = function(e) {
   $("#editor-image").height(editorHeight);
   $("#edited-image").css('left', (editorWidth - $("#edited-image").width()) / 2);
   $("#edited-image").css('top', (editorHeight - $("#edited-image").height()) / 2);
-  
+
   $("#editor .CodeMirror").width(editorWidth);
   $("#editor .CodeMirror").height(editorHeight);
   $("#editor .CodeMirror-scroll").width(editorWidth);
@@ -434,7 +459,7 @@ Spark.prototype.onProjectSelect = function(projectName, e) {
   this.ActiveProjectName = projectName;
   this.writePrefs();
   this.fileTree.refresh(true, null);
-  
+
   this.refreshProjectList();
 };
 
@@ -457,7 +482,7 @@ Spark.prototype.onBufferSwitch = function(e) {
 
   $("#tabs").children().removeClass("active");
   buffer.tabElement.addClass("active");
-  
+
   if (this.currentBuffer.isImage) {
     Buffer.showImageBuffer();
     this.updateImage();
@@ -579,10 +604,10 @@ Spark.prototype.loadProjects = function(callback) {
 
 
 Spark.prototype.createProject = function(project_name, callback) {
+
   var handleLoadProject = function(directory) {
     this.activeProject = directory;
     this.projects[project_name] = directory;
-    console.log(directory);
     var templateLoadCb = function() {
       this.fileTree.refresh(true, null);
       this.refreshProjectList();
@@ -590,8 +615,8 @@ Spark.prototype.createProject = function(project_name, callback) {
     };
     this.templateLoader.loadTemplate(templateLoadCb.bind(this));
   };
-  this.fileSystem.root.getDirectory(project_name,{create:true},
-      handleLoadProject.bind(this), errorHandler);
+  this.fileOperations.createDirectory(project_name,
+      fileEntryMap[this.fileSystem.root.fullPath], handleLoadProject.bind(this));
 };
 
 Spark.prototype.loadPrefsFile = function(callback) {
@@ -638,19 +663,36 @@ Spark.prototype.writePrefs = function() {
   });
 };
 
+var tries = 4;
+
 Spark.prototype.onSyncFileSystemOpened = function(fs) {
   var spark = this;
   console.log("Obtained sync file system");
   this.fileSystem = fs;
+  if (!fs) {
+    if (tries) {
+      tries--;
+      chrome.syncFileSystem.requestFileSystem(spark.onSyncFileSystemOpened.bind(tries, this));
+      return;
+    }
+    else {
+      console.log('unable to obtain sync filesystem.');
+      return;
+    }
+  }
+
   this.filer = new Filer(fs);
   this.fileTree = new FileTree(this.filer, this);
   this.templateLoader = new TemplateLoader(this.fileTree, this);
   this.activeProject = this.fileSystem.root;
+  this.fileNode = new FileNode(this.fileSystem.root, null);
+  this.fileOperations = new FileOperations();
 
   chrome.syncFileSystem.setConflictResolutionPolicy('last_write_win');
 
   chrome.syncFileSystem.onFileStatusChanged.addListener(
       function(detail) {
+        console.log(detail);
         if (detail.direction == 'remote_to_local') {
           spark.loadProjects(function() {spark.refreshProjectList();});
           var buffer = openedTabHash[detail.fileEntry.name];
@@ -676,43 +718,24 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   this.loadProjects(loadProjectsCb.bind(this));
 
   var spark = this;
+  var pendingCount = 0;
   var dnd = new DnDFileController('body', function(files, e) {
     var items = e.dataTransfer.items;
-    var entries = new Array();
-    var pendingCount = 0;
+    var pendingCount = items.length;
     for (var i = 0, item; item = items[i]; ++i) {
-      var entry = item.webkitGetAsEntry();
-      entries.push(entry);
-      var writeendCb = function() {
-        console.log('writes done.');
-        pendingCount --;
-        if (pendingCount == 0) {
-          spark.fileTree.refresh(false, function() {
-            spark.filesListViewController.setSelection(entries);
-          });
+      var dndCallback = function() {
+        pendingCount--;
+        console.log('one batch written');
+        if (!pendingCount) {
+          spark.fileTree.refresh(false, null);
+          console.log('all files written');
         }
-      }
-      if (entry.isDirectory) {
-        var reader = entry.createReader();
-        var handleDnDFoler = function(entries) {
-          var fileEntries = [];
-          for (var i = 0; i < entries.length; ++i) {
-            if (entries[i].isDirectory) {
-              console.log('Directories are not supported currently. Skipping'
-                + ' adding: ' + entries[i].name);
-              continue;
-            }
-            fileEntries.push(entries[i]);
-          }
-
-          pendingCount ++
-          spark.templateLoader.writeFiles(fileEntries, writeendCb);
-        };
-        reader.readEntries(handleDnDFoler.bind(this));
-      } else {
-        pendingCount ++
-        spark.templateLoader.writeFiles([entry], writeendCb);
-      }
+      };
+      var entry = item.webkitGetAsEntry();
+      console.log(fileEntryMap);
+      spark.fileOperations.copyDirectory(entry,
+          spark.getActiveProject(spark.ActiveProjectName), dndCallback);
+      console.log(entry);
     }
   });
 };
@@ -747,7 +770,7 @@ Spark.prototype.filesListViewControllerShowContextMenuForElement = function(elem
   else {
     $('#files-menu-rename').parent().addClass('disabled');
   }
-    
+
   // Move the files context menu to the location of the caret.
   var x = getAbsoluteX(element.get(0));
   var y = getAbsoluteY(element.get(0)) + element.outerHeight()+ 5;
@@ -756,7 +779,7 @@ Spark.prototype.filesListViewControllerShowContextMenuForElement = function(elem
   $('#files-menu').css('left', x + 'px');
   this.currentFileMenuElement = element;
   $('.caret', this.currentFileMenuElement).css('opacity', '1.0');
-    
+
   event.preventDefault();
   event.stopPropagation();
 
@@ -767,4 +790,5 @@ Spark.prototype.filesListViewControllerShowContextMenuForElement = function(elem
 
 $(function() {
   var spark = new Spark();
-});
+})
+

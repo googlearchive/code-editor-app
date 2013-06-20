@@ -12,14 +12,13 @@ FileTree = function(filer, spark) {
 FileTree.prototype.refresh = function(selectItemEnabled, callback) {
   this.entries = [];
   var fileTree = this;
-  var reader =
-      this.spark.projects[this.spark.ActiveProjectName].createReader();
+  var reader = this.spark.getActiveProject().node.createReader();
   var handleProjectLs = function(entries) {
     this.parentElement.empty();
     for (var i = 0; i < entries.length; ++i) {
       this.handleCreatedEntry(false, null, entries[i]);
     }
-    
+
     var openedOne = false;
     var firstEntry = null;
     var selectedItemIndex = -1;
@@ -52,7 +51,7 @@ FileTree.prototype.refresh = function(selectItemEnabled, callback) {
         selectedItemIndex = 0;
       }
     }
-    
+
     this.spark.fileViewControllerTreeUpdated(filteredEntries);
     if (selectItemEnabled) {
       if (openedOne) {
@@ -60,7 +59,7 @@ FileTree.prototype.refresh = function(selectItemEnabled, callback) {
         this.spark.fileViewControllerSetSelection([entries[selectedItemIndex]]);
       }
     }
-    
+
     if (callback != null) {
       callback(filteredEntries);
     }
@@ -98,34 +97,18 @@ FileTree.prototype.closeOpenedTabs = function() {
   }
 };
 
-FileTree.prototype.createNewFile = function(name, callback) {
-  var entry = this.entries[name];
-  if (entry) {
-    console.log(name + ': file already exist.');
-    var buffer = openedTabHash[entry.name];
-    if (buffer == null) {
-      buffer = new Buffer(entry, this.spark);
-    }
-    buffer.switchTo();
-    $('#new-file-name').val('');
-    return;
-  }
-  this.spark.projects[this.spark.ActiveProjectName].getFile(
-      name, {create: true}, this.handleCreatedEntry.bind(this, true, callback), errorHandler);
-}
-
 FileTree.prototype.handleCreatedEntry = function(switchToBufferEnabled, callback, fileEntry) {
   var fileTree = this;
   fileEntry.active = false;
   this.entries[fileEntry.name] = fileEntry;
-  
+
   if (switchToBufferEnabled) {
     fileEntry.buffer = new Buffer(fileEntry, this.spark);
     fileEntry.buffer.switchTo();
     $('#new-file-name').val('');
   }
-  
+
   if (callback != null) {
-    callback();
+    callback(fileEntry);
   }
 };
