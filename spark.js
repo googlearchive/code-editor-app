@@ -598,40 +598,27 @@ Spark.prototype.createProject = function(project_name, callback) {
       fileEntryMap[this.fileSystem.root.fullPath], handleLoadProject.bind(this));
 };
 
-Spark.prototype.loadPrefsFile = function(callback) {
+Spark.prototype.loadPrefs = function(callback) {
   var spark = this;
-  var handleOpenPrefs = function(entry) {
-    spark.prefsEntry = entry;
-    entry.file(function(file) {
-      var reader = new FileReader();
-      reader.readAsText(file, 'utf-8');
-      reader.onload = function(ev) {
-        // This is the first run of the editor.
-        if (!ev.target.result.length) {
-          spark.ActiveProjectName = "sample_app";
-          spark.writePrefs.bind(spark);
-          spark.writePrefs();
-
-          var createProjectCb = function() {
-            callback();
-          };
-
-          spark.createProject("sample_app", createProjectCb.bind(this));
-        } else {
-          spark.ActiveProjectName = ev.target.result;
-          callback();
-        }
+  chrome.storage.sync.get('last_project', function(entry) {
+    if (!entry.last_project) {
+      spark.ActiveProjectName = 'sample_app';
+      spark.writePrefs();
+      var createProjectCb = function() {
+        callback();
       };
-    });
-  };
-  this.filer.fs.root.getFile('prefs', {create: true}, handleOpenPrefs);
+      spark.createProject("sample_app", createProjectCb.bind(this));
+    } else {
+      spark.ActiveProjectName = entry.last_project;
+      callback();
+    }
+  });
 };
 
 Spark.prototype.writePrefs = function() {
-  this.fileOperations.writeFile(fileEntryMap[this.prefsEntry.fullPath],
-      [this.ActiveProjectName], function() {
-        console.log('prefs file write complete.');
-      });
+  chrome.storage.sync.set({'last_project': this.ActiveProjectName}, function() {
+    console.log('prefs saved');
+  });
 };
 
 var tries = 4;
@@ -677,13 +664,13 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
         }
       });
 
-  var loadPrefsFileCb = function() {
+  var loadPrefsCb = function() {
     this.refreshProjectList();
     this.fileTree.refresh(true, null);
   };
 
   var loadProjectsCb = function() {
-    this.loadPrefsFile(loadPrefsFileCb.bind(this));
+    this.loadPrefs(loadPrefsCb.bind(this));
   };
   this.loadProjects(loadProjectsCb.bind(this));
 

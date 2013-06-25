@@ -16,7 +16,7 @@
     { "fileSystem": ["write"] },
     "unlimitedStorage",
     "syncFileSystem",
-    "experimental",
+    "storage",
     "developerPrivate",
     "management"
   ],
