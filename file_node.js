@@ -44,7 +44,7 @@ FileOperations.prototype = {
       return;
     }
     root.node.getFile(name, {create:true}, function(fileEntry) {
-      var fileNode = new FileNode(fileEntry, root.node);
+      var fileNode = new FileNode(fileEntry, root);
       fileEntryMap[fileEntry.fullPath] = fileNode;
       root.childrens.push(fileNode);
       if (callback)
@@ -65,7 +65,7 @@ FileOperations.prototype = {
     }
     console.log("creating directory");
     root.node.getDirectory(name, {create:true}, function(directory) {
-      var directoryNode = new FileNode(directory, root.nod);
+      var directoryNode = new FileNode(directory, root);
       root.childrens.push(directoryNode);
       fileEntryMap[directory.fullPath] = directoryNode;
       if (callback)
@@ -134,8 +134,8 @@ FileOperations.prototype = {
     // remove from parent's children list. Delete the node and file.
     if (fileEntryMap[entry.fullPath]) {
       var pnt = fileEntryMap[entry.fullPath].pnt;
-      delete fileEntryMap[entry.fullPath];
       delete pnt.childrens[entry.fullPath];
+      delete fileEntryMap[entry.fullPath];
     }
     entry.remove(callback);
   },
@@ -160,7 +160,6 @@ FileOperations.prototype = {
       fileEntryMap[createdEntry.fullPath] = file_node;
       file_node.pnt.childrens[createdEntry.fullPath] = createdEntry;
       callback(createdEntry);
-      console.log(createdEntry);
     });
   },
 

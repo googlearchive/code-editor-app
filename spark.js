@@ -7,6 +7,7 @@ Spark = function() {
 
   var spark = this;
 
+  this.tabs = new Tabs(this);
   CodeMirror.commands.autocomplete = function(cm) {
     CodeMirror.showHint(cm, CodeMirror.javascriptHint);
   };
@@ -16,6 +17,8 @@ Spark = function() {
       spark.currentBuffer.userRemoveTab();
     }
   };
+
+  this.sparkWindow = new SparkWindow(this);
 
   this.editor = CodeMirror(
     document.getElementById("editor"),
@@ -30,16 +33,9 @@ Spark = function() {
   $("#run-button").click(this.handleRunButton.bind(this));
   $("#export-button").click(this.handleExportButton.bind(this));
 
-  window.addEventListener("bufferSwitch", this.onBufferSwitch.bind(this));
-  window.addEventListener("removeBuffer", this.onRemoveBuffer.bind(this));
-  window.addEventListener("emptyBuffer", this.onEmptyBuffer.bind(this));
-  window.addEventListener("imageBuffer", this.onImageBuffer.bind(this));
-  window.addEventListener("imageLoaded", this.onImageLoaded.bind(this));
   window.onerror = function(e) {
-    console.log('wljfjksdlfjlfl');
     console.log(e);
   };
-
 
   $('#editor-placeholder-string').html('No file selected');
   Buffer.showEmptyBuffer();
@@ -56,81 +52,9 @@ Spark = function() {
 
   this.filesListViewController = new FilesListViewController($('#files-listview'), this);
 
-  this.setupModalDialogs();
+  this.modelDialogsController = new ModelDialogsController(this);
 
   this.setupFileMenu();
-}
-
-Spark.prototype.setupModalDialogs = function() {
-  var spark = this;
-
-  // Add project modal configuration.
-  $('#AddProjectModal').on('show', function () {
-    spark.modalShown = true;
-  });
-  $('#AddProjectModal').on('hide', function () {
-    spark.modalShown = false;
-    $('#new-project-name').blur();
-  });
-  $('#AddProjectModal').on('shown', function () {
-    $('#new-project-name').val('');
-    $('#new-project-name').focus();
-  })
-  $('#AddFileModal').on('show', function () {
-    spark.modalShown = true;
-  });
-  $('#AddFileModal').on('hide', function () {
-    spark.modalShown = false;
-    $('#new-file-name').blur();
-  });
-  $('#AddFileModal').on('shown', function () {
-    $('#new-file-name').val('');
-    $('#new-file-name').focus();
-  })
-  $('#RemoveFilesModal').on('show', function () {
-    var selection = spark.filesListViewController.selection();
-
-    if (selection.length == 0) {
-      return;
-    }
-
-    if (selection.length == 1) {
-      $('#delete-modal-description').text('Do you really want to delete ' + selection[0].name + '?');
-    } else {
-      $('#delete-modal-description').text('Do you really want to delete ' + selection.length + ' files?');
-    }
-
-    spark.modalShown = true;
-    spark.removeFilesModalShown = true;
-  });
-  $('#RemoveFilesModal').on('hide', function () {
-    spark.modalShown = false;
-    spark.removeFilesModalShown = false;
-  });
-  $('#RemoveFilesModal').on('shown', function () {
-    spark.modalShown = true;
-  })
-  $('#RenameFilesModal').on('show', function () {
-    spark.modalShown = true;
-    spark.renameFilesModalShown = true;
-  });
-  $('#RenameFilesModal').on('hide', function () {
-    spark.modalShown = false;
-    spark.renameFilesModalShown = false;
-    $('#rename-file-name').blur();
-  });
-  $('#RenameFilesModal').on('shown', function () {
-    $('#rename-file-name').focus();
-  })
-  
-  $('#new-file-name').keypress(this.onAddFileModalKeyPress.bind(this));
-  $('#new-project-name').keypress(this.onAddProjectModalKeyPress.bind(this));
-  $('#rename-file-name').keypress(this.onRenameFileModalKeyPress.bind(this));
-  $('#RemoveFilesModal').keydown(this.modalDeleteDialogkeyDown.bind(this));
-  $('#AddFileModal .btn-primary').click(this.onAddFileModalClicked.bind(this));
-  $('#AddProjectModal .btn-primary').click(this.onAddProjectModalClicked.bind(this));
-  $('#RemoveFilesModal .btn-primary').click(this.onConfirmDeletion.bind(this));
-  $('#RenameFilesModal .btn-primary').click(this.onConfirmRename.bind(this));
 }
 
 Spark.prototype.hideFileMenu = function() {
@@ -177,13 +101,6 @@ Spark.prototype.setupFileMenu = function() {
 
     $('#RenameFilesModal').modal('show');
   });
-}
-
-Spark.prototype.modalDeleteDialogkeyDown = function(e) {
-  if (e.keyCode == 13) {
-    e.preventdefault;
-    this.onConfirmDeletion(null);
-  }
 }
 
 Spark.prototype.onConfirmDeletion = function(e) {
@@ -233,184 +150,9 @@ Spark.prototype.onConfirmRename = function(e) {
   this.fileOperations.renameFile(entry, enteredName, renameCallback);
 }
 
-// Buttons actions
-
-Spark.prototype.onAddFileModalKeyPress = function(e) {
-  if (e.keyCode == 13) {
-    e.preventDefault();
-    this.onAddFileModalClicked(e);
-  }
-}
-
-Spark.prototype.onAddProjectModalKeyPress = function(e) {
-  if (e.keyCode == 13) {
-    e.preventDefault();
-    this.onAddProjectModalClicked(e);
-  }
-}
-
-Spark.prototype.onRenameFileModalKeyPress = function(e) {
-  if (e.keyCode == 13) {
-    e.preventDefault();
-    this.onConfirmRename(e);
-  }
-}
-
-Spark.prototype.onAddFileModalClicked = function(e) {
-  var filename = $('#new-file-name').val();
-  var spark = this;
-  console.log('flsadlkfksadlfjksadl');
-  console.log(filename);
-  var root = fileEntryMap[spark.getAbsolutePath(this.ActiveProjectName)];
-  console.log(root);
-  this.fileOperations.createFile(filename, root, function(fileNode, isCreated) {
-    if (!isCreated) {
-      spark.fileTree.refresh(false, function() {
-        console.log('select ' + filename);
-        spark.filesListViewController.setSelectionByNames([filename]);
-      });
-    }
-  });
-  $('#AddFileModal').modal('hide')
-}
-
-Spark.prototype.onAddProjectModalClicked = function(e) {
-  var projectName = $('#new-project-name').val();
-  this.fileTree.closeOpenedTabs();
-  this.ActiveProjectName = projectName;
-  this.writePrefs();
-  var createProjectCb = function() {
-    this.refreshProjectList();
-    $('#AddProjectModal').modal('hide')
-  };
-  this.createProject(this.ActiveProjectName, createProjectCb.bind(this));
-}
-
-// Buffers callback.
-// TODO(dvh): needs to be refactored using callbacks instead of events.
-
-Spark.prototype.onEmptyBuffer = function(e) {
-  $("#editor-pane").hide();
-  $("#editor").hide();
-  $("#editor-placeholder").show();
-  $("#editor-image").hide();
-}
-
-Spark.prototype.onImageBuffer = function(e) {
-  $("#editor-pane").show();
-  $("#editor").hide();
-  $("#editor-placeholder").hide();
-  $("#editor-image").show();
-}
-
-Spark.prototype.onImageLoaded = function(e) {
-  if (e.detail.buffer != this.currentBuffer) {
-    return;
-  }
-  this.updateImage();
-}
-
-Spark.prototype.updateImage = function() {
-  if (this.currentBuffer == null) {
-    $("#edited-image").hide();
-  } else if (this.currentBuffer.hasImageData) {
-    $("#edited-image").show();
-    $("#edited-image").one("load", function() {
-      $("#edited-image").css('left', ($("#editor-image").width() - $("#edited-image").width()) / 2);
-      $("#edited-image").css('top', ($("#editor-image").height() - $("#edited-image").height()) / 2);
-    }).attr("src", this.currentBuffer.imageData);
-  } else {
-    $("#edited-image").hide();
-  }
-}
-
-Spark.prototype.onRemoveBuffer = function(e) {
-  this.closeBufferTab(e.detail.buffer);
-};
-
-Spark.prototype.closeBuffer = function(buffer) {
-  // Save before closing.
-  buffer.save();
-  buffer.fileEntry.buffer = null;
-  buffer.fileEntry.active = false;
-  buffer.removeTab();
-}
-
-Spark.prototype.closeBufferTab = function(buffer) {
-  var spark = this;
-
-  if (buffer == spark.currentBuffer) {
-    var currentBufferIndex = spark.currentBuffer.indexInTabs();
-    var previousBuffer = null;
-
-    this.closeBuffer(buffer);
-
-    if (currentBufferIndex > 0) {
-      previousBuffer = openedTabEntries[currentBufferIndex - 1];
-    } else if (openedTabEntries.length > 0) {
-      previousBuffer = openedTabEntries[0];
-    }
-
-    if (previousBuffer != null) {
-      previousBuffer.switchTo();
-    } else {
-      var emptyDoc = CodeMirror.Doc('');
-      spark.editor.swapDoc(emptyDoc);
-      Buffer.showEmptyBuffer();
-    }
-  } else {
-    this.closeBuffer(buffer);
-  }
-}
-
 // Window resize handler.
-
 Spark.prototype.onWindowResize = function(e) {
-  var windowWidth = $(window).innerWidth();
-  var windowHeight = $(window).innerHeight();
-  var topBarHeight = $("#top-bar").outerHeight();
-  // Hard-coded size because it won't work on launch. (dvh)
-  topBarHeight = 45;
-
-  $("#top-bar").width(windowWidth);
-  $("#main-view").width(windowWidth);
-  var mainViewHeight = windowHeight - topBarHeight;
-  $("#main-view").height(mainViewHeight);
-  // Hard-coded size because it won't work on launch. (dvh)
-  var fileTreePaneWidth = 205;
-  // Adds a right margin.
-  var editorPaneWidth = windowWidth - fileTreePaneWidth;
-  $("#editor-pane").width(editorPaneWidth);
-  $("#editor-pane").height(mainViewHeight);
-  $("#file-tree").height(mainViewHeight);
-  $("#files-listview-container").height(mainViewHeight);
-  var filesContainerHeight = $("#files-listview-actions").outerHeight();
-  $("#files-listview").css('top', '40px');
-  $("#files-listview").height(mainViewHeight - filesContainerHeight - 50);
-  var tabsHeight = $('#tabs').outerHeight();
-  // Hard-coded size because it won't work on first launch. (dvh)
-  tabsHeight = 31 + 50;
-  var editorHeight = mainViewHeight - tabsHeight;
-  var editorWidth = editorPaneWidth;
-  $("#tabs").width(editorWidth);
-  $("#editor").css('position', 'absolute');
-  $("#editor").css('top', '40px');
-  $("#editor").width(editorWidth);
-  $("#editor").height(editorHeight);
-  $("#editor-placeholder").css('top', '40px');
-  $("#editor-placeholder").width(editorPaneWidth);
-  $("#editor-placeholder").height(editorHeight);
-  $("#editor-placeholder div").css('line-height', editorHeight + 'px');
-  $("#editor-image").css('top', '40px');
-  $("#editor-image").width(editorWidth);
-  $("#editor-image").height(editorHeight);
-  $("#edited-image").css('left', (editorWidth - $("#edited-image").width()) / 2);
-  $("#edited-image").css('top', (editorHeight - $("#edited-image").height()) / 2);
-
-  $("#editor .CodeMirror").width(editorWidth);
-  $("#editor .CodeMirror").height(editorHeight);
-  $("#editor .CodeMirror-scroll").width(editorWidth);
-  $("#editor .CodeMirror-scroll").height(editorHeight);
+  this.sparkWindow.onWindowResize(e);
 }
 
 Spark.prototype.ActiveProjectName = 'untitled';
@@ -450,29 +192,6 @@ Spark.prototype.onSaveTimer = function() {
 Spark.prototype.onEditorChange = function(instance, changeObj) {
   if (this.currentBuffer)
     this.currentBuffer.markDirty();
-};
-
-Spark.prototype.onBufferSwitch = function(e) {
-  if (this.currentBuffer)
-    this.currentBuffer.active = false;
-  this.currentBuffer = e.detail.buffer;
-  var buffer = this.currentBuffer;
-  buffer.active = true;
-
-  $("#tabs").children().removeClass("active");
-  buffer.tabElement.addClass("active");
-
-  if (this.currentBuffer.isImage) {
-    Buffer.showImageBuffer();
-    this.updateImage();
-  } else {
-    $("#editor-pane").show();
-    $("#editor").show();
-    $("#editor-placeholder").hide();
-    $("#editor-image").hide();
-  }
-
-  this.editor.swapDoc(buffer.doc);
 };
 
 Spark.prototype.handleRunButton = function(e) {

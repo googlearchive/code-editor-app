@@ -52,26 +52,3 @@ TemplateLoader.prototype.readFile = function(url, name) {
   }
   file.send(null);
 }
-
-/*TemplateLoader.prototype.writeFile = function(name, content) {
-  var templateLoader = this;
-  var activeProject = this.spark.projects[this.spark.ActiveProjectName];
-  activeProject.getFile(
-      name, {create: true},
-      function(entry) {
-        entry.createWriter(function(writer) {
-          writer.truncate(0);
-          console.log(entry);
-          writer.onwriteend = function() {
-            var blob = new Blob([content]);
-            writer.write(blob);
-            writer.onwriteend = function() {
-              templateLoader.pendingWrites--;
-              if (!templateLoader.pendingWrites)
-                templateLoader.callback();
-            };
-          };
-        });
-      });
-}*/
-
