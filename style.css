@@ -1,5 +1,11 @@
+html {
+  overflow: hidden;
+  height: 100%;
+}
+
 body {
   margin: 0px;
+  height: 100%;
 }
 
 #top-bar {
@@ -313,4 +319,23 @@ body {
 
 .modal-backdrop {
   background-color: white;
+}
+
+.folder-expand-button {
+  float: left;
+  width: 20px;
+  display: inline-block;
+}
+
+.folder-expand-button > div {
+  width: 10px;
+  opacity: 0.5;
+  position: absolute;
+  top: 2px;
+  transition: -webkit-transform 0.25s;
+}
+
+.folder-expand-button.expanded > div {
+  -webkit-transform: rotate(90deg);
+  top: 1px;
 }
