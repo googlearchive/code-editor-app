@@ -73,14 +73,6 @@ Spark.prototype.onClickHideFileMenu = function(e) {
    e.stopPropagation();
 };
 
-Spark.prototype.getAbsolutePath = function(name) {
-  return '/' + name;
-};
-
-Spark.prototype.getActiveProject = function() {
-  return fileEntryMap[this.getAbsolutePath(this.ActiveProjectName)];
-};
-
 Spark.prototype.setupFileMenu = function() {
   var spark = this;
   $('#files-menu-remove').click(function(e) {
@@ -107,8 +99,8 @@ Spark.prototype.onConfirmDeletion = function(e) {
   var count = 0;
   var spark = this;
   this.filesListViewController.selection().forEach(function(entry, i) {
-    if (this.tabsManager.openedTabHash[entry.name] != null) {
-      this.tabsManager.openedTabHash[entry.name].userRemoveTab();
+    if (spark.tabsManager.openedTabHash[entry.name] != null) {
+      spark.tabsManager.openedTabHash[entry.name].userRemoveTab();
     }
     count ++;
     var callback = function() {
@@ -154,6 +146,14 @@ Spark.prototype.onConfirmRename = function(e) {
 Spark.prototype.onWindowResize = function(e) {
   this.sparkWindow.onWindowResize(e);
 }
+
+Spark.prototype.getAbsolutePath = function(name) {
+  return '/' + name;
+};
+
+Spark.prototype.getActiveProject = function() {
+  return fileEntryMap[this.getAbsolutePath(this.ActiveProjectName)];
+};
 
 Spark.prototype.ActiveProjectName = 'untitled';
 
@@ -283,21 +283,12 @@ Spark.prototype.handleExportButton = function(e) {
 };
 
 Spark.prototype.loadProjects = function(callback) {
-  var reader = this.fileSystem.root.createReader();
+  var root = fileEntryMap['/'];
   this.projects = {};
-  var handleProjectsLs = function(projects) {
-    for (var i = 0; i < projects.length; ++i) {
-      // Skip showing files as projects.
-      if (!projects[i].isDirectory) {
-        continue;
-      }
-      this.projects[projects[i].name] = projects[i];
-      if (projects[i].name == 'prefs')
-        continue;
-    }
+  for (var path in root.children) {
+    this.projects[root.children[path].node.name] = root.children[path];
     callback();
-  };
-  reader.readEntries(handleProjectsLs.bind(this));
+  }
 };
 
 
@@ -362,8 +353,20 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   this.fileTree = new FileTree(this.filer, this);
   this.templateLoader = new TemplateLoader(this.fileTree, this);
   this.activeProject = this.fileSystem.root;
-  this.fileNode = new FileNode(this.fileSystem.root, null);
   this.fileOperations = new FileOperations();
+  var fileNodeCb = function() {
+    var loadPrefsCb = function() {
+      spark.refreshProjectList();
+      spark.fileTree.refresh(true, null);
+    };
+
+    var loadProjectsCb = function() {
+      spark.loadPrefs(loadPrefsCb.bind(spark));
+    };
+    spark.loadProjects(loadProjectsCb.bind(spark));
+  };
+
+  this.fileNode = new FileNode(this.fileSystem.root, null, fileNodeCb);
 
   chrome.syncFileSystem.setConflictResolutionPolicy('last_write_win');
 
@@ -382,16 +385,6 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
           }
         }
       });
-
-  var loadPrefsCb = function() {
-    this.refreshProjectList();
-    this.fileTree.refresh(true, null);
-  };
-
-  var loadProjectsCb = function() {
-    this.loadPrefs(loadPrefsCb.bind(this));
-  };
-  this.loadProjects(loadProjectsCb.bind(this));
 
   var spark = this;
   var pendingCount = 0;

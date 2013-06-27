@@ -8,21 +8,28 @@ var fileEntryMap = [];
 /** Creates and initializes the DOMFilesystem
  * @contructor
  */
-FileNode = function(entry, pnt) {
+FileNode = function(entry, pnt, callback) {
   this.node = entry;
   this.pnt = pnt;
   this.isDirectory = entry.isDirectory;
-  this.childrens = [];
+  this.children = {};
+  if (!callback)
+    callback = function(){};
   fileEntryMap[entry.fullPath] = this;
   if (this.isDirectory) {
     var reader = entry.createReader();
     var handleReadEntriesCb = function(entries) {
       for (var i = 0; i < entries.length; ++i) {
         var file_node = new FileNode(entries[i], this);
-        this.childrens[file_node.node.fullPath] = file_node;
+        this.children[file_node.node.fullPath] = file_node;
       }
+      // TODO(grv) : Callback should be called after all the recursive calls
+      // return.
+      callback();
     };
-    reader .readEntries(handleReadEntriesCb.bind(this));
+    reader.readEntries(handleReadEntriesCb.bind(this));
+  } else {
+    callback();
   }
 }
 
@@ -46,7 +53,7 @@ FileOperations.prototype = {
     root.node.getFile(name, {create:true}, function(fileEntry) {
       var fileNode = new FileNode(fileEntry, root);
       fileEntryMap[fileEntry.fullPath] = fileNode;
-      root.childrens.push(fileNode);
+      root.children[fileNode.node.fullPath] = fileNode;
       if (callback)
         callback(fileNode, false);
     }, errorHandler);
@@ -66,7 +73,7 @@ FileOperations.prototype = {
     console.log("creating directory");
     root.node.getDirectory(name, {create:true}, function(directory) {
       var directoryNode = new FileNode(directory, root);
-      root.childrens.push(directoryNode);
+      root.children[directoryNode.node.fullPath] = directoryNode;
       fileEntryMap[directory.fullPath] = directoryNode;
       if (callback)
         callback(directoryNode, false);
@@ -134,7 +141,7 @@ FileOperations.prototype = {
     // remove from parent's children list. Delete the node and file.
     if (fileEntryMap[entry.fullPath]) {
       var pnt = fileEntryMap[entry.fullPath].pnt;
-      delete pnt.childrens[entry.fullPath];
+      delete pnt.children[entry.fullPath];
       delete fileEntryMap[entry.fullPath];
     }
     entry.remove(callback);
@@ -155,10 +162,10 @@ FileOperations.prototype = {
     entry.moveTo(file_node.pnt.node, newName);
     file_node.pnt.node.getFile(newName, {create: true},
         function(createdEntry) {
-      delete file_node.pnt.childrens[entry.fullPath];
+      delete file_node.pnt.children[entry.fullPath];
       file_node = new FileNode(createdEntry, file_node.pnt);
       fileEntryMap[createdEntry.fullPath] = file_node;
-      file_node.pnt.childrens[createdEntry.fullPath] = createdEntry;
+      file_node.pnt.children[createdEntry.fullPath] = createdEntry;
       callback(createdEntry);
     });
   },
