@@ -7,7 +7,7 @@ Spark = function() {
 
   var spark = this;
 
-  this.tabs = new Tabs(this);
+  this.tabsManager = new TabsManager(this);
   CodeMirror.commands.autocomplete = function(cm) {
     CodeMirror.showHint(cm, CodeMirror.javascriptHint);
   };
@@ -107,8 +107,8 @@ Spark.prototype.onConfirmDeletion = function(e) {
   var count = 0;
   var spark = this;
   this.filesListViewController.selection().forEach(function(entry, i) {
-    if (openedTabHash[entry.name] != null) {
-      openedTabHash[entry.name].userRemoveTab();
+    if (this.tabsManager.openedTabHash[entry.name] != null) {
+      this.tabsManager.openedTabHash[entry.name].userRemoveTab();
     }
     count ++;
     var callback = function() {
@@ -130,7 +130,7 @@ Spark.prototype.onConfirmRename = function(e) {
   var spark = this;
   var selection = this.filesListViewController.selection();
   var entry = selection[0];
-  var buffer = openedTabHash[entry.name];
+  var buffer = this.tabsManager.openedTabHash[entry.name];
   if (buffer != null) {
     buffer.userRemoveTab();
   }
@@ -371,7 +371,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
       function(detail) {
         if (detail.direction == 'remote_to_local') {
           spark.loadProjects(function() {spark.refreshProjectList();});
-          var buffer = openedTabHash[detail.fileEntry.name];
+          var buffer = this.tabsManager.openedTabHash[detail.fileEntry.name];
           if (buffer && buffer.fileEntry.fullPath == detail.fileEntry.fullPath) {
             buffer.fileEntry = detail.fileEntry;
             buffer.open();

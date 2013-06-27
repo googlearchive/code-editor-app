@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-function Tabs(spark) {
+function TabsManager(spark) {
   this.spark = spark;
   window.addEventListener("bufferSwitch", this.onBufferSwitch.bind(this));
   window.addEventListener("emptyBuffer", this.onEmptyBuffer.bind(this));
@@ -12,7 +12,11 @@ function Tabs(spark) {
   console.log("tabs initialized.");
 }
 
-Tabs.prototype = {
+TabsManager.prototype = {
+
+  openedTabEntries: Array(),
+
+  openedTabHash: Object(),
 
   onRemoveBuffer: function(e) {
     this.closeTab(e.detail.buffer);
@@ -86,9 +90,9 @@ Tabs.prototype = {
       this.closeBuffer(buffer);
 
       if (currentBufferIndex > 0) {
-        previousBuffer = openedTabEntries[currentBufferIndex - 1];
-      } else if (openedTabEntries.length > 0) {
-        previousBuffer = openedTabEntries[0];
+        previousBuffer = this.openedTabEntries[currentBufferIndex - 1];
+      } else if (this.openedTabEntries.length > 0) {
+        previousBuffer = this.openedTabEntries[0];
       }
 
       if (previousBuffer != null) {

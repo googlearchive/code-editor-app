@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-var openedTabEntries = new Array();
-var openedTabHash = new Object();
+//var openedTabEntries = new Array();
+//var openedTabHash = new Object();
 
 Buffer = function(fileEntry, spark) {
   this.fileEntry = fileEntry;
   this.spark = spark;
+  this.tabsManager = spark.tabsManager;
 
   // TODO(dvh): needs to be refactored to remove UI from this class.
   this.tabElement = $("<li><a href='#'>" +
@@ -15,17 +16,17 @@ Buffer = function(fileEntry, spark) {
     fileEntry.name + "</a></li>");
   this.tabElement.click(this.switchTo.bind(this));
   var matches = this.tabElement.children().children();
-  
+
   var buffer = this;
   matches.click(this.userRemoveTab.bind(this))
-  
+
   $("#tabs").append(this.tabElement);
-  openedTabEntries.push(this);
-  openedTabHash[fileEntry.name] = this;
+  this.tabsManager.openedTabEntries.push(this);
+  this.tabsManager.openedTabHash[fileEntry.name] = this;
 
   var pattern = /\.(jpg|jpeg|png|gif)$/i;
   this.isImage = pattern.test(fileEntry.name);
-  
+
   this.doc = CodeMirror.Doc('<loading>');
 
   this.open();
@@ -54,7 +55,7 @@ Buffer.prototype.userRemoveTab = function() {
 Buffer.prototype.indexInTabs = function() {
   var buffer = this;
   var foundValue = -1;
-  openedTabEntries.forEach(function(value, i) {
+  this.tabsManager.openedTabEntries.forEach(function(value, i) {
     if (value == buffer) {
       foundValue = i;
       return;
@@ -65,8 +66,9 @@ Buffer.prototype.indexInTabs = function() {
 
 Buffer.prototype.removeTab = function() {
   var index = this.indexInTabs();
-  delete openedTabHash[openedTabEntries[index].fileEntry.name];
-  openedTabEntries.splice(index, 1);
+  delete this.tabsManager.openedTabHash[
+      this.tabsManager.openedTabEntries[index].fileEntry.name];
+  this.tabsManager.openedTabEntries.splice(index, 1);
   this.tabElement.remove();
 }
 

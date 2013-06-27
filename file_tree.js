@@ -76,7 +76,7 @@ FileTree.prototype.handleProjectsLs = function(entries) {
 
 FileTree.prototype.openFileEntry = function(fileEntry) {
   fileEntry.active = true;
-  var buffer = openedTabHash[fileEntry.name];
+  var buffer = this.spark.tabsManager.openedTabHash[fileEntry.name];
   if (!buffer) {
     // This feels wrong.
     fileEntry.buffer = new Buffer(fileEntry, this.spark);
@@ -90,7 +90,7 @@ FileTree.prototype.closeOpenedTabs = function() {
     if (fname == 'prefs')
       continue;
     var entry = this.entries[fname];
-    var buffer = openedTabHash[entry.name];
+    var buffer = this.spark.tabsManager.openedTabHash[entry.name];
     if (buffer != null) {
       buffer.userRemoveTab();
     }
