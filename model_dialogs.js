@@ -127,7 +127,7 @@ ModelDialogsController.prototype = {
 
   onAddProjectModalClicked: function(e) {
     var projectName = $('#new-project-name').val();
-    this.spark.fileTree.closeOpenedTabs();
+    this.spark.tabsManager.closeOpenedTabs();
     this.spark.ActiveProjectName = projectName;
     this.spark.writePrefs();
     var createProjectCb = function() {

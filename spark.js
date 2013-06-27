@@ -338,9 +338,8 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
     }
   }
 
-  this.filer = new Filer(fs);
-  this.fileTree = new FileTree(this.filer, this);
-  this.templateLoader = new TemplateLoader(this.fileTree, this);
+  this.fileTree = new FileTree(this);
+  this.templateLoader = new TemplateLoader(this);
   this.activeProject = this.fileSystem.root;
   this.fileOperations = new FileOperations();
   var fileNodeCb = function() {

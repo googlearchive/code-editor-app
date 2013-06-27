@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-TemplateLoader = function(filetree, spark) {
+TemplateLoader = function(spark) {
   this.spark = spark;
-  this.filetree = filetree;
   this.pendingWrites = 0;
   this.callback = function() {};
 }

@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-FileTree = function(filer, spark) {
-  this.filer = filer;
+FileTree = function(spark) {
   this.spark = spark;
   this.parentElement = $('#filetree');
   this.entries = [];
@@ -66,13 +65,6 @@ FileTree.prototype.refresh = function(selectItemEnabled, callback) {
   };
   reader.readEntries(handleProjectLs.bind(this));
 }
-
-FileTree.prototype.handleProjectsLs = function(entries) {
-  var fileTree = this;
-  entries.forEach(function(entry, i) {
-    fileTree.handleCreatedEntry(false, null, entry);
-  });
-};
 
 FileTree.prototype.handleCreatedEntry = function(switchToBufferEnabled, callback, fileEntry) {
   var fileTree = this;
