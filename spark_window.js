@@ -26,26 +26,31 @@ SparkWindow.prototype = {
     var windowHeight = $(window).innerHeight();
     var topBarHeight = $("#top-bar").outerHeight();
     // Hard-coded size because it won't work on launch. (dvh)
-    topBarHeight = 45;
+    topBarHeight = 72;
 
     $("#top-bar").width(windowWidth);
     $("#main-view").width(windowWidth);
     var mainViewHeight = windowHeight - topBarHeight;
     $("#main-view").height(mainViewHeight);
     // Hard-coded size because it won't work on launch. (dvh)
-    var fileTreePaneWidth = 205;
+    var fileTreePaneWidth = 285;
     // Adds a right margin.
     var editorPaneWidth = windowWidth - fileTreePaneWidth;
+    $("#files-listview-container").width(fileTreePaneWidth - 5);
+    $("#files-listview").width(fileTreePaneWidth - 5);
+    $("#editor-pane").css('left', (fileTreePaneWidth - 5) + 'px');
+    $("#editor-placeholder").css('left', (fileTreePaneWidth - 5) + 'px');
+    
     $("#editor-pane").width(editorPaneWidth);
     $("#editor-pane").height(mainViewHeight);
     $("#file-tree").height(mainViewHeight);
     $("#files-listview-container").height(mainViewHeight);
     var filesContainerHeight = $("#files-listview-actions").outerHeight();
     $("#files-listview").css('top', '40px');
-    $("#files-listview").height(mainViewHeight - filesContainerHeight - 50);
+    $("#files-listview").height(mainViewHeight - filesContainerHeight - 40);
     var tabsHeight = $('#tabs').outerHeight();
     // Hard-coded size because it won't work on first launch. (dvh)
-    tabsHeight = 31 + 50;
+    tabsHeight = 40 + 5;
     var editorHeight = mainViewHeight - tabsHeight;
     var editorWidth = editorPaneWidth;
     $("#tabs").width(editorWidth);
