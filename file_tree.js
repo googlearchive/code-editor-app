@@ -55,7 +55,7 @@ FileTree.prototype.refresh = function(selectItemEnabled, callback) {
     this.spark.fileViewControllerTreeUpdated(filteredEntries);
     if (selectItemEnabled) {
       if (openedOne) {
-        this.openFileEntry(firstEntry);
+        this.spark.tabsManager.openTab(firstEntry);
         this.spark.fileViewControllerSetSelection([entries[selectedItemIndex]]);
       }
     }
@@ -72,29 +72,6 @@ FileTree.prototype.handleProjectsLs = function(entries) {
   entries.forEach(function(entry, i) {
     fileTree.handleCreatedEntry(false, null, entry);
   });
-};
-
-FileTree.prototype.openFileEntry = function(fileEntry) {
-  fileEntry.active = true;
-  var buffer = this.spark.tabsManager.openedTabHash[fileEntry.name];
-  if (!buffer) {
-    // This feels wrong.
-    fileEntry.buffer = new Buffer(fileEntry, this.spark);
-  } else {
-    buffer.switchTo();
-  }
-}
-
-FileTree.prototype.closeOpenedTabs = function() {
-  for (var fname in this.entries) {
-    if (fname == 'prefs')
-      continue;
-    var entry = this.entries[fname];
-    var buffer = this.spark.tabsManager.openedTabHash[entry.name];
-    if (buffer != null) {
-      buffer.userRemoveTab();
-    }
-  }
 };
 
 FileTree.prototype.handleCreatedEntry = function(switchToBufferEnabled, callback, fileEntry) {

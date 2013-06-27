@@ -171,7 +171,7 @@ Spark.prototype.refreshProjectList = function() {
 
 Spark.prototype.onProjectSelect = function(projectName, e) {
   // TODO(dvh) : remember last loaded project name.
-  this.fileTree.closeOpenedTabs();
+  this.tabsManager.closeOpenedTabs();
   this.ActiveProjectName = projectName;
   this.writePrefs();
   this.fileTree.refresh(true, null);
@@ -280,7 +280,6 @@ Spark.prototype.loadProjects = function(callback) {
     callback();
   }
 };
-
 
 Spark.prototype.createProject = function(project_name, callback) {
 
@@ -417,7 +416,7 @@ Spark.prototype.filesListViewControllerSelectionChanged = function(selectedEntri
 
 Spark.prototype.filesListViewControllerDoubleClicked = function(selectedEntries) {
   if (selectedEntries.length == 1) {
-    this.fileTree.openFileEntry(selectedEntries[0]);
+    this.tabsManager.openTab(selectedEntries[0]);
   }
 }
 

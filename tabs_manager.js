@@ -88,6 +88,17 @@ TabsManager.prototype = {
     }
   },
 
+  openTab: function(fileEntry) {
+    fileEntry.active = true;
+    var buffer = this.openedTabHash[fileEntry.name];
+    if (!buffer) {
+      // This feels wrong.
+      fileEntry.buffer = new Buffer(fileEntry, this.spark);
+    } else {
+      buffer.switchTo();
+    }
+  },
+
   closeTab: function(buffer) {
     if (buffer == this.currentBuffer) {
       var currentBufferIndex = this.currentBuffer.indexInTabs();
@@ -124,6 +135,13 @@ TabsManager.prototype = {
   onSaveTimer: function() {
     if (this.currentBuffer)
       this.currentBuffer.save();
+  },
+
+  closeOpenedTabs: function() {
+    for (var buffer in this.openedTabHash) {
+      if (this.openedTabHash[buffer] != null)
+        this.openedTabHash[buffer].userRemoveTab();
+    }
   },
 };
 
