@@ -9,6 +9,10 @@ function TabsManager(spark) {
   window.addEventListener("imageBuffer", this.onImageBuffer.bind(this));
   window.addEventListener("imageLoaded", this.onImageLoaded.bind(this));
   window.addEventListener("removeBuffer", this.onRemoveBuffer.bind(this));
+
+  // TODO(dvh): the timer should be triggered only if there's a change.
+  window.setInterval(this.onSaveTimer.bind(this), 2000);
+
   console.log("tabs initialized.");
 }
 
@@ -18,21 +22,23 @@ TabsManager.prototype = {
 
   openedTabHash: Object(),
 
+  currentBuffer: null,
+
   onRemoveBuffer: function(e) {
     this.closeTab(e.detail.buffer);
   },
 
   onBufferSwitch: function(e) {
-    if (this.spark.currentBuffer)
-      this.spark.currentBuffer.active = false;
-    this.spark.currentBuffer = e.detail.buffer;
-    var buffer = this.spark.currentBuffer;
+    if (this.currentBuffer)
+      this.currentBuffer.active = false;
+    this.currentBuffer = e.detail.buffer;
+    var buffer = this.currentBuffer;
     buffer.active = true;
 
     $("#tabs").children().removeClass("active");
     buffer.tabElement.addClass("active");
 
-    if (this.spark.currentBuffer.isImage) {
+    if (this.currentBuffer.isImage) {
       Buffer.showImageBuffer();
       this.updateImage();
     } else {
@@ -60,31 +66,31 @@ TabsManager.prototype = {
   },
 
   onImageLoaded: function(e) {
-    if (e.detail.buffer != this.spark.currentBuffer) {
+    if (e.detail.buffer != this.currentBuffer) {
       return;
     }
     this.updateImage();
   },
 
   updateImage: function() {
-    if (this.spark.currentBuffer == null) {
+    if (this.currentBuffer == null) {
       $("#edited-image").hide();
-    } else if (this.spark.currentBuffer.hasImageData) {
+    } else if (this.currentBuffer.hasImageData) {
       $("#edited-image").show();
       $("#edited-image").one("load", function() {
         $("#edited-image").css('left', ($("#editor-image").width()
             - $("#edited-image").width()) / 2);
         $("#edited-image").css('top', ($("#editor-image").height()
             - $("#edited-image").height()) / 2);
-      }).attr("src", this.spark.currentBuffer.imageData);
+      }).attr("src", this.currentBuffer.imageData);
     } else {
       $("#edited-image").hide();
     }
   },
 
   closeTab: function(buffer) {
-    if (buffer == this.spark.currentBuffer) {
-      var currentBufferIndex = this.spark.currentBuffer.indexInTabs();
+    if (buffer == this.currentBuffer) {
+      var currentBufferIndex = this.currentBuffer.indexInTabs();
       var previousBuffer = null;
 
       this.closeBuffer(buffer);
@@ -113,6 +119,11 @@ TabsManager.prototype = {
     buffer.fileEntry.buffer = null;
     buffer.fileEntry.active = false;
     buffer.removeTab();
+  },
+
+  onSaveTimer: function() {
+    if (this.currentBuffer)
+      this.currentBuffer.save();
   },
 };
 

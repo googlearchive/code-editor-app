@@ -13,8 +13,8 @@ Spark = function() {
   };
 
   CodeMirror.commands.closeBuffer = function(cm) {
-    if (spark.currentBuffer != null) {
-      spark.currentBuffer.userRemoveTab();
+    if (spark.tabsManager.currentBuffer != null) {
+      spark.tabsManager.currentBuffer.userRemoveTab();
     }
   };
 
@@ -39,11 +39,6 @@ Spark = function() {
 
   $('#editor-placeholder-string').html('No file selected');
   Buffer.showEmptyBuffer();
-
-  this.currentBuffer = null;
-
-  // TODO(dvh): the timer should be triggered only if there's a change.
-  window.setInterval(this.onSaveTimer.bind(this), 2000);
 
   $(window).resize(this.onWindowResize.bind(this));
   this.onWindowResize(null);
@@ -184,14 +179,9 @@ Spark.prototype.onProjectSelect = function(projectName, e) {
   this.refreshProjectList();
 };
 
-Spark.prototype.onSaveTimer = function() {
-  if (this.currentBuffer)
-    this.currentBuffer.save();
-};
-
 Spark.prototype.onEditorChange = function(instance, changeObj) {
-  if (this.currentBuffer)
-    this.currentBuffer.markDirty();
+  if (this.tabsManager.currentBuffer)
+    this.tabsManager.currentBuffer.markDirty();
 };
 
 Spark.prototype.handleRunButton = function(e) {
@@ -378,7 +368,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
           if (buffer && buffer.fileEntry.fullPath == detail.fileEntry.fullPath) {
             buffer.fileEntry = detail.fileEntry;
             buffer.open();
-            if (spark.currentBuffer.fileEntry.fullPath
+            if (spark.tabsManager.currentBuffer.fileEntry.fullPath
                     == detail.fileEntry.fullPath) {
               spark.editor.swapDoc(buffer.doc);
             }
