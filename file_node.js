@@ -4,6 +4,7 @@
 
 
 var fileEntryMap = [];
+var fileNodeRoot = null;
 
 /** Creates and initializes the DOMFilesystem
  * @contructor
@@ -11,6 +12,9 @@ var fileEntryMap = [];
 FileNode = function(entry, parentNode, callback) {
   this.entry = entry;
   this.parentNode = parentNode;
+  if (parentNode == null) {
+    fileNodeRoot = this;
+  }
   this.isDirectory = entry.isDirectory;
   this.children = {};
   if (!callback)
