@@ -63,35 +63,6 @@ var ListView = function(element, delegate) {
 
 ListView.selectedColor = '#eee';
 
-ListView.prototype.reloadData = function() {
-  if (this.cleanupTimer != null) {
-    window.clearTimeout(this.cleanupTimer);
-    this.cleanupTimer = null;
-  }
-  
-  this.firstVisibleRowIndex = 0;
-  this.lastVisibleRowIndex = -1;
-  this._cleanupCells();
-  
-  this.cells = new Array();
-  var count = this.delegate.listViewNumberOfRows();
-  var y = 0;
-  var updatedSelectedRowsSet = new Set();
-  for (var i = 0 ; i < count ; ++i) {
-    var cell = new ListViewCell();
-    this.cells.push(cell);
-    cell.y = y;
-    cell.height = this.delegate.listViewHeightForRow(i);
-    y += cell.height;
-    if (this.selectedRowsSet.contains(i)) {
-      updatedSelectedRowsSet.add(i);
-    }
-  }
-  this.selectedRowsSet = updatedSelectedRowsSet;
-  this.innerElement.height(y);
-  this._updateScrollArea();
-}
-
 ListView.prototype._rowIndexForTopPositionBounds = function(top, leftBound, rightBound) {
   if (leftBound == rightBound) {
     return leftBound;
@@ -248,4 +219,58 @@ ListView.prototype._cleanupCells = function() {
   //console.log('cleanup ' + this.existingMinimumRowIndex + ' ' + this.existingMaximumRowIndex);
   this.existingMinimumRowIndex = this.firstVisibleRowIndex;
   this.existingMaximumRowIndex = this.lastVisibleRowIndex;
+}
+
+ListView.prototype.reloadData = function() {
+  this.reloadDataAfterIndex(-1);
+}
+
+ListView.prototype.reloadDataAfterIndex = function(index) {
+  if (this.cleanupTimer != null) {
+    window.clearTimeout(this.cleanupTimer);
+    this.cleanupTimer = null;
+  }
+  
+  if (index < -1) {
+    console.err('reloadDataAfterIndex cannot be called with index < -1');
+    return;
+  }
+  
+  this.firstVisibleRowIndex = 0;
+  this.lastVisibleRowIndex = index;
+  this._cleanupCells();
+  
+  this.cells.length = index + 1;
+  var count = this.delegate.listViewNumberOfRows() - (index + 1);
+  var y = 0;
+  if (index >= 0) {
+    y = this.cells[index].y + this.cells[index].height;
+  }
+  var updatedSelectedRowsSet = new Set();
+  for (var i = 0 ; i < count ; ++i) {
+    var cell = new ListViewCell();
+    this.cells.push(cell);
+    cell.y = y;
+    cell.height = this.delegate.listViewHeightForRow(i + index + 1);
+    y += cell.height;
+    if (this.selectedRowsSet.contains(i + index + 1)) {
+      updatedSelectedRowsSet.add(i + index + 1);
+    }
+  }
+  this.cells.length = this.delegate.listViewNumberOfRows();
+  
+  this.selectedRowsSet = updatedSelectedRowsSet;
+  
+  this.innerElement.height(y);
+  this._updateScrollArea();
+  
+  for(var i = this.existingMinimumRowIndex ; i <= this.existingMaximumRowIndex ; ++i) {
+    if (this.cells[i].element != null) {
+      if (this.selectedRowsSet.contains(i)) {
+        this.cells[i].element.css('background-color', ListView.selectedColor);
+      } else {
+        this.cells[i].element.css('background-color', '');
+      }
+    }
+  }
 }
