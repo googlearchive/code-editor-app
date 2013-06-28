@@ -8,9 +8,9 @@ var fileEntryMap = [];
 /** Creates and initializes the DOMFilesystem
  * @contructor
  */
-FileNode = function(entry, pnt, callback) {
+FileNode = function(entry, parentNode, callback) {
   this.node = entry;
-  this.pnt = pnt;
+  this.parentNode = parentNode;
   this.isDirectory = entry.isDirectory;
   this.children = {};
   if (!callback)
@@ -114,7 +114,8 @@ FileOperations.prototype = {
           pendingCallbacks.count += entries.length - 1;
           console.log(pendingCallbacks.count);
           for (var i = 0; i < entries.length; ++i) {
-            fileOperations.copyDirectory(entries[i], directory, callback, pendingCallbacks);
+            fileOperations.copyDirectory(entries[i], directory, callback,
+                pendingCallbacks);
           }
 
           if (!pendingCallbacks.count && callback)
@@ -140,8 +141,8 @@ FileOperations.prototype = {
   deleteFile: function(entry, callback) {
     // remove from parent's children list. Delete the node and file.
     if (fileEntryMap[entry.fullPath]) {
-      var pnt = fileEntryMap[entry.fullPath].pnt;
-      delete pnt.children[entry.fullPath];
+      var parentNode = fileEntryMap[entry.fullPath].parentNode;
+      delete parentNode.children[entry.fullPath];
       delete fileEntryMap[entry.fullPath];
     }
     entry.remove(callback);
@@ -159,13 +160,13 @@ FileOperations.prototype = {
    */
   renameFile: function(entry, newName, callback) {
     var file_node = fileEntryMap[entry.fullPath];
-    entry.moveTo(file_node.pnt.node, newName);
-    file_node.pnt.node.getFile(newName, {create: true},
+    entry.moveTo(file_node.parentNode.node, newName);
+    file_node.parentNode.node.getFile(newName, {create: true},
         function(createdEntry) {
-      delete file_node.pnt.children[entry.fullPath];
-      file_node = new FileNode(createdEntry, file_node.pnt);
+      delete file_node.parentNode.children[entry.fullPath];
+      file_node = new FileNode(createdEntry, file_node.parentNode);
       fileEntryMap[createdEntry.fullPath] = file_node;
-      file_node.pnt.children[createdEntry.fullPath] = createdEntry;
+      file_node.parentNode.children[createdEntry.fullPath] = createdEntry;
       callback(createdEntry);
     });
   },

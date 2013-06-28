@@ -172,10 +172,8 @@ Spark.prototype.exportProject = function(fileEntry) {
       entry.file(function(file) {
         var fileReader = new FileReader();
         fileReader.onload = function(e) {
-          console.log(entry.name);
           zip.file(entry.name, e.target.result, { binary: true });
           pendingWrites--;
-          console.log(pendingWrites);
           if (!pendingWrites)
           writeZipFile();
         };
