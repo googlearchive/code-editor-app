@@ -5,6 +5,19 @@
 
 function SparkWindow(spark) {
   this.spark = spark;
+
+  window.onerror = function(e) {
+    console.log(e);
+  };
+
+  this.setupEditor();
+  $(window).resize(this.onWindowResize.bind(this));
+  this.onWindowResize(null);
+
+  $("#run-button").click(this.handleRunButton.bind(this));
+  $("#export-button").click(this.handleExportButton.bind(this));
+  $(".tt").tooltip({ 'placement': 'bottom' });
+
 };
 
 SparkWindow.prototype = {
@@ -54,6 +67,71 @@ SparkWindow.prototype = {
     $("#editor .CodeMirror").height(editorHeight);
     $("#editor .CodeMirror-scroll").width(editorWidth);
     $("#editor .CodeMirror-scroll").height(editorHeight);
+  },
+
+  setupEditor: function() {
+    var spark = this.spark;
+    CodeMirror.commands.autocomplete = function(cm) {
+      CodeMirror.showHint(cm, CodeMirror.javascriptHint);
+    };
+
+    CodeMirror.commands.closeBuffer = function(cm) {
+      if (spark.tabsManager.currentBuffer != null) {
+        spark.tabsManager.currentBuffer.userRemoveTab();
+      }
+    };
+
+    spark.editor = CodeMirror(
+        document.getElementById("editor"),
+        {
+          mode: {name: "javascript", json: true },
+        lineNumbers: true,
+        extraKeys: {"Ctrl-Space": "autocomplete", "Ctrl-W": "closeBuffer"},
+        });
+
+    spark.editor.on('change', spark.onEditorChange.bind(spark));
+
+    $('#editor-placeholder-string').html('No file selected');
+
+    Buffer.showEmptyBuffer();
+  },
+
+  handleRunButton: function(e) {
+    e.preventDefault();
+    var spark = this.spark;
+    var exportFolderCb = function() {
+      chrome.developerPrivate.loadProject(spark.ActiveProjectName,
+          function(itemId) {
+            // loadProject may return before the app is actually loaded returning
+            // garbage item_id. However, a second call should succeed.
+            // TODO (grv): Listen to loadProject event and return when the app
+            // is loaded.
+            setTimeout(function() {
+              chrome.developerPrivate.loadProject(spark.ActiveProjectName,
+                function(itemId) {
+                  setTimeout(function() {
+                    if (!itemId) {
+                      console.log('invalid itemId');
+                      return;
+                    }
+                    // Since the API doesn't wait for the item to load,may return
+                    // before it has fully loaded. Delay the launch event.
+                    chrome.management.launchApp(itemId, function(){});
+                  }, 500);
+                });
+            }, 500);
+          });
+    };
+    chrome.developerPrivate.exportSyncfsFolderToLocalfs(
+        spark.ActiveProjectName, exportFolderCb.bind(spark));
+  },
+
+  handleExportButton: function(e) {
+    e.preventDefault();
+    var spark = this.spark;
+    chrome.fileSystem.chooseEntry({ "type": "saveFile",
+      "suggestedName": spark.ActiveProjectName + ".zip" },
+      spark.exportProject.bind(spark));
   },
 };
 

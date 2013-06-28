@@ -7,43 +7,8 @@ Spark = function() {
 
   var spark = this;
 
-  this.tabsManager = new TabsManager(this);
-  CodeMirror.commands.autocomplete = function(cm) {
-    CodeMirror.showHint(cm, CodeMirror.javascriptHint);
-  };
-
-  CodeMirror.commands.closeBuffer = function(cm) {
-    if (spark.tabsManager.currentBuffer != null) {
-      spark.tabsManager.currentBuffer.userRemoveTab();
-    }
-  };
-
   this.sparkWindow = new SparkWindow(this);
-
-  this.editor = CodeMirror(
-    document.getElementById("editor"),
-    {
-      mode: {name: "javascript", json: true },
-      lineNumbers: true,
-      extraKeys: {"Ctrl-Space": "autocomplete", "Ctrl-W": "closeBuffer"},
-    });
-
-  this.editor.on('change', this.onEditorChange.bind(this));
-
-  $("#run-button").click(this.handleRunButton.bind(this));
-  $("#export-button").click(this.handleExportButton.bind(this));
-
-  window.onerror = function(e) {
-    console.log(e);
-  };
-
-  $('#editor-placeholder-string').html('No file selected');
-  Buffer.showEmptyBuffer();
-
-  $(window).resize(this.onWindowResize.bind(this));
-  this.onWindowResize(null);
-
-  $(".tt").tooltip({ 'placement': 'bottom' });
+  this.tabsManager = new TabsManager(this);
 
   this.filesListViewController = new FilesListViewController($('#files-listview'), this);
 
@@ -137,11 +102,6 @@ Spark.prototype.onConfirmRename = function(e) {
   this.fileOperations.renameFile(entry, enteredName, renameCallback);
 }
 
-// Window resize handler.
-Spark.prototype.onWindowResize = function(e) {
-  this.sparkWindow.onWindowResize(e);
-}
-
 Spark.prototype.getAbsolutePath = function(name) {
   return '/' + name;
 };
@@ -184,36 +144,6 @@ Spark.prototype.onEditorChange = function(instance, changeObj) {
     this.tabsManager.currentBuffer.markDirty();
 };
 
-Spark.prototype.handleRunButton = function(e) {
-  e.preventDefault();
-  var spark = this;
-  var exportFolderCb = function() {
-    chrome.developerPrivate.loadProject(spark.ActiveProjectName,
-        function(itemId) {
-          // loadProject may return before the app is actually loaded returning
-          // garbage item_id. However, a second call should succeed.
-          // TODO (grv): Listen to loadProject event and return when the app
-          // is loaded.
-          setTimeout(function() {
-            chrome.developerPrivate.loadProject(spark.ActiveProjectName,
-              function(itemId) {
-                setTimeout(function() {
-                  if (!itemId) {
-                    console.log('invalid itemId');
-                    return;
-                  }
-                // Since the API doesn't wait for the item to load,may return
-                // before it has fully loaded. Delay the launch event.
-                chrome.management.launchApp(itemId, function(){});
-                }, 500);
-              });
-          }, 500);
-        });
-  };
-  chrome.developerPrivate.exportSyncfsFolderToLocalfs(
-      this.ActiveProjectName, exportFolderCb.bind(this));
-};
-
 Spark.prototype.exportProject = function(fileEntry) {
   var zip = new JSZip();
 
@@ -235,41 +165,33 @@ Spark.prototype.exportProject = function(fileEntry) {
     }, errorHandler);
   }
 
-  var entries = [];
-  var zipEntries = function() {
-    if (entries.length) {
-      var entry = entries.pop();
-      if (entry.isFile) {
-        entry.file(function(file) {
-          var fileReader = new FileReader();
-          fileReader.onload = function(e) {
-            zip.file(entry.name, e.target.result, { binary: true });
-            zipEntries();
-          };
-          fileReader.onerror = function(e) {
-            console.log("Error while zipping: " + e.toString());
-          };
-          fileReader.readAsBinaryString(file);
-        }, errorHandler);
-      } else {
-        // TODO(miket): handle directories
-        zipEntries();
-      }
+  var entries = this.getActiveProject().children;
+  var pendingWrites = Object.keys(entries).length;
+  var zipEntry = function(entry) {
+    if (entry.isFile) {
+      entry.file(function(file) {
+        var fileReader = new FileReader();
+        fileReader.onload = function(e) {
+          console.log(entry.name);
+          zip.file(entry.name, e.target.result, { binary: true });
+          pendingWrites--;
+          console.log(pendingWrites);
+          if (!pendingWrites)
+          writeZipFile();
+        };
+        fileReader.onerror = function(e) {
+          console.log("Error while zipping: " + e.toString());
+        };
+        fileReader.readAsBinaryString(file);
+      }, errorHandler);
     } else {
-      writeZipFile();
+      // TODO(grv): handle directories
     }
   };
-  this.filer.ls(this.ActiveProjectName, function(e) {
-    entries = e;
-    zipEntries();
-  });
-};
 
-Spark.prototype.handleExportButton = function(e) {
-  e.preventDefault();
-  chrome.fileSystem.chooseEntry({ "type": "saveFile",
-    "suggestedName": this.ActiveProjectName + ".zip" },
-    this.exportProject.bind(this));
+  for (var key in entries) {
+    zipEntry(entries[key].node);
+  }
 };
 
 Spark.prototype.loadProjects = function(callback) {
@@ -362,7 +284,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
       function(detail) {
         if (detail.direction == 'remote_to_local') {
           spark.loadProjects(function() {spark.refreshProjectList();});
-          var buffer = this.tabsManager.openedTabHash[detail.fileEntry.name];
+          var buffer = spark.tabsManager.openedTabHash[detail.fileEntry.name];
           if (buffer && buffer.fileEntry.fullPath == detail.fileEntry.fullPath) {
             buffer.fileEntry = detail.fileEntry;
             buffer.open();

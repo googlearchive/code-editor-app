@@ -5,11 +5,9 @@
 FileTree = function(spark) {
   this.spark = spark;
   this.parentElement = $('#filetree');
-  this.entries = [];
 };
 
 FileTree.prototype.refresh = function(selectItemEnabled, callback) {
-  this.entries = [];
   var fileTree = this;
   var reader = this.spark.getActiveProject().node.createReader();
   var handleProjectLs = function(entries) {
@@ -69,7 +67,6 @@ FileTree.prototype.refresh = function(selectItemEnabled, callback) {
 FileTree.prototype.handleCreatedEntry = function(switchToBufferEnabled, callback, fileEntry) {
   var fileTree = this;
   fileEntry.active = false;
-  this.entries[fileEntry.name] = fileEntry;
 
   if (switchToBufferEnabled) {
     fileEntry.buffer = new Buffer(fileEntry, this.spark);

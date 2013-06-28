@@ -36,9 +36,8 @@ function SparkFilesystem() {
 
   this.init = function(realFilesystem) {
     this.fs = realFilesystem;
-    this.fs.root.getFile('index.json',
-			 {create: true},
-			 function(f) { this.indexFileEntry = f; readIndex() });
+    this.fs.root.getFile('index.json',{create: true},
+        function(f) { this.indexFileEntry = f; readIndex() });
   };
 
   this.readIndex = function() {
