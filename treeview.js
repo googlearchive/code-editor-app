@@ -162,22 +162,20 @@ TreeView.prototype.listViewHeightForRow = function(rowIndex) {
 }
 
 TreeView.prototype.listViewSelectionChanged = function(rowIndexes) {
-  var treeview = this;
   var selection = new Array();
   rowIndexes.forEach(function(rowIndex, i) {
-    var nodeUID = treeview.items[rowIndex].nodeUID;
+    var nodeUID = this.items[rowIndex].nodeUID;
     selection.push(nodeUID);
-  });
+  }.bind(this));
   this.delegate.treeViewSelectionChanged(selection);
 }
 
 TreeView.prototype.listViewDoubleClicked = function(rowIndexes) {
-  var treeview = this;
   var selection = new Array();
   rowIndexes.forEach(function(rowIndex, i) {
-    var nodeUID = treeview.items[rowIndex].nodeUID;
+    var nodeUID = this.items[rowIndex].nodeUID;
     selection.push(nodeUID);
-  });
+  }.bind(this));
   this.delegate.treeViewDoubleClicked(selection);
 }
 
