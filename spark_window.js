@@ -38,8 +38,8 @@ SparkWindow.prototype = {
     var editorPaneWidth = windowWidth - fileTreePaneWidth;
     $("#files-listview-container").width(fileTreePaneWidth - 5);
     $("#files-listview").width(fileTreePaneWidth - 5);
-    $("#editor-pane").css('left', (fileTreePaneWidth - 5) + 'px');
-    $("#editor-placeholder").css('left', (fileTreePaneWidth - 5) + 'px');
+    $("#editor-pane").css('left', fileTreePaneWidth + 'px');
+    $("#editor-placeholder").css('left', fileTreePaneWidth + 'px');
     
     $("#editor-pane").width(editorPaneWidth);
     $("#editor-pane").height(mainViewHeight);

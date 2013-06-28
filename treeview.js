@@ -38,7 +38,6 @@ TreeViewDelegate.prototype.treeViewDoubleClicked = function(nodesUIDs) {
 
 var TreeViewCell = function() {
   this.expanded = false;
-  //this.expanded = true;
   this.nodeUID = null;
   this.hasChildren = false;
   this.indentationLevel = 0;
@@ -51,30 +50,39 @@ var TreeView = function(element, delegate) {
   this.listView = new ListView(element, this);
 }
 
-TreeView.prototype.reloadData = function() {
-  this.reloadDataAfterIndex(-1);
+TreeView.prototype.reloadData = function(keepExpanded) {
+  this.reloadDataAfterIndex(-1, keepExpanded);
 }
 
-TreeView.prototype.reloadDataAfterIndex = function(index) {
+TreeView.prototype.reloadDataAfterIndex = function(index, keepExpanded) {
   var selection = new Array();
   this.listView.selectedRows().forEach(function(rowIndex, i) {
     var nodeUID = this.items[rowIndex].nodeUID;
     selection.push(nodeUID);
   }.bind(this));
-  
-  this.expandedSet = new Set();
 
-  this.items.forEach(function(cell, i) {
-    if (cell.expanded) {
-      this.expandedSet.add(cell.nodeUID);
-    }
-  }.bind(this))
+  if (keepExpanded == null) {
+    keepExpanded = false;
+  }
+
+  if (keepExpanded) {
+    this.expandedSet.allObjects().forEach(function(nodeUID, i) {
+      if (!this.delegate.treeViewExists(nodeUID)) {
+        this.expandedSet.remove(nodeUID);
+      }
+    }.bind(this));
+  } else {
+    this.expandedSet = new Set();
+    this.items.forEach(function(cell, i) {
+      if (cell.expanded) {
+        this.expandedSet.add(cell.nodeUID);
+      }
+    }.bind(this))
+  }
 
   this.indexes = new Object();
   this.items.length = 0;
   this._fillListForNodeUID(null, 0);
-
-  this.expandedSet.removeAll();
 
   this.listView.reloadDataAfterIndex(index);
   
@@ -177,6 +185,11 @@ TreeView.prototype.toggle = function(nodeUID) {
   var index = this.indexes[nodeUID];
   var cell = this.items[index];
   cell.expanded = !cell.expanded;
+  if (cell.expanded) {
+    this.expandedSet.add(nodeUID);
+  } else {
+    this.expandedSet.remove(nodeUID);
+  }
   var element = this.listView.cells[index].element;
   var expandButton = element.find('.folder-expand-button');
   if (cell.expanded) {
@@ -184,5 +197,28 @@ TreeView.prototype.toggle = function(nodeUID) {
   } else {
     expandButton.removeClass('expanded');
   }
-  this.reloadDataAfterIndex(index);
+  this.reloadDataAfterIndex(index, true);
+}
+
+TreeView.prototype.setSelectedNodesUIDs = function(nodesUIDs) {
+  var selection = new Array();
+  nodesUIDs.forEach(function(nodeUID, i) {
+    var idx = this.indexes[nodeUID];
+    if (idx != null)
+      selection.push(idx);
+  }.bind(this))
+  this.listView.setSelectedRows(selection);
+}
+
+TreeView.prototype.selectedNodesUIDs = function() {
+  var selection = new Array();
+  this.listView.selectedRows().forEach(function(rowIndex, i) {
+    var nodeUID = this.items[rowIndex].nodeUID;
+    selection.push(nodeUID);
+  }.bind(this));
+  return selection;
+}
+
+TreeView.prototype.setSelectedNodeUID = function(nodeUID) {
+  this.listView.setSelectedRow(this.indexes[nodeUID]);
 }

@@ -91,10 +91,10 @@ Spark.prototype.onConfirmRename = function(e) {
 
   console.log(entry.fullPath);
 
-  var renameCallback = function(fileEntry) {
+  var renameCallback = function(entry) {
     spark.fileTree.refresh(false, function() {
       console.log(entry);
-      spark.filesListViewController.setSelection([fileEntry]);
+      spark.filesListViewController.setSelection([entry]);
     });
     $('#RenameFilesModal').modal('hide');
   };
@@ -292,7 +292,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
             }
           }
         }
-      });
+      }.bind(this));
 
   var spark = this;
   var pendingCount = 0;
@@ -319,12 +319,12 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
 
 // FileTree callbacks.
 
-Spark.prototype.fileViewControllerSetSelection = function(selectedEntries) {
-  this.filesListViewController.setSelection(selectedEntries);
+Spark.prototype.fileViewControllerSetSelection = function(selectedEntriesPaths) {
+  this.filesListViewController.setSelection(selectedEntriesPaths);
 }
 
 Spark.prototype.fileViewControllerTreeUpdated = function(entries) {
-  this.filesListViewController.updateEntries(entries);
+  this.filesListViewController.updateRoot(this.getActiveProject());
 }
 
 // FilesListViewController callback
@@ -350,7 +350,7 @@ Spark.prototype.filesListViewControllerShowContextMenuForElement = function(elem
 
   // Move the files context menu to the location of the caret.
   var x = getAbsoluteX(element.get(0));
-  var y = getAbsoluteY(element.get(0)) + element.outerHeight()+ 5;
+  var y = getAbsoluteY(element.get(0)) + element.outerHeight() - 2;
   $('#files-menu').css('display', 'block');
   $('#files-menu').css('top', y + 'px');
   $('#files-menu').css('left', x + 'px');

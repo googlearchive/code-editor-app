@@ -53,7 +53,7 @@ FileTree.prototype.refresh = function(selectItemEnabled, callback) {
     if (selectItemEnabled) {
       if (openedOne) {
         this.spark.tabsManager.openTab(firstEntry);
-        this.spark.fileViewControllerSetSelection([entries[selectedItemIndex]]);
+        this.spark.fileViewControllerSetSelection([entries[selectedItemIndex].fullPath]);
       }
     }
 

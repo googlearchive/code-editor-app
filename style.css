@@ -163,6 +163,7 @@ body {
 }
 
 .file-item .caret {
+  margin-left: 3px;
   margin-top: 10px;
   opacity: 0.0;
 }
@@ -174,22 +175,24 @@ body {
 .file-item img {
   float: left;
   margin-top: 4px;
-  margin-right: 3px;  
+  margin-right: 3px;
 }
 
-.file-item div {
-  float: right;
+.file-item img.folder-icon {
+  opacity: 0.5;
 }
 
-.file-item div a {
-  padding-top: 10px;
-  padding-left: 5px;
-  padding-right: 5px;  
+.file-item a {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 25px;
+  width: 15px;
 }
 
 .file-item-text {
   display: inline-block;
-  max-width: 143px;
+  max-width: calc(100% - 30px);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
