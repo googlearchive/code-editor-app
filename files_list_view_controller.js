@@ -26,8 +26,8 @@ var FilesListViewController = function(element, delegate) {
   this.entries = null;
   this.entriesHash = new Object();
   this.childrenCache = new Object();
-  this.listView = new TreeView(element, this);
-  this.listView.reloadData();
+  this.treeView = new TreeView(element, this);
+  this.treeView.reloadData();
   this.delegate = delegate;
   element.keydown(this.keyDown.bind(this));
 }
@@ -42,7 +42,7 @@ FilesListViewController.prototype.keyDown = function(e) {
 FilesListViewController.prototype.updateRoot = function(activeProject) {
   this.root = activeProject;
   this.childrenCache = new Object();
-  this.listView.reloadData();
+  this.treeView.reloadData();
 }
 
 FilesListViewController.prototype.setSelection = function(selectedEntriesPaths) {
@@ -50,16 +50,16 @@ FilesListViewController.prototype.setSelection = function(selectedEntriesPaths) 
   selectedEntriesPaths.forEach(function(entry, i) {
     selectedNodeUIDs.push(entry.name);
   });
-  this.listView.setSelectedNodesUIDs(selectedNodeUIDs);
+  this.treeView.setSelectedNodesUIDs(selectedNodeUIDs);
 }
 
 FilesListViewController.prototype.setSelectionByNames = function(names) {
-  this.listView.setSelectedNodeUIDs(names);
+  this.treeView.setSelectedNodeUIDs(names);
 }
 
 FilesListViewController.prototype.selection = function() {
   var result = [];
-  this.listView.selectedNodesUIDs().forEach(function(nodeUID, i) {
+  this.treeView.selectedNodesUIDs().forEach(function(nodeUID, i) {
     result.push(fileEntryMap[nodeUID].entry);
   });
   console.log('selection: ' + result);
@@ -173,13 +173,13 @@ FilesListViewController.prototype.treeViewElementForNode = function(nodeUID) {
     console.log('click link');
     // Select item if not selected.
     var isSelected = false;
-    this.listView.selectedNodesUIDs().forEach(function(currentNodeUID, i) {
+    this.treeView.selectedNodesUIDs().forEach(function(currentNodeUID, i) {
       if (currentNodeUID == nodeUID) {
         isSelected = true;
       }
     });
     if (!isSelected) {
-      this.listView.setSelectedNodeUID(nodeUID);
+      this.treeView.setSelectedNodeUID(nodeUID);
     }
     
     this.delegate.filesListViewControllerShowContextMenuForElement(link, e);
