@@ -335,6 +335,10 @@ Spark.prototype.filesListViewControllerSelectionChanged = function(selectedEntri
 
 Spark.prototype.filesListViewControllerDoubleClicked = function(selectedEntries) {
   if (selectedEntries.length == 1) {
+    if (selectedEntries[0].isDirectory) {
+      // Don't open directories in the editor.
+      return;
+    }
     this.tabsManager.openTab(selectedEntries[0]);
   }
 }
