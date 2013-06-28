@@ -27,6 +27,11 @@ FileNode = function(entry, parentNode, callback) {
         var file_node = new FileNode(entries[i], this);
         this.children[file_node.entry.fullPath] = file_node;
       }
+      
+      if (entries.length > 0) {
+        sendUpdatedEvent(entry.fullPath);
+      }
+      
       // TODO(grv) : Callback should be called after all the recursive calls
       // return.
       callback();
@@ -58,6 +63,7 @@ FileOperations.prototype = {
       var fileNode = new FileNode(fileEntry, root);
       fileEntryMap[fileEntry.fullPath] = fileNode;
       root.children[fileNode.entry.fullPath] = fileNode;
+      sendUpdatedEvent(fileEntry.fullPath);
       if (callback)
         callback(fileNode, false);
     }, errorHandler);
@@ -79,6 +85,7 @@ FileOperations.prototype = {
       var directoryNode = new FileNode(directory, root);
       root.children[directoryNode.entry.fullPath] = directoryNode;
       fileEntryMap[directory.fullPath] = directoryNode;
+      sendUpdatedEvent(directory.fullPath);
       if (callback)
         callback(directoryNode, false);
     }, errorHandler);
@@ -93,8 +100,13 @@ FileOperations.prototype = {
       var reader = new FileReader();
       reader.readAsArrayBuffer(file);
       reader.onload = function(ev) {
+        var writeFileCb = function(targetEntry) {
+          sendUpdatedEvent(targetEntry.fullPath);
+          if (callback)
+            callback();
+        };
         var createFileCb = function(targetEntry) {
-          fileOperations.writeFile(targetEntry, ev.target.result, callback);
+          fileOperations.writeFile(targetEntry, ev.target.result, writeFileCb);
         };
         fileOperations.createFile(sourceEntry.name, root, createFileCb);
       };
@@ -148,6 +160,7 @@ FileOperations.prototype = {
       var parentNode = fileEntryMap[entry.fullPath].parentNode;
       delete parentNode.children[entry.fullPath];
       delete fileEntryMap[entry.fullPath];
+      sendUpdatedEvent(entry.fullPath);
     }
     entry.remove(callback);
   },
@@ -172,6 +185,7 @@ FileOperations.prototype = {
       fileEntryMap[createdEntry.fullPath] = file_node;
       file_node.parentNode.children[createdEntry.fullPath] = createdEntry;
       callback(createdEntry);
+      sendUpdatedEvent(createdEntry.fullPath);
     });
   },
 
@@ -195,3 +209,8 @@ FileOperations.prototype = {
     });
   }
 };
+
+var sendUpdatedEvent = function(path) {
+  var event = new CustomEvent("FileNodeTreeUpdated", {"detail": {"path": path}});
+  window.dispatchEvent(event);
+}
