@@ -60,7 +60,7 @@ FilesListViewController.prototype.setSelectionByNames = function(names) {
 FilesListViewController.prototype.selection = function() {
   var result = [];
   this.listView.selectedNodesUIDs().forEach(function(nodeUID, i) {
-    result.push(fileEntryMap[nodeUID].node);
+    result.push(fileEntryMap[nodeUID].entry);
   });
   console.log('selection: ' + result);
   console.log(result);
@@ -109,7 +109,7 @@ FilesListViewController.prototype.treeViewNumberOfChildren = function(nodeUID) {
 }
 
 FilesListViewController.prototype.cachedChildrenForNode = function(fileNode) {
-  var children = this.childrenCache[fileNode.node.fullPath];
+  var children = this.childrenCache[fileNode.entry.fullPath];
   if (children != null) {
     return children;
   }
@@ -126,7 +126,7 @@ FilesListViewController.prototype.cachedChildrenForNode = function(fileNode) {
     else
       return 0;
   });
-  this.childrenCache[fileNode.node.fullPath] = children;
+  this.childrenCache[fileNode.entry.fullPath] = children;
   
   return children;
 }
@@ -146,14 +146,14 @@ FilesListViewController.prototype.treeViewChild = function(nodeUID, childIndex) 
 }
 
 FilesListViewController.prototype.treeViewElementForNode = function(nodeUID) {
-  var entry = fileEntryMap[nodeUID];
+  var node = fileEntryMap[nodeUID];
   var fileicon;
-  if (fileEntryMap[nodeUID].isDirectory) {
+  if (node.isDirectory) {
     fileicon = $('<img src="img/file-regular.png" class="folder-icon"/>');
   } else {
     fileicon = $('<img src="img/file-regular.png"/>');
   }
-  var text = $('<span class="file-item-text">' + htmlEncode(entry.node.name) + '</span>');
+  var text = $('<span class="file-item-text">' + htmlEncode(node.entry.name) + '</span>');
   var caret = $('<span class="caret"></span>');
   var dropdown = $('<div></div>');
   var link = $('<a href="#"></a>');
