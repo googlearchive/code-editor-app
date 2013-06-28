@@ -188,7 +188,7 @@ Spark.prototype.exportProject = function(fileEntry) {
   };
 
   for (var key in entries) {
-    zipEntry(entries[key].node);
+    zipEntry(entries[key].entry);
   }
 };
 
@@ -196,7 +196,7 @@ Spark.prototype.loadProjects = function(callback) {
   var root = fileEntryMap['/'];
   this.projects = {};
   for (var path in root.children) {
-    this.projects[root.children[path].node.name] = root.children[path];
+    this.projects[root.children[path].entry.name] = root.children[path];
     callback();
   }
 };

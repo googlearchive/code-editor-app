@@ -9,7 +9,7 @@ FileTree = function(spark) {
 
 FileTree.prototype.refresh = function(selectItemEnabled, callback) {
   var fileTree = this;
-  var reader = this.spark.getActiveProject().node.createReader();
+  var reader = this.spark.getActiveProject().entry.createReader();
   var handleProjectLs = function(entries) {
     this.parentElement.empty();
     for (var i = 0; i < entries.length; ++i) {

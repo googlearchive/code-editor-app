@@ -9,7 +9,7 @@ var fileEntryMap = [];
  * @contructor
  */
 FileNode = function(entry, parentNode, callback) {
-  this.node = entry;
+  this.entry = entry;
   this.parentNode = parentNode;
   this.isDirectory = entry.isDirectory;
   this.children = {};
@@ -21,7 +21,7 @@ FileNode = function(entry, parentNode, callback) {
     var handleReadEntriesCb = function(entries) {
       for (var i = 0; i < entries.length; ++i) {
         var file_node = new FileNode(entries[i], this);
-        this.children[file_node.node.fullPath] = file_node;
+        this.children[file_node.entry.fullPath] = file_node;
       }
       // TODO(grv) : Callback should be called after all the recursive calls
       // return.
@@ -43,17 +43,17 @@ FileOperations.prototype = {
    *
    */
   createFile: function(name, root, callback) {
-    var entry = fileEntryMap[root.node.fullPath + '/' + name];
+    var entry = fileEntryMap[root.entry.fullPath + '/' + name];
     if (entry) {
       console.log(name + ': file already exists.');
       if (callback)
         callback(entry, true);
       return;
     }
-    root.node.getFile(name, {create:true}, function(fileEntry) {
+    root.entry.getFile(name, {create:true}, function(fileEntry) {
       var fileNode = new FileNode(fileEntry, root);
       fileEntryMap[fileEntry.fullPath] = fileNode;
-      root.children[fileNode.node.fullPath] = fileNode;
+      root.children[fileNode.entry.fullPath] = fileNode;
       if (callback)
         callback(fileNode, false);
     }, errorHandler);
@@ -71,9 +71,9 @@ FileOperations.prototype = {
       return;
     }
     console.log("creating directory");
-    root.node.getDirectory(name, {create:true}, function(directory) {
+    root.entry.getDirectory(name, {create:true}, function(directory) {
       var directoryNode = new FileNode(directory, root);
-      root.children[directoryNode.node.fullPath] = directoryNode;
+      root.children[directoryNode.entry.fullPath] = directoryNode;
       fileEntryMap[directory.fullPath] = directoryNode;
       if (callback)
         callback(directoryNode, false);
@@ -160,8 +160,8 @@ FileOperations.prototype = {
    */
   renameFile: function(entry, newName, callback) {
     var file_node = fileEntryMap[entry.fullPath];
-    entry.moveTo(file_node.parentNode.node, newName);
-    file_node.parentNode.node.getFile(newName, {create: true},
+    entry.moveTo(file_node.parentNode.entry, newName);
+    file_node.parentNode.entry.getFile(newName, {create: true},
         function(createdEntry) {
       delete file_node.parentNode.children[entry.fullPath];
       file_node = new FileNode(createdEntry, file_node.parentNode);
@@ -181,7 +181,7 @@ FileOperations.prototype = {
    *
    */
   writeFile: function(fileEntry, content, onwriteend) {
-    fileEntry.node.createWriter(function(writer) {
+    fileEntry.entry.createWriter(function(writer) {
       writer.truncate(0);
       writer.onwriteend = function() {
         var blob = new Blob([content]);
