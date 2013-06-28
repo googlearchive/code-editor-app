@@ -12,7 +12,7 @@ Spark = function() {
 
   this.filesListViewController = new FilesListViewController($('#files-listview'), this);
 
-  this.modelDialogsController = new ModelDialogsController(this);
+  this.modalDialogsController = new ModalDialogsController(this);
 
   this.setupFileMenu();
 }

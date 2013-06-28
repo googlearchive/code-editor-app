@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-function ModelDialogsController(spark) {
+function ModalDialogsController(spark) {
   this.spark = spark;
   this.setup();
 }
 
-ModelDialogsController.prototype = {
+ModalDialogsController.prototype = {
   setup: function() {
     var spark = this.spark;
 
