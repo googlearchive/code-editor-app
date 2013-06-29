@@ -115,26 +115,23 @@ ModalDialogsController.prototype = {
     var spark = this.spark;
     var root = fileEntryMap[spark.getAbsolutePath(spark.ActiveProjectName)];
     spark.fileOperations.createFile(filename, root, function(fileNode, isCreated) {
+      console.log('created ' + fileNode);
+      console.log(fileNode);
       if (!isCreated) {
-        spark.fileTree.refresh(false, function() {
-          console.log('select ' + filename);
-          spark.filesListViewController.setSelectionByNames([filename]);
-        });
+        spark.filesListViewController.setSelectionByNames([fileNode.entry.fullPath]);
       }
     });
     $('#AddFileModal').modal('hide')
   },
 
   onAddProjectModalClicked: function(e) {
+    $('#AddProjectModal').modal('hide')
     var projectName = $('#new-project-name').val();
-    this.spark.tabsManager.closeOpenedTabs();
-    this.spark.ActiveProjectName = projectName;
-    this.spark.writePrefs();
     var createProjectCb = function() {
-      this.spark.refreshProjectList();
-      $('#AddProjectModal').modal('hide')
+      this.spark.selectProject(projectName);
+      this.spark.writePrefs();
     };
-    this.spark.createProject(this.spark.ActiveProjectName,
+    this.spark.createProject(projectName,
         createProjectCb.bind(this));
   },
 }

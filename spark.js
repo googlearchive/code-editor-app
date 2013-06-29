@@ -7,6 +7,7 @@ Spark = function() {
 
   var spark = this;
 
+  this.projects = null;
   this.sparkWindow = new SparkWindow(this);
   this.tabsManager = new TabsManager(this);
 
@@ -113,30 +114,53 @@ Spark.prototype.getActiveProject = function() {
 Spark.prototype.ActiveProjectName = 'untitled';
 
 Spark.prototype.refreshProjectList = function() {
+  var root = this.fileNode;
+  this.projects = {};
+  for (var path in root.children) {
+    this.projects[root.children[path].entry.name] = root.children[path];
+  }
+
   var menu = $('#project-selector .dropdown-menu');
   menu.empty();
-  for (var name in this.projects) {
+  
+  if (this.projects == null)
+    return;
+
+  var keys = Object.keys(this.projects);
+  keys.sort(function(a,b) {
+    if (a.toLowerCase() < b.toLowerCase())
+      return -1;
+    else if (a.toLowerCase() > b.toLowerCase())
+      return 1;
+    else
+      return 0;
+  });
+  keys.forEach(function(name, i) {
     // Do not list prefs file as a project.
     if (name == 'prefs')
-      continue;
+      return;
     var menuItem = $('<li><a tabindex="-1">' + htmlEncode(name) + '</a></li>');
     menuItem.click(this.onProjectSelect.bind(this, name));
     menu.append(menuItem)
     if (this.ActiveProjectName == name) {
       $('a', menuItem).addClass('menu-checkmark');
     }
-  }
+  }.bind(this));
   $('#project-name').html(htmlEncode(this.ActiveProjectName));
 };
 
-Spark.prototype.onProjectSelect = function(projectName, e) {
-  // TODO(dvh) : remember last loaded project name.
+Spark.prototype.selectProject = function(projectName) {
   this.tabsManager.closeOpenedTabs();
   this.ActiveProjectName = projectName;
-  this.writePrefs();
-  this.fileTree.refresh(true, null);
+  $('#project-name').html(htmlEncode(this.ActiveProjectName));
 
+  this.filesListViewController.updateRoot(this.getActiveProject());
   this.refreshProjectList();
+}
+
+Spark.prototype.onProjectSelect = function(projectName, e) {
+  this.selectProject(projectName);
+  this.writePrefs();
 };
 
 Spark.prototype.onEditorChange = function(instance, changeObj) {
@@ -192,25 +216,20 @@ Spark.prototype.exportProject = function(fileEntry) {
   }
 };
 
-Spark.prototype.loadProjects = function(callback) {
-  var root = fileEntryMap['/'];
-  this.projects = {};
-  for (var path in root.children) {
-    this.projects[root.children[path].entry.name] = root.children[path];
-    callback();
-  }
-};
-
 Spark.prototype.createProject = function(project_name, callback) {
 
   var handleLoadProject = function(directory) {
-    this.activeProject = directory;
-    this.projects[project_name] = directory;
+    //this.activeProject = directory;
+    //this.projects[project_name] = directory;
     var templateLoadCb = function() {
-      this.fileTree.refresh(true, null);
-      this.refreshProjectList();
+      //this.fileTree.refresh(true, null);
+      //this.refreshProjectList();
       callback();
     };
+    this.refreshProjectList();
+    this.selectProject(project_name);
+    console.log(project_name);
+    console.log(this.ActiveProjectName);
     this.templateLoader.loadTemplate(templateLoadCb.bind(this));
   };
   this.fileOperations.createDirectory(project_name,
@@ -218,20 +237,20 @@ Spark.prototype.createProject = function(project_name, callback) {
 };
 
 Spark.prototype.loadPrefs = function(callback) {
-  var spark = this;
+  //var spark = this;
   chrome.storage.sync.get('last_project', function(entry) {
     if (!entry.last_project) {
-      spark.ActiveProjectName = 'sample_app';
-      spark.writePrefs();
+      this.selectProject('sample_app');
+      this.writePrefs();
       var createProjectCb = function() {
         callback();
       };
-      spark.createProject("sample_app", createProjectCb.bind(this));
+      this.createProject("sample_app", createProjectCb.bind(this));
     } else {
-      spark.ActiveProjectName = entry.last_project;
+      this.selectProject(entry.last_project);
       callback();
     }
-  });
+  }.bind(this));
 };
 
 Spark.prototype.writePrefs = function() {
@@ -259,6 +278,8 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   }
 
   this.fileTree = new FileTree(this);
+  window.addEventListener("FileNodeTreeUpdated", this.onFileNodeTreeUpdated.bind(this));
+  
   this.templateLoader = new TemplateLoader(this);
   this.activeProject = this.fileSystem.root;
   this.fileOperations = new FileOperations();
@@ -268,10 +289,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
       spark.fileTree.refresh(true, null);
     };
 
-    var loadProjectsCb = function() {
-      spark.loadPrefs(loadPrefsCb.bind(spark));
-    };
-    spark.loadProjects(loadProjectsCb.bind(spark));
+    spark.loadPrefs(loadPrefsCb.bind(spark));
   };
 
   this.fileNode = new FileNode(this.fileSystem.root, null, fileNodeCb);
@@ -281,7 +299,8 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   chrome.syncFileSystem.onFileStatusChanged.addListener(
       function(detail) {
         if (detail.direction == 'remote_to_local') {
-          spark.loadProjects(function() {spark.refreshProjectList();});
+          //this.fileNode = new FileNode(this.fileSystem.root, null, fileNodeCb);
+          
           var buffer = spark.tabsManager.openedTabHash[detail.fileEntry.name];
           if (buffer && buffer.fileEntry.fullPath == detail.fileEntry.fullPath) {
             buffer.fileEntry = detail.fileEntry;
@@ -294,6 +313,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
         }
       }.bind(this));
 
+  // Drag&Drop handler.
   var spark = this;
   var pendingCount = 0;
   var dnd = new DnDFileController('body', function(files, e) {
@@ -367,6 +387,15 @@ Spark.prototype.filesListViewControllerShowContextMenuForElement = function(elem
   this.onClickFileMenuHandler = this.onClickHideFileMenu.bind(this);
   // When the user will click anywhere in the page, it will hide the menu.
   $('html').bind('click', this.onClickFileMenuHandler);
+}
+
+Spark.prototype.onFileNodeTreeUpdated = function(event) {
+  var path = event.detail.path;
+  if (path != this.fileNode.entry.fullPath)
+    return;
+
+  console.log('project list updated');
+  this.refreshProjectList();
 }
 
 $(function() {

@@ -49,7 +49,7 @@ FileTree.prototype.refresh = function(selectItemEnabled, callback) {
       }
     }
 
-    this.spark.fileViewControllerTreeUpdated(filteredEntries);
+    //this.spark.fileViewControllerTreeUpdated(filteredEntries);
     if (selectItemEnabled) {
       if (openedOne) {
         this.spark.tabsManager.openTab(firstEntry);

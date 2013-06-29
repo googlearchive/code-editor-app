@@ -30,6 +30,8 @@ var FilesListViewController = function(element, delegate) {
   this.treeView.reloadData();
   this.delegate = delegate;
   element.keydown(this.keyDown.bind(this));
+  
+  window.addEventListener("FileNodeTreeUpdated", this.onFileNodeTreeUpdated.bind(this));
 }
 
 FilesListViewController.prototype.keyDown = function(e) {
@@ -54,7 +56,7 @@ FilesListViewController.prototype.setSelection = function(selectedEntriesPaths) 
 }
 
 FilesListViewController.prototype.setSelectionByNames = function(names) {
-  this.treeView.setSelectedNodeUIDs(names);
+  this.treeView.setSelectedNodesUIDs(names);
 }
 
 FilesListViewController.prototype.selection = function() {
@@ -199,4 +201,19 @@ FilesListViewController.prototype.treeViewSelectionChanged = function(nodesUIDs)
 
 FilesListViewController.prototype.treeViewDoubleClicked = function(nodesUIDs) {
   this.delegate.filesListViewControllerDoubleClicked(this.selection());
+}
+
+FilesListViewController.prototype.onFileNodeTreeUpdated = function(event) {
+  var path = event.detail.path;
+  if (this.root == null)
+    return;
+
+  //console.log("updated path " + path);
+  // Update view only if updates files are in the scope of displayed files.
+  if ((path + '/').indexOf(this.root.entry.fullPath + '/') != 0)
+    return;
+  //console.log("update tree " + this.root);
+
+  this.childrenCache = new Object();
+  this.treeView.reloadData();
 }
