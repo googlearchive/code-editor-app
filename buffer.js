@@ -106,7 +106,9 @@ Buffer.prototype.handleDocumentChange = function() {
   } else {
     //document.getElementById("title").innerHTML = "[no document loaded]";
   }
-  this.doc.getEditor().setOption("mode", mode);
+  if (this.doc.getEditor() != null) {
+    this.doc.getEditor().setOption("mode", mode);
+  }
   //document.getElementById("mode").innerHTML = modeName;
 }
 

@@ -69,7 +69,6 @@ Spark.prototype.onConfirmDeletion = function(e) {
       count --;
       if (count == 0) {
         spark.filesListViewController.setSelection([]);
-        spark.fileTree.refresh(false, null);
       }
     };
     spark.fileOperations.deleteFile(entry, callback);
@@ -93,11 +92,8 @@ Spark.prototype.onConfirmRename = function(e) {
   console.log(entry.fullPath);
 
   var renameCallback = function(entry) {
-    spark.fileTree.refresh(false, function() {
-      console.log(entry);
-      spark.filesListViewController.setSelection([entry]);
-    });
     $('#RenameFilesModal').modal('hide');
+    spark.filesListViewController.setSelection([entry]);
   };
 
   this.fileOperations.renameFile(entry, enteredName, renameCallback);
@@ -219,11 +215,7 @@ Spark.prototype.exportProject = function(fileEntry) {
 Spark.prototype.createProject = function(project_name, callback) {
 
   var handleLoadProject = function(directory) {
-    //this.activeProject = directory;
-    //this.projects[project_name] = directory;
     var templateLoadCb = function() {
-      //this.fileTree.refresh(true, null);
-      //this.refreshProjectList();
       callback();
     };
     this.refreshProjectList();
@@ -277,7 +269,6 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
     }
   }
 
-  this.fileTree = new FileTree(this);
   window.addEventListener("FileNodeTreeUpdated", this.onFileNodeTreeUpdated.bind(this));
   
   this.templateLoader = new TemplateLoader(this);
@@ -286,7 +277,6 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   var fileNodeCb = function() {
     var loadPrefsCb = function() {
       spark.refreshProjectList();
-      spark.fileTree.refresh(true, null);
     };
 
     spark.loadPrefs(loadPrefsCb.bind(spark));
@@ -324,7 +314,6 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
         pendingCount--;
         console.log('one batch written');
         if (!pendingCount) {
-          spark.fileTree.refresh(false, null);
           console.log('all files written');
         }
       };
