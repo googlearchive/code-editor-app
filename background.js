@@ -3,7 +3,18 @@
 // found in the LICENSE file.
 
 chrome.app.runtime.onLaunched.addListener(function() {
+  var screenWidth = screen.availWidth;
+  var screenHeight = screen.availHeight;
+  var width = Math.floor(screenWidth*(7/8));
+  var height = Math.floor(screenHeight*(7/8));
   chrome.app.window.create('spark.html', {
-    frame: 'chrome', width: 940, height: 860, minWidth: 600, minHeight: 350
+    id: 'defaultWin',
+    frame: 'chrome',
+    width: width, 
+    height: height,
+    minWidth: 600,
+    minHeight: 350,
+    left: Math.floor((screenWidth-width)/2),
+    top: Math.floor((screenHeight-height)/2)
   });
 });
