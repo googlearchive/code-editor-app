@@ -8,6 +8,7 @@ chrome.app.runtime.onLaunched.addListener(function() {
   var width = Math.floor(screenWidth*(7/8));
   var height = Math.floor(screenHeight*(7/8));
   chrome.app.window.create('spark.html', {
+    id: 'defaultWin',
     frame: 'chrome',
     width: width, 
     height: height,
