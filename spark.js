@@ -539,7 +539,7 @@ Spark.prototype.exportProject = function(fileEntry) {
           fileReader.readAsBinaryString(file);
         }, errorHandler);
       } else {
-        // TODO(miket): handle directories
+        // TODO(grv): handle directories
         zipEntries();
       }
     } else {
