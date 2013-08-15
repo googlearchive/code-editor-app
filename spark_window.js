@@ -127,8 +127,11 @@ SparkWindow.prototype = {
             }, 500);
           });
     };
-    chrome.developerPrivate.exportSyncfsFolderToLocalfs(
-        spark.ActiveProjectName, exportFolderCb.bind(spark));
+    var activeProject = spark.getActiveProject();
+    console.log(activeProject.entry);
+    console.log(activeProject.entry.toURL());
+    chrome.developerPrivate.loadDirectory(
+        activeProject.entry, exportFolderCb.bind(spark));
   },
 
   handleExportButton: function(e) {

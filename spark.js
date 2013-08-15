@@ -10,6 +10,7 @@ Spark = function() {
   this.projects = null;
   this.sparkWindow = new SparkWindow(this);
   this.tabsManager = new TabsManager(this);
+  this.gitClient = new GitClient(this);
 
   this.filesListViewController = new FilesListViewController($('#files-listview'), this);
 
@@ -212,24 +213,38 @@ Spark.prototype.exportProject = function(fileEntry) {
   }
 };
 
-Spark.prototype.createProject = function(project_name, callback) {
+Spark.prototype.createProject = function(project_name, repo_url, callback) {
 
+  var spark = this;
   var handleLoadProject = function(directory) {
     var templateLoadCb = function() {
       callback();
     };
     this.refreshProjectList();
     this.selectProject(project_name);
-    console.log(project_name);
-    console.log(this.ActiveProjectName);
-    this.templateLoader.loadTemplate(templateLoadCb.bind(this));
+    if (repo_url) {
+      var options = {
+        dir: directory.entry,
+        url: repo_url,
+        depth: 1
+      };
+      GitApi.clone(options, function() {
+        console.log('Cloning repo' + repo_url);
+        var cb = function() {
+          spark.refreshProjectList();
+          spark.selectProject(project_name);
+        };
+        spark.fileOperations.copyDirectory(directory.entry, fileEntryMap['/'], cb);
+      });
+    } else {
+      spark.templateLoader.loadTemplate(templateLoadCb.bind(this));
+    }
   };
   this.fileOperations.createDirectory(project_name,
       fileEntryMap[this.fileSystem.root.fullPath], handleLoadProject.bind(this));
 };
 
 Spark.prototype.loadPrefs = function(callback) {
-  //var spark = this;
   chrome.storage.sync.get('last_project', function(entry) {
     if (!entry.last_project) {
       this.selectProject('sample_app');
@@ -318,7 +333,6 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
         }
       };
       var entry = item.webkitGetAsEntry();
-      console.log(fileEntryMap);
       spark.fileOperations.copyDirectory(entry,
           spark.getActiveProject(spark.ActiveProjectName), dndCallback);
       console.log(entry);

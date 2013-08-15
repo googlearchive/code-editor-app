@@ -28,7 +28,15 @@ body {
   display: inline-block;
 }
 
+#git-menu-button {
+  position: absolute;
+  left: 100px;
+  top: 10px;
+  display: inline-block;
+}
+
 #right-buttons {
+
   position: absolute;
   right: 10px;
   top: 10px;

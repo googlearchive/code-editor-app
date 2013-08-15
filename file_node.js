@@ -80,7 +80,6 @@ FileOperations.prototype = {
         callback(entry, true);
       return;
     }
-    console.log("creating directory");
     root.entry.getDirectory(name, {create:true}, function(directory) {
       var directoryNode = new FileNode(directory, root);
       root.children[directoryNode.entry.fullPath] = directoryNode;

@@ -31,6 +31,8 @@
   <script src="treeview.js"></script>
   <script src="files_list_view_controller.js"></script>
   <script src="absolutepos.js"></script>
+  <script src="api-built.js"></script>
+  <script src="git.js"></script>
 
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="codemirror-3.1/lib/codemirror.css">
@@ -49,7 +51,25 @@
         </a>
         <ul class="dropdown-menu">
           <li><a tabindex="-1" data-toggle="modal" href="#AddProjectModal">Project</a></li>
+          <li><a tabindex="-1" data-toggle="modal" href="#AddGitProjectModal">Git Project</a></li>
           <li><a tabindex="-1" data-toggle="modal" href="#AddFileModal">File</a></li>
+        </ul>
+      </div>
+
+      <div class="btn-group" id="git-menu-button">
+        <a class="btn btn-danger dropdown-toggle" data-toggle="dropdown" href="#">
+          git
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a tabindex="-1" data-toggle="modal" href="#GitPullModal"> Pull</a></li>
+          <li><a tabindex="-1" data-toggle="modal" href="#GitPushModal"> Push</a></li>
+          <li><a tabindex="-1" data-toggle="modal" href="#GitCommitModal">
+            Commit</a></li>
+          <li><a tabindex="-1" data-toggle="modal" href="#GitBranchModal">
+            Branch</a></li>
+          <li><a tabindex="-1" data-toggle="modal" href="#GitCheckoutModal">
+            checkout</a></li>
         </ul>
       </div>
       
@@ -77,7 +97,115 @@
           <button class="btn btn-primary">Create</button>
         </div>
       </div>
-      
+
+       <!-- Modal Git Pull -->
+      <div id="GitPullModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="myModalLabel">Git Pull</h3>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary">Ok</button>
+        </div>
+      </div>
+
+      <!-- Modal Git Push -->
+      <div id="GitPushModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="myModalLabel">Git Push</h3>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary">Ok</button>
+        </div>
+      </div>
+
+
+      <!-- Modal Git Commit -->
+      <div id="GitCommitModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="myModalLabel">Git Commit </h3>
+        </div>
+        <div class="modal-body">
+          Email
+          <input type="text" placeholder="xyz@abc.com" id="git-email"/>
+          Name:
+          <input type="text" placeholder="name"
+              id="git-name"/>
+          <br/>
+          Commit Message:
+          <input type="textArea" id="commit-message">
+          <br/>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+          <button class="btn btn-primary">Ok</button>
+        </div>
+      </div>
+
+      <!-- Modal Add Git Project -->
+      <div id="AddGitProjectModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="myModalLabel">New Git Project</h3>
+        </div>
+        <div class="modal-body">
+          Project Name:
+          <input type="text" placeholder="New_project" id="new-git-project-name"/>
+          <br/>
+          Remote Git Url:
+          <input type="text" placeholder="https://hostname/repo.git"
+              id="remote-git-url"/>
+          <br/>
+          Username:
+          <input type="text" id="git-username">
+          <br/>
+          Password:
+          <input type="password" id="git-password">
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+          <button class="btn btn-primary">Create</button>
+        </div>
+      </div>
+
+      <!-- Modal Git Branch -->
+      <div id="GitBranchModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="myModalLabel">Create New Branch</h3>
+        </div>
+        <div class="modal-body">
+          <p>Create a new branch from "master".</p>
+          <input type="text" placeholder="New Branch Name" id="new-branch-name"/>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+          <button class="btn btn-primary">Ok</button>
+        </div>
+      </div>
+
+      <!-- Modal Git Checkout -->
+      <div id="GitCheckoutModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="myModalLabel">Git Checkout</h3>
+        </div>
+        <div class="modal-body">
+          Current Branch:
+          <input type="text" placeholder="master" id="currentBranch" />
+          <br/>
+          <select id="checkoutBranch">
+            <option> abc </option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+          <button class="btn btn-primary">Ok</button>
+        </div>
+      </div>
+
       <!-- Modal Add File -->
       <div id="AddFileModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-header">
