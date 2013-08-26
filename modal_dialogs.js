@@ -11,11 +11,13 @@ ModalDialogsController.prototype = {
   setup: function() {
     var spark = this.spark;
     var mdc = this;
+    var gitClient = spark.gitClient;
 
     // Add project modal configuration.
     $('#AddProjectModal').on('show', function () {
       spark.modalShown = true;
     });
+
     $('#AddProjectModal').on('hide', function () {
       spark.modalShown = false;
       $('#new-project-name').blur();
@@ -25,7 +27,30 @@ ModalDialogsController.prototype = {
       $('#new-project-name').focus();
     })
 
-    // Add project modal configuration.
+
+    // Import project modal configuration.
+    $('#ImportProjectModal').on('show', function () {
+
+      var templateMenu = document.getElementById('templateProject');
+      templateMenu.innerHTML = '';
+      spark.htmlfs.root.getDirectory('/.templates', {}, function(templates) {
+        var dirReader = templates.createReader();
+        dirReader.readEntries(function(results) {
+          results.forEach(function(entry, i) {
+            if (entry.isDirectory && entry.name.search('.git') == -1 ) {
+              var option = document.createElement('option');
+              option.value = entry.name;
+              option.text = entry.name;
+              templateMenu.appendChild(option);
+            }
+          });
+        });
+      });
+
+      spark.modalShown = true;
+    });
+
+    // Add Git project modal configuration.
     $('#AddGitProjectModal').on('show', function () {
       spark.modalShown = true;
     });
@@ -43,7 +68,6 @@ ModalDialogsController.prototype = {
       spark.modalShown = true;
       var gitPull = mdc.onGitPull.bind(mdc);
       gitPull();
-      console.log('sdfsadfsadf');
     });
     $('#GitPullModal').on('hide', function () {
       spark.modalShown = false;
@@ -63,8 +87,14 @@ ModalDialogsController.prototype = {
     // Git Commit Model configuration.
     $('#GitCommitModal').on('show', function () {
       spark.modalShown = true;
+      if (gitClient.settings.email)
+        $('#git-email').val(gitClient.settings.email);
+      if (gitClient.settings.name)
+        $('#git-name').val(gitClient.settings.name);
     });
     $('#GitCommitModal').on('hide', function () {
+      $('#git-email').val('');
+      $('#git-name').val('');
       spark.modalShown = false;
       $('#git-email').blur();
     });
@@ -76,6 +106,7 @@ ModalDialogsController.prototype = {
     $('#GitBranchModal').on('hide', function () {
       spark.modalShown = false;
       $('#new-branch-name').blur();
+      $('#new-branch-name').val('');
     });
 
     // Git Checkout Model configuration.
@@ -161,6 +192,7 @@ ModalDialogsController.prototype = {
     $('#AddFileModal .btn-primary').click(this.onAddFileModalClicked.bind(this));
     $('#AddProjectModal .btn-primary').click(this.onAddProjectModalClicked.bind(this));
     $('#AddGitProjectModal .btn-primary').click(this.onAddGitProjectModalClicked.bind(this));
+    $('#ImportProjectModal .btn-primary').click(this.onImportProjectModalClicked.bind(this));
     $('#GitCommitModal .btn-primary').click(this.onGitCommitClicked.bind(this));
     $('#GitBranchModal .btn-primary').click(this.onGitBranchClicked.bind(this));
     $('#GitCheckoutModal .btn-primary').click(this.onGitCheckoutClicked.bind(this));
@@ -224,16 +256,39 @@ ModalDialogsController.prototype = {
     $('#AddProjectModal').modal('hide')
     var projectName = $('#new-project-name').val();
     var createProjectCb = function() {
+      this.spark.refreshProjectList();
       this.spark.selectProject(projectName);
       this.spark.writePrefs();
     };
-    this.spark.createProject(projectName, null,
+    this.spark.createProject(projectName, 'empty',
         createProjectCb.bind(this));
+  },
+
+  onImportProjectModalClicked: function(e) {
+    var spark = this.spark;
+    var projectName = $('#templateProject').val();
+    var callback = function() {
+      spark.refreshProjectList();
+      spark.selectProject(spark.ActiveProjectName);
+      spark.writePrefs();
+      $('#ImportProjectModal').modal('hide')
+    };
+    console.log(projectName);
+    spark.htmlfs.root.getDirectory('/.templates/' + projectName, {}, function(project) {
+      project.psuedoName = spark.ActiveProjectName;
+      spark.fileOperations.copyDirectory(project, fileEntryMap['/'], callback);
+    });
   },
 
   onAddGitProjectModalClicked: function(e) {
     $('#AddGitProjectModal').modal('hide')
     var projectName = $('#new-git-project-name').val();
+    var username = $('#git-username').val();
+    var password = $('#git-password').val();
+    if (username)
+      this.spark.gitClient.settings.username = username;
+    if (password)
+      this.spark.gitClient.settings.password = password;
     var repoUrl = $('#remote-git-url').val();
     var createProjectCb = function() {
       this.spark.selectProject(projectName);
@@ -246,8 +301,9 @@ ModalDialogsController.prototype = {
   onGitPull: function() {
     var gitPullCb = function() {
       console.log('pulling');
-      $('#GitPullModal').modal('hide');
+    document.getElementById('GitPullMessage').innerHTML = 'Updated Project Successful!!';
     };
+    document.getElementById('GitPullMessage').innerHTML = 'Pulling and Updating from repo.....';
     this.spark.gitClient.pull(gitPullCb);
   },
 
@@ -276,8 +332,12 @@ ModalDialogsController.prototype = {
 
   onGitCommitClicked: function() {
     var commitMessage = $('#commit-message');
-    var name = $('#git-name');
-    var email = $('#git-email');
+    var name = $('#git-name').val();
+    var email = $('#git-email').val();
+    if (name)
+      this.spark.gitClient.settings.name = name;
+    if (email)
+      this.spark.gitClient.settings.email = email;
     var gitCommitCb = function() {
       console.log('commiting');
       $('#GitCommitModal').modal('hide');
@@ -294,9 +354,12 @@ ModalDialogsController.prototype = {
     var directory = this.spark.getActiveProject().entry;
     var gitPushCb = function() {
       console.log('pushing');
-      $('#GitPushModal').modal('hide');
+      document.getElementById('GitPushMessage').innerHTML = 'Push Successful!!';
     };
 
+    var pushMessage = document.getElementById('GitPushMessage');
+    console.log(pushMessage);
+    pushMessage.innerHTML = 'pushing to repo....';
     this.spark.gitClient.push(gitPushCb);
   },
 }

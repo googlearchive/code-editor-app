@@ -7903,8 +7903,8 @@ define('commands/branch',['utils/file_utils', 'utils/errors'], function(fileutil
 
     var checkBranchName = function(branchName){
         if (branchName && branchName.length && branchName.match(branchRegex)){
-            if (branchName.lastIndexOf('.lock') != branchName.length - '.lock'.length &&
-                branchName.charAt(branchName.length - 1) != '.' && 
+            if ((branchName.length < 5 || branchName.lastIndexOf('.lock') != branchName.length - '.lock'.length) &&
+                branchName.charAt(branchName.length - 1) != '.' &&
                 branchName.charAt(branchName.length - 1) != '/' &&
                 branchName.charAt(0) != '.'){
                 return true;

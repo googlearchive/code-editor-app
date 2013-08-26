@@ -4,6 +4,7 @@
 
 function GitClient(spark) {
   this.spark = spark;
+  this.settings = {};
 }
 
 var errorhandler = function(e) {
@@ -21,7 +22,10 @@ GitClient.prototype = {
     GitApi.pull(options, function() {
       console.log('pull complete');
       callback();
-    }, errorhandler);
+    }, function(e) {
+      document.getElementById('GitPullMessage').innerHTML = e.msg;
+      errorhandler(e);
+    });
   },
 
   branch: function(branchName, callback) {
@@ -32,7 +36,7 @@ GitClient.prototype = {
         console.log('branching done');
         callback();
         });
-    }, errorHandler);
+    }, errorhandler);
   },
 
   checkout: function(branchName, callback) {
@@ -42,7 +46,7 @@ GitClient.prototype = {
       // checkout complete, do a push here
       console.log('checkout done.');
       callback();
-    }, errorHandler);
+    }, errorhandler);
   },
 
   commit: function(options, callback) {
@@ -58,11 +62,16 @@ GitClient.prototype = {
     var directory = this.spark.getActiveProject().entry;
     var options = {
       dir: directory,
+      username: this.settings.username,
+      password: this.settings.password
     };
 
     GitApi.push(options, function() {
       console.log('push done.');
       callback();
-    }, errorhandler);
+    }, function(e) {
+      document.getElementById('GitPushMessage').innerHTML = e.msg;
+      errorhandler(e);
+    });
   },
 };

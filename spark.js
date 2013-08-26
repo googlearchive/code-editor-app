@@ -55,6 +55,15 @@ Spark.prototype.setupFileMenu = function() {
 
     $('#RenameFilesModal').modal('show');
   });
+  $('#files-menu-run').click(function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var selection = spark.filesListViewController.selection();
+    console.log(selection[0]);
+    spark.sparkWindow.runDirectory(selection[0]);
+    spark.hideFileMenu();
+    console.log(e);
+  });
 }
 
 Spark.prototype.onConfirmDeletion = function(e) {
@@ -213,7 +222,7 @@ Spark.prototype.exportProject = function(fileEntry) {
   }
 };
 
-Spark.prototype.createProject = function(project_name, repo_url, callback) {
+Spark.prototype.createProject = function(project_name, source, callback) {
 
   var spark = this;
   var handleLoadProject = function(directory) {
@@ -222,14 +231,14 @@ Spark.prototype.createProject = function(project_name, repo_url, callback) {
     };
     this.refreshProjectList();
     this.selectProject(project_name);
-    if (repo_url) {
+    if (source.search('.git') != -1) {
       var options = {
         dir: directory.entry,
-        url: repo_url,
+        url: source,
         depth: 1
       };
       GitApi.clone(options, function() {
-        console.log('Cloning repo' + repo_url);
+        console.log('Cloning repo' + source);
         var cb = function() {
           spark.refreshProjectList();
           spark.selectProject(project_name);
@@ -237,12 +246,49 @@ Spark.prototype.createProject = function(project_name, repo_url, callback) {
         spark.fileOperations.copyDirectory(directory.entry, fileEntryMap['/'], cb);
       });
     } else {
-      spark.templateLoader.loadTemplate(templateLoadCb.bind(this));
+      console.log(source);
+      spark.templateLoader.loadTemplate(source, templateLoadCb.bind(this));
     }
   };
   this.fileOperations.createDirectory(project_name,
       fileEntryMap[this.fileSystem.root.fullPath], handleLoadProject.bind(this));
 };
+
+Spark.prototype.downloadChromeSamples = function() {
+  var spark = this;
+
+  var callback = function(templates) {
+    var cb = function() {
+      spark.refreshProjectList();
+      spark.selectProject(spark.ActiveProjectName);
+    };
+  }
+
+  window.requestFileSystem(window.PERSISTENT, 5*1024*1024*1024, function(fs) {
+    spark.htmlfs = fs;
+    fs.root.getDirectory('/.templates', {create:false}, function(templates) {
+      if (templates) {
+        callback(templates);
+        return;
+      }
+      fs.root.getDirectory('.templates', {create:true}, function(templates) {
+        var repoUrl = 'https://github.com/GoogleChrome/chrome-app-samples.git';
+        var options = {
+          dir: templates,
+          url: repoUrl,
+          depth: 1
+        };
+
+        console.log('Downloading chrome app samples from ' + repoUrl);
+
+        GitApi.clone(options, function() {
+          callback(templates);
+          console.log('downloaded chrome app samples.');
+        });
+      });
+    })
+  });
+}
 
 Spark.prototype.loadPrefs = function(callback) {
   chrome.storage.sync.get('last_project', function(entry) {
@@ -295,6 +341,7 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
     };
 
     spark.loadPrefs(loadPrefsCb.bind(spark));
+    spark.downloadChromeSamples();
   };
 
   this.fileNode = new FileNode(this.fileSystem.root, null, fileNodeCb);

@@ -76,6 +76,8 @@
       <div id="right-buttons">
         <button id="run-button" class="btn btn-primary tt"
         title="Reloads and runs the project in Chrome.">Run</button>
+        <button id="import-button" class="btn tt"
+        title="Imports project from system or sample apps.">Import</button>
         <button id="export-button" class="btn tt"
         title="Exports the entire project as a zip file.">Export</button>
       </div>
@@ -91,10 +93,29 @@
         <div class="modal-body">
           <p>Please enter the name your project:</p>
           <input type="text" placeholder="New_project" id="new-project-name"/>
+          <br/>
         </div>
         <div class="modal-footer">
           <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
           <button class="btn btn-primary">Create</button>
+        </div>
+      </div>
+
+      <!-- Modal Import Project-->
+      <div id="ImportProjectModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="myModalLabel">Import Project</h3>
+        </div>
+        <div class="modal-body">
+          <p>Sample Chrome Apps:</p>
+          <select id="templateProject">
+            <option> hello-world </option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+          <button class="btn btn-primary">Ok</button>
         </div>
       </div>
 
@@ -104,6 +125,7 @@
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
           <h3 id="myModalLabel">Git Pull</h3>
         </div>
+        <div id="GitPullMessage"> </div>
         <div class="modal-footer">
           <button class="btn btn-primary">Ok</button>
         </div>
@@ -115,6 +137,7 @@
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
           <h3 id="myModalLabel">Git Push</h3>
         </div>
+        <div id="GitPushMessage"> </div>
         <div class="modal-footer">
           <button class="btn btn-primary">Ok</button>
         </div>
@@ -259,6 +282,7 @@
       <ul id="files-menu" class="dropdown-menu" role="menu" style="position: fixed; top: 0px; left: 0px;">
         <li><a tabindex="-1" id="files-menu-remove" href="#">Delete</a></li>
         <li><a tabindex="-1" id="files-menu-rename" href="#">Rename</a></li>
+        <li><a tabindex="-1" id="files-menu-run" href="#">Run</a></li>
       </ul>
     </div>
     <div id="main-view">

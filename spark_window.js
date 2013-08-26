@@ -16,6 +16,7 @@ function SparkWindow(spark) {
 
   $("#run-button").click(this.handleRunButton.bind(this));
   $("#export-button").click(this.handleExportButton.bind(this));
+  $("#import-button").click(this.handleImportButton.bind(this));
   $(".tt").tooltip({ 'placement': 'bottom' });
 
 };
@@ -129,9 +130,40 @@ SparkWindow.prototype = {
     };
     var activeProject = spark.getActiveProject();
     console.log(activeProject.entry);
-    console.log(activeProject.entry.toURL());
     chrome.developerPrivate.loadDirectory(
         activeProject.entry, exportFolderCb.bind(spark));
+  },
+
+  runDirectory: function(directory, callback) {
+    var spark = this.spark;
+    var exportFolderCb = function() {
+      console.log('comes in exprot');
+
+      console.log(directory.name);
+      chrome.developerPrivate.loadProject(directory.name,
+          function(itemId) {
+            // loadProject may return before the app is actually loaded returning
+            // garbage item_id. However, a second call should succeed.
+            // TODO (grv): Listen to loadProject event and return when the app
+            // is loaded.
+            setTimeout(function() {
+              chrome.developerPrivate.loadProject(directory.name,
+                function(itemId) {
+                  setTimeout(function() {
+                    if (!itemId) {
+                      console.log('invalid itemId');
+                      return;
+                    }
+                    // Since the API doesn't wait for the item to load,may return
+                    // before it has fully loaded. Delay the launch event.
+                    chrome.management.launchApp(itemId, function(){});
+                  }, 500);
+                });
+            }, 500);
+          });
+    };
+    chrome.developerPrivate.loadDirectory(
+        directory, exportFolderCb.bind(spark));
   },
 
   handleExportButton: function(e) {
@@ -140,6 +172,12 @@ SparkWindow.prototype = {
     chrome.fileSystem.chooseEntry({ "type": "saveFile",
       "suggestedName": spark.ActiveProjectName + ".zip" },
       spark.exportProject.bind(spark));
+  },
+
+  handleImportButton: function(e) {
+    e.preventDefault();
+    var spark = this.spark;
+    $('#ImportProjectModal').modal('show');
   },
 };
 

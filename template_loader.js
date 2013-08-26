@@ -8,7 +8,20 @@ TemplateLoader = function(spark) {
   this.callback = function() {};
 }
 
-TemplateLoader.prototype.loadTemplate = function(callback) {
+TemplateLoader.prototype.loadTemplate = function(projectName, callback) {
+  // Creates an empty project.
+  if (projectName == 'empty')
+    return;
+  var spark = this.spark;
+  spark.htmlfs.root.getDirectory('/.templates/' + projectName,
+      {create:false}, function(project) {
+    var root = fileEntryMap['/'];
+    project.psuedoName = spark.ActiveProjectName;
+    spark.fileOperations.copyDirectory(project, root, callback);
+  });
+
+  return;
+
   this.pendingWrites = 8;
   this.callback = callback;
   this.readFile(chrome.runtime.getURL('sample_app/manifest_2.json'),

@@ -138,7 +138,9 @@ FileOperations.prototype = {
         };
         reader.readEntries(readEntriesCb);
       }
-      fileOperations.createDirectory(sourceEntry.name, root, createDirectoryCb);
+      var name = sourceEntry.psuedoName ? sourceEntry.psuedoName
+          : sourceEntry.name;
+      fileOperations.createDirectory(name, root, createDirectoryCb);
     } else {
       var copyFileCb = function() {
         pendingCallbacks.count--;
