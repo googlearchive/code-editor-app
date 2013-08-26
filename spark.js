@@ -267,11 +267,9 @@ Spark.prototype.downloadChromeSamples = function() {
   window.requestFileSystem(window.PERSISTENT, 5*1024*1024*1024, function(fs) {
     spark.htmlfs = fs;
     fs.root.getDirectory('/.templates', {create:false}, function(templates) {
-      if (templates) {
-        callback(templates);
-        return;
-      }
-      fs.root.getDirectory('.templates', {create:true}, function(templates) {
+      callback(templates);
+    }, function(e) {
+      fs.root.getDirectory('/.templates', {create:true}, function(templates) {
         var repoUrl = 'https://github.com/GoogleChrome/chrome-app-samples.git';
         var options = {
           dir: templates,
