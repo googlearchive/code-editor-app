@@ -19,7 +19,6 @@
   <script src="globals.js"></script>
   <script src="util.js"></script>
   <script src="buffer.js"></script>
-  <script src="file_tree.js"></script>
   <script src="file_node.js"></script>
   <script src="template_loader.js"></script>
   <script src="spark_window.js"></script>
@@ -44,33 +43,35 @@
 <body>
   <div>
     <div id="top-bar">
-      <div class="btn-group" id="create-button">
-        <a class="btn btn-danger dropdown-toggle" data-toggle="dropdown" href="#">
-          Create
-          <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu">
-          <li><a tabindex="-1" data-toggle="modal" href="#AddProjectModal">Project</a></li>
-          <li><a tabindex="-1" data-toggle="modal" href="#AddGitProjectModal">Git Project</a></li>
-          <li><a tabindex="-1" data-toggle="modal" href="#AddFileModal">File</a></li>
-        </ul>
-      </div>
+      <div id="left-buttons">
+        <div class="btn-group" id="create-button">
+          <a class="btn btn-danger dropdown-toggle" data-toggle="dropdown" href="#">
+            Create
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a tabindex="-1" data-toggle="modal" href="#AddProjectModal">Project</a></li>
+            <li><a tabindex="-1" data-toggle="modal" href="#AddGitProjectModal">Git Project</a></li>
+            <li><a tabindex="-1" data-toggle="modal" href="#AddFileModal">File</a></li>
+          </ul>
+        </div>
 
-      <div class="btn-group" id="git-menu-button">
-        <a class="btn btn-danger dropdown-toggle" data-toggle="dropdown" href="#">
-          git
-          <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu">
-          <li><a tabindex="-1" data-toggle="modal" href="#GitPullModal"> Pull</a></li>
-          <li><a tabindex="-1" data-toggle="modal" href="#GitPushModal"> Push</a></li>
-          <li><a tabindex="-1" data-toggle="modal" href="#GitCommitModal">
-            Commit</a></li>
-          <li><a tabindex="-1" data-toggle="modal" href="#GitBranchModal">
-            Branch</a></li>
-          <li><a tabindex="-1" data-toggle="modal" href="#GitCheckoutModal">
-            checkout</a></li>
-        </ul>
+        <div class="btn-group" id="git-menu-button">
+          <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+            git
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a tabindex="-1" data-toggle="modal" href="#GitPullModal"> Pull</a></li>
+            <li><a tabindex="-1" data-toggle="modal" href="#GitPushModal"> Push</a></li>
+            <li><a tabindex="-1" data-toggle="modal" href="#GitCommitModal">
+              Commit</a></li>
+            <li><a tabindex="-1" data-toggle="modal" href="#GitBranchModal">
+              Branch</a></li>
+            <li><a tabindex="-1" data-toggle="modal" href="#GitCheckoutModal">
+              checkout</a></li>
+          </ul>
+        </div>
       </div>
       
       <div id="right-buttons">

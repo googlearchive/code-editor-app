@@ -21,22 +21,19 @@ body {
   outline: none;
 }
 
-#create-button {
+#left-buttons {
   position: absolute;
   left: 10px;
   top: 10px;
   display: inline-block;
 }
 
+#create-button,
 #git-menu-button {
-  position: absolute;
-  left: 100px;
-  top: 10px;
   display: inline-block;
 }
 
 #right-buttons {
-
   position: absolute;
   right: 10px;
   top: 10px;
@@ -83,10 +80,6 @@ body {
 
 #edited-image {
   position: absolute;
-}
-
-#run-button {
-  margin-left: 10px;
 }
 
 .close-buffer-button {
@@ -281,6 +274,21 @@ body {
   height: 22px;
 }
 
+#git-menu-button {
+  margin: 0;
+}
+
+#git-menu-button .btn {
+  background-color: #f1f1f1;
+  background-image: none;
+  border-radius: 2px;
+  border: solid 1px #c9c9c9;
+  font-size: 11px;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+  height: 22px;
+}
+
 #run-button {
   background-color: #4d90fe;
   background-image: none;
@@ -292,6 +300,7 @@ body {
   height: 32px;
 }
 
+#import-button,
 #export-button {
   background-color: #f1f1f1;
   background-image: none;
