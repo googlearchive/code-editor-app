@@ -2,8 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+const USE_SYNC_FS = true;
+
 Spark = function() {
-  chrome.syncFileSystem.requestFileSystem(this.onSyncFileSystemOpened.bind(this));
+
+  if (USE_SYNC_FS) {
+    chrome.syncFileSystem.requestFileSystem(
+        this.onSyncFileSystemOpened.bind(this));
+  }
+  else {
+    window.requestFileSystem(window.PERSISTENT, 5*1024*1024*1024,
+        this.onSyncFileSystemOpened.bind(this));
+  }
 
   var spark = this;
 
@@ -143,7 +153,7 @@ Spark.prototype.refreshProjectList = function() {
   });
   keys.forEach(function(name, i) {
     // Do not list prefs file as a project.
-    if (name == 'prefs')
+    if (name == 'prefs' || name == '.templates')
       return;
     var menuItem = $('<li><a tabindex="-1">' + htmlEncode(name) + '</a></li>');
     menuItem.click(this.onProjectSelect.bind(this, name));
