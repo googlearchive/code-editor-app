@@ -107,7 +107,8 @@ FilesListViewController.prototype.treeViewNumberOfChildren = function(nodeUID) {
   if (node == null)
     return 0;
 
-  return Object.keys(node.children).length;
+  var children = this.cachedChildrenForNode(node);
+  return children.length;
 }
 
 FilesListViewController.prototype.cachedChildrenForNode = function(fileNode) {
@@ -118,6 +119,8 @@ FilesListViewController.prototype.cachedChildrenForNode = function(fileNode) {
   
   children = [];
   Object.keys(fileNode.children).forEach(function(childPath, i) {
+    if (fileEntryMap[childPath].entry.name == '.git')
+      return;
     children.push(childPath);
   });
   children.sort(function(a,b) {
