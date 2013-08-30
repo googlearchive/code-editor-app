@@ -5,7 +5,7 @@
 const USE_SYNC_FS = true;
 
 Spark = function() {
-
+  $('#syncfs-modal').removeAttr('hidden');
   if (USE_SYNC_FS) {
     chrome.syncFileSystem.requestFileSystem(
         this.onSyncFileSystemOpened.bind(this));
@@ -241,28 +241,41 @@ Spark.prototype.createProject = function(project_name, source, callback) {
     };
     this.refreshProjectList();
     this.selectProject(project_name);
-    if (source.search('.git') != -1) {
+    console.log('source: ' + source);
+    if (source != null) {
+      if ((source.indexOf('https://github.com/') == 0) && (source.indexOf('.git', source.length - 4) == -1)) {
+        source += '.git';
+      }
+      console.log('source: ' + source);
       var options = {
         dir: directory.entry,
         url: source,
-        depth: 1
+        depth: 1,
+        progress: function(info) {
+          this.updateGitCloneProgress();
+        }.bind(this)
       };
       GitApi.clone(options, function() {
         console.log('Cloning repo' + source);
         var cb = function() {
           spark.refreshProjectList();
           spark.selectProject(project_name);
+          $('#AddGitProjectModal').modal('hide')
         };
         spark.fileOperations.copyDirectory(directory.entry, fileEntryMap['/'], cb);
       });
     } else {
-      console.log(source);
-      spark.templateLoader.loadTemplate(source, templateLoadCb.bind(this));
+      spark.templateLoader.loadTemplate('hello-world', templateLoadCb.bind(this));
     }
   };
   this.fileOperations.createDirectory(project_name,
       fileEntryMap[this.fileSystem.root.fullPath], handleLoadProject.bind(this));
 };
+
+
+Spark.prototype.updateGitCloneProgress = function(option) {
+  
+}
 
 Spark.prototype.downloadChromeSamples = function() {
   var spark = this;
@@ -329,17 +342,21 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
   if (!fs) {
     if (tries) {
       tries--;
+      console.log('Retrying (' + tries + ').');
       chrome.syncFileSystem.requestFileSystem(spark.onSyncFileSystemOpened.bind(tries, this));
       return;
     }
     else {
-      console.log('unable to obtain sync filesystem.');
+      this.modalDialogsController.showErrorMessage('Google Drive is not available',
+          'Code Editor has not been able to connect to Google Drive.');
+          $('#syncfs-modal').attr('hidden', 'true');
       return;
     }
   }
 
+  $('#syncfs-modal').attr('hidden', 'true');
   window.addEventListener("FileNodeTreeUpdated", this.onFileNodeTreeUpdated.bind(this));
-  
+
   this.templateLoader = new TemplateLoader(this);
   this.activeProject = this.fileSystem.root;
   this.fileOperations = new FileOperations();

@@ -277,6 +277,20 @@
           <button class="btn btn-primary">Rename</button>
         </div>
       </div>
+      
+      <!-- Modal Error message -->
+      <div id="ErrorMessageModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="error-dialog-title">Error title</h3>
+        </div>
+        <div class="modal-body">
+          <p id="error-dialog-message">Error message</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary">OK</button>
+        </div>
+      </div>
     </div>
 
     <div>
@@ -313,6 +327,9 @@
         <div id="editor-placeholder-string">No file selected</div>
       </div>
     </div>
+  </div>
+  <div id="syncfs-modal" hidden>
+    <div class="syncfs-label">SyncFS initializing...</div>
   </div>
 </body>
 </html>

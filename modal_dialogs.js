@@ -26,11 +26,11 @@ ModalDialogsController.prototype = {
       $('#new-project-name').val('');
       $('#new-project-name').focus();
     })
-
+    $('#new-project-name').keypress(this.onAddProjectModalKeyPress.bind(this));
+    $('#AddProjectModal .btn-primary').click(this.onAddProjectModalClicked.bind(this));
 
     // Import project modal configuration.
     $('#ImportProjectModal').on('show', function () {
-
       var templateMenu = document.getElementById('templateProject');
       templateMenu.innerHTML = '';
       spark.htmlfs.root.getDirectory('/.templates', {}, function(templates) {
@@ -49,6 +49,7 @@ ModalDialogsController.prototype = {
 
       spark.modalShown = true;
     });
+    $('#ImportProjectModal .btn-primary').click(this.onImportProjectModalClicked.bind(this));
 
     // Add Git project modal configuration.
     $('#AddGitProjectModal').on('show', function () {
@@ -62,6 +63,8 @@ ModalDialogsController.prototype = {
       $('#new-git-project-name').val('');
       $('#new-git-project-name').focus();
     })
+    $('#new-git-project-name').keypress(this.onAddGitProjectModalKeyPress.bind(this));
+    $('#AddGitProjectModal .btn-primary').click(this.onAddGitProjectModalClicked.bind(this));
 
     // Pull Model configuration.
     $('#GitPullModal').on('show', function () {
@@ -98,6 +101,7 @@ ModalDialogsController.prototype = {
       spark.modalShown = false;
       $('#git-email').blur();
     });
+    $('#GitCommitModal .btn-primary').click(this.onGitCommitClicked.bind(this));
 
     // Git Branch Model configuration.
     $('#GitBranchModal').on('show', function () {
@@ -108,6 +112,7 @@ ModalDialogsController.prototype = {
       $('#new-branch-name').blur();
       $('#new-branch-name').val('');
     });
+    $('#GitBranchModal .btn-primary').click(this.onGitBranchClicked.bind(this));
 
     // Git Checkout Model configuration.
     $('#GitCheckoutModal').on('show', function () {
@@ -130,13 +135,14 @@ ModalDialogsController.prototype = {
       GitApi.getCurrentBranch({dir: dir}, function(branch) {
         console.log(branch);
         $('#currentBranch').val(branch);
+      });
     });
-    });
-
     $('#GitCheckoutModal').on('hide', function () {
       spark.modalShown = false;
     });
+    $('#GitCheckoutModal .btn-primary').click(this.onGitCheckoutClicked.bind(this));
 
+    // Add File Modal configuration
     $('#AddFileModal').on('show', function () {
       spark.modalShown = true;
     });
@@ -148,6 +154,10 @@ ModalDialogsController.prototype = {
       $('#new-file-name').val('');
       $('#new-file-name').focus();
     })
+    $('#new-file-name').keypress(this.onAddFileModalKeyPress.bind(this));
+    $('#AddFileModal .btn-primary').click(this.onAddFileModalClicked.bind(this));
+    
+    // Remove File Modal configuration
     $('#RemoveFilesModal').on('show', function () {
       var selection = spark.filesListViewController.selection();
 
@@ -171,6 +181,9 @@ ModalDialogsController.prototype = {
     $('#RemoveFilesModal').on('shown', function () {
       spark.modalShown = true;
     })
+    $('#RemoveFilesModal .btn-primary').click(spark.onConfirmDeletion.bind(spark));
+    
+    // Rename File Modal configuration
     $('#RenameFilesModal').on('show', function () {
       spark.modalShown = true;
       spark.renameFilesModalShown = true;
@@ -183,22 +196,20 @@ ModalDialogsController.prototype = {
     $('#RenameFilesModal').on('shown', function () {
       $('#rename-file-name').focus();
     })
-
-    $('#new-file-name').keypress(this.onAddFileModalKeyPress.bind(this));
-    $('#new-project-name').keypress(this.onAddProjectModalKeyPress.bind(this));
-    $('#new-git-project-name').keypress(this.onAddGitProjectModalKeyPress.bind(this));
     $('#rename-file-name').keypress(this.onRenameFileModalKeyPress.bind(this));
     $('#RemoveFilesModal').keydown(this.modalDeleteDialogkeyDown.bind(this));
-    $('#AddFileModal .btn-primary').click(this.onAddFileModalClicked.bind(this));
-    $('#AddProjectModal .btn-primary').click(this.onAddProjectModalClicked.bind(this));
-    $('#AddGitProjectModal .btn-primary').click(this.onAddGitProjectModalClicked.bind(this));
-    $('#ImportProjectModal .btn-primary').click(this.onImportProjectModalClicked.bind(this));
-    $('#GitCommitModal .btn-primary').click(this.onGitCommitClicked.bind(this));
-    $('#GitBranchModal .btn-primary').click(this.onGitBranchClicked.bind(this));
-    $('#GitCheckoutModal .btn-primary').click(this.onGitCheckoutClicked.bind(this));
-
-    $('#RemoveFilesModal .btn-primary').click(spark.onConfirmDeletion.bind(spark));
     $('#RenameFilesModal .btn-primary').click(spark.onConfirmRename.bind(spark));
+    
+    // Error modal configuration
+    $('#ErrorMessageModal').on('show', function () {
+      spark.modalShown = true;
+    });
+    $('#ErrorMessageModal').on('hide', function () {
+      spark.modalShown = false;
+    });
+    $('#ErrorMessageModal .btn-primary').click(function() {
+      $('#ErrorMessageModal').modal('hide');
+    });
   },
 
   // Button actions.
@@ -260,7 +271,7 @@ ModalDialogsController.prototype = {
       this.spark.selectProject(projectName);
       this.spark.writePrefs();
     };
-    this.spark.createProject(projectName, 'empty',
+    this.spark.createProject(projectName, null,
         createProjectCb.bind(this));
   },
 
@@ -361,5 +372,11 @@ ModalDialogsController.prototype = {
     console.log(pushMessage);
     pushMessage.innerHTML = 'pushing to repo....';
     this.spark.gitClient.push(gitPushCb);
+  },
+  
+  showErrorMessage: function(title, message) {
+    $('#error-dialog-title').text(title);
+    $('#error-dialog-message').text(message);
+    $('#ErrorMessageModal').modal('show');
   },
 }
