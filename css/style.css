@@ -252,7 +252,7 @@ body {
   top: 4px;
   width: 16px;
   height: 16px;
-  content: url(img/check.png);
+  content: url(../img/check.png);
 }
 
 #new-project-name {
