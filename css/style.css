@@ -376,3 +376,21 @@ body {
   margin-top: 100px;
   color: #888;
 }
+
+#AddGitProjectModalProgressContainer {
+  padding: 20px;
+}
+
+#AddGitProjectModalProgressLabel {
+  
+}
+
+#AddGitProjectModalProgress {
+  border: 1px solid #ddd;
+}
+
+#AddGitProjectModalProgressBarValue {
+  transition: width 250ms;
+  height: 30px;
+  background: #ccf;
+}

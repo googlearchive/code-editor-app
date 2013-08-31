@@ -58,6 +58,10 @@ ModalDialogsController.prototype = {
     $('#AddGitProjectModal').on('hide', function () {
       spark.modalShown = false;
       $('#new-git-project-name').blur();
+      $('#AddGitProjectModalProgressContainer').attr('hidden', 'true');
+      $('#AddGitProjectModalProgressBarValue').width('0px');
+      $('#AddGitProjectModal input').removeAttr('disabled');
+      $('#AddGitProjectModal .btn-primary').removeAttr('disabled');
     });
     $('#AddGitProjectModal').on('shown', function () {
       $('#new-git-project-name').val('');
@@ -292,7 +296,6 @@ ModalDialogsController.prototype = {
   },
 
   onAddGitProjectModalClicked: function(e) {
-    $('#AddGitProjectModal').modal('hide')
     var projectName = $('#new-git-project-name').val();
     var username = $('#git-username').val();
     var password = $('#git-password').val();

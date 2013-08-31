@@ -243,6 +243,13 @@ Spark.prototype.createProject = function(project_name, source, callback) {
     this.selectProject(project_name);
     console.log('source: ' + source);
     if (source != null) {
+      // Disable part of the dialog.
+      $('#AddGitProjectModal input').attr('disabled', 'true');
+      $('#AddGitProjectModal .btn-primary').attr('disabled', 'true');
+      // Reinit and show progress.
+      $('#AddGitProjectModalProgressBarValue').width('0px');
+      $('#AddGitProjectModalProgressContainer').removeAttr('hidden');
+      
       if ((source.indexOf('https://github.com/') == 0) && (source.indexOf('.git', source.length - 4) == -1)) {
         source += '.git';
       }
@@ -252,7 +259,7 @@ Spark.prototype.createProject = function(project_name, source, callback) {
         url: source,
         depth: 1,
         progress: function(info) {
-          this.updateGitCloneProgress();
+          this.updateGitCloneProgress(info);
         }.bind(this)
       };
       GitApi.clone(options, function() {
@@ -274,7 +281,7 @@ Spark.prototype.createProject = function(project_name, source, callback) {
 
 
 Spark.prototype.updateGitCloneProgress = function(option) {
-  
+  $('#AddGitProjectModalProgressBarValue').width(Math.floor(option.pct) + '%');
 }
 
 Spark.prototype.downloadChromeSamples = function() {
