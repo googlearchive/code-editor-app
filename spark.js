@@ -270,7 +270,11 @@ Spark.prototype.createProject = function(project_name, source, callback) {
           $('#AddGitProjectModal').modal('hide')
         };
         spark.fileOperations.copyDirectory(directory.entry, fileEntryMap['/'], cb);
-      });
+      }, function(error) {
+        $('#AddGitProjectModal').modal('hide')
+        console.log(error);
+        this.modalDialogsController.showErrorMessage('Could not clone repository', 'The repository could not be cloned. Please check that the URL of the repository if correct, you authentication information or your internet connection.');
+      }.bind(this));
     } else {
       spark.templateLoader.loadTemplate('hello-world', templateLoadCb.bind(this));
     }
