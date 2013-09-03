@@ -350,7 +350,8 @@ Spark.prototype.onSyncFileSystemOpened = function(fs) {
     if (tries) {
       tries--;
       console.log('Retrying (' + tries + ').');
-      chrome.syncFileSystem.requestFileSystem(spark.onSyncFileSystemOpened.bind(tries, this));
+      chrome.syncFileSystem.requestFileSystem(
+          spark.onSyncFileSystemOpened.bind(this));
       return;
     }
     else {
