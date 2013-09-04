@@ -130,8 +130,8 @@ SparkWindow.prototype = {
     };
     var activeProject = spark.getActiveProject();
     console.log(activeProject.entry);
-    chrome.developerPrivate.loadDirectory(
-        activeProject.entry, exportFolderCb.bind(spark));
+    chrome.developerPrivate.exportSyncfsFolderToLocalfs(
+        spark.ActiveProjectName, exportFolderCb.bind(spark));
   },
 
   runDirectory: function(directory, callback) {

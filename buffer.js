@@ -161,8 +161,8 @@ Buffer.prototype.save = function() {
       fileWriter.write(blob);
       fileWriter.onwriteend = function(e) {
         buffer.isDirty = false;
-        chrome.developerPrivate.loadDirectory(
-            buffer.spark.getActiveProject().entry,
+        chrome.developerPrivate.exportSyncfsFolderToLocalfs(
+            buffer.spark.ActiveProjectName,
             function(){});
       }
     };
