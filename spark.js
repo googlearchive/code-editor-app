@@ -205,31 +205,35 @@ Spark.prototype.exportProject = function(fileEntry) {
     }, errorHandler);
   }
 
-  var entries = this.getActiveProject().children;
-  var pendingWrites = Object.keys(entries).length;
+  var pendingWrites = 0;
   var zipEntry = function(entry) {
-    if (entry.isFile) {
-      entry.file(function(file) {
+    console.log(entry);
+    console.log('is file: ' + (!entry.isDirectory));
+    if (!entry.isDirectory) {
+      pendingWrites ++;
+      console.log('add file');
+      entry.entry.file(function(file) {
         var fileReader = new FileReader();
         fileReader.onload = function(e) {
-          zip.file(entry.name, e.target.result, { binary: true });
+          zip.file(entry.entry.fullPath, e.target.result, { binary: true });
           pendingWrites--;
           if (!pendingWrites)
-          writeZipFile();
+            writeZipFile();
         };
         fileReader.onerror = function(e) {
           console.log("Error while zipping: " + e.toString());
         };
         fileReader.readAsBinaryString(file);
       }, errorHandler);
-    } else {
-      // TODO(grv): handle directories
+    } else if (entry.children != null) {
+      var items = Object.keys(entry.children);
+      items.forEach(function (key, i) {
+        zipEntry(entry.children[key]);
+      });
     }
   };
 
-  for (var key in entries) {
-    zipEntry(entries[key].entry);
-  }
+  zipEntry(this.getActiveProject());
 };
 
 Spark.prototype.createProject = function(project_name, source, callback) {
