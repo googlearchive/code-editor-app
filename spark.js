@@ -302,6 +302,7 @@ Spark.prototype.downloadChromeSamples = function() {
     };
   }
 
+
   window.requestFileSystem(window.PERSISTENT, 5*1024*1024*1024, function(fs) {
     spark.htmlfs = fs;
     fs.root.getDirectory('/.templates', {create:false}, function(templates) {
@@ -317,6 +318,8 @@ Spark.prototype.downloadChromeSamples = function() {
 
         console.log('Downloading chrome app samples from ' + repoUrl);
 
+        // Disable downlaading of samples for now.
+        return;
         GitApi.clone(options, function() {
           callback(templates);
           console.log('downloaded chrome app samples.');
