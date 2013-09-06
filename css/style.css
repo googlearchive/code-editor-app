@@ -289,7 +289,8 @@ body {
   height: 22px;
 }
 
-#run-button {
+#run-button,
+#publish-button {
   background-color: #4d90fe;
   background-image: none;
   border-radius: 2px;
@@ -377,19 +378,23 @@ body {
   color: #888;
 }
 
-#AddGitProjectModalProgressContainer {
+#AddGitProjectModalProgressContainer,
+#PublishModalProgressContainer{
   padding: 20px;
 }
 
-#AddGitProjectModalProgressLabel {
-  
+#AddGitProjectModalProgressLabel,
+#PublishModalProgressLabel {
+
 }
 
-#AddGitProjectModalProgress {
+#AddGitProjectModalProgress,
+#PublishModalProgress {
   border: 1px solid #ddd;
 }
 
-#AddGitProjectModalProgressBarValue {
+#AddGitProjectModalProgressBarValue,
+#PublishModalProgressBarValue {
   transition: width 250ms;
   height: 30px;
   background: #ccf;

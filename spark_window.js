@@ -17,6 +17,7 @@ function SparkWindow(spark) {
   $("#run-button").click(this.handleRunButton.bind(this));
   $("#export-button").click(this.handleExportButton.bind(this));
   $("#import-button").click(this.handleImportButton.bind(this));
+  $("#publish-button").click(this.handlePublishButton.bind(this));
   $(".tt").tooltip({ 'placement': 'bottom' });
 
 };
@@ -41,7 +42,7 @@ SparkWindow.prototype = {
     $("#files-listview").width(fileTreePaneWidth - 5);
     $("#editor-pane").css('left', fileTreePaneWidth + 'px');
     $("#editor-placeholder").css('left', fileTreePaneWidth + 'px');
-    
+
     $("#editor-pane").width(editorPaneWidth);
     $("#editor-pane").height(mainViewHeight);
     $("#file-tree").height(mainViewHeight);
@@ -178,6 +179,38 @@ SparkWindow.prototype = {
     e.preventDefault();
     var spark = this.spark;
     $('#ImportProjectModal').modal('show');
+  },
+  handlePublishButton: function(e) {
+    e.preventDefault();
+    var spark = this.spark;
+    $('#PublishModal').modal('show');
+      $('#PublishModalProgressBarValue').width('0px');
+      $('#PublishModalProgressBarValue').show();
+      $('#PublishModalProgressContainer').removeAttr('hidden');
+      $('#PublishModalProgressContainer').show();
+        $('#CWSAppPublish').hide();
+    this.fakeUpload();
+  },
+  fakeUpload: function() {
+    var progress = 0;
+    var publishProgress = function() {
+      progress += Math.floor((Math.random() * 35) + 1);
+      if (progress > 100)
+        progress = 100;
+      $('#PublishModalProgressBarValue').width(progress + '%');
+      if (progress < 100) {
+        setTimeout(publishProgress, 300);
+        console.log(progress);
+      } else {
+        $('#PublishModalProgressBarValue').hide();
+        $('#PublishModalProgressContainer').hide();
+        var link = 'https://chrome.google.com/webstore/a/google.com/detail/todo-list/bapfgdaapcibkddlfdpbemdabhoepllh?authuser=1';
+        $('#WebstoreAppLink').attr('href', link);
+        $('#CWSAppPublish').show();
+      }
+    };
+
+    setTimeout(publishProgress, 300);
   },
 };
 

@@ -81,6 +81,8 @@
         title="Imports project from system or sample apps.">Import</button>
         <button id="export-button" class="btn tt"
         title="Exports the entire project as a zip file.">Export</button>
+        <button id="publish-button" class="btn btn-primary tt"
+        title="Publish the app to the webstore.">Publish </button>
       </div>
     </div>
     
@@ -253,7 +255,27 @@
           <button class="btn btn-primary">Add</button>
         </div>
       </div>
-      
+
+      <!-- Modal Publish -->
+      <div id="PublishModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+          <h3 id="myModalLabel">Publish to CWS</h3>
+        </div>
+        <div class="modal-body">
+        <div id="PublishModalProgressContainer">
+          <div id="PublishModalProgressLabel">Publishing to Webstore.</div>
+          <div id="PublishModalProgress">
+            <div id="PublishModalProgressBarValue">
+            </div>
+          </div>
+        </div>
+        <div id="CWSAppPublish" hidden> Published to Chrome Webstore.
+          <a id="WebstoreAppLink" target="_blank">open app in webstore.</a>  
+        </div>
+      </div>
+
+
       <!-- Modal Remove Files -->
       <div id="RemoveFilesModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-header">
