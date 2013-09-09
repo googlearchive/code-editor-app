@@ -316,10 +316,11 @@ Spark.prototype.downloadChromeSamples = function() {
           depth: 1
         };
 
-        console.log('Downloading chrome app samples from ' + repoUrl);
-
         // Disable downlaading of samples for now.
         return;
+
+        console.log('Downloading chrome app samples from ' + repoUrl);
+
         GitApi.clone(options, function() {
           callback(templates);
           console.log('downloaded chrome app samples.');
