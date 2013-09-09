@@ -80,6 +80,8 @@ ModalDialogsController.prototype = {
       spark.modalShown = false;
     });
 
+    $('#GitPullModal .btn-primary').click(this.onGitPullClicked.bind(this));
+
     // Push Model configuration.
     $('#GitPushModal').on('show', function () {
       spark.modalShown = true;
@@ -90,6 +92,8 @@ ModalDialogsController.prototype = {
       spark.modalShown = false;
       //$('#new-git-project-name').blur();
     });
+
+    $('#GitPushModal .btn-primary').click(this.onGitPushClicked.bind(this));
 
     // Git Commit Model configuration.
     $('#GitCommitModal').on('show', function () {
@@ -321,6 +325,10 @@ ModalDialogsController.prototype = {
     this.spark.gitClient.pull(gitPullCb);
   },
 
+  onGitPullClicked: function() {
+    $('#GitPullModal').modal('hide');
+  },
+
   onGitBranchClicked: function() {
     var branchName = $('#new-branch-name').val();
     var gitBranchCb = function() {
@@ -362,6 +370,10 @@ ModalDialogsController.prototype = {
       commitMsg : commitMessage
     };
     this.spark.gitClient.commit(options,gitCommitCb);
+  },
+
+  onGitPushClicked: function() {
+    $('#GitPushModal').modal('hide');
   },
 
   onGitPush: function() {
