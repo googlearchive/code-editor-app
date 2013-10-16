@@ -625,17 +625,26 @@ Spark.prototype.loadPrefsFile = function(callback) {
 
 Spark.prototype.writePrefs = function() {
   var spark = this;
-  this.prefsEntry.createWriter(function(writer) {
-    writer.truncate(0);
-    writer.onwriteend = function() {
-      var blob = new Blob([spark.ActiveProjectName]);
-      var size = spark.ActiveProjectName.length;
-      writer.write(blob);
+  try {
+    var checkIfPrefsExists = function(entry) {
+     spark.prefsEntry = entry;
+     entry.file(function(file) {
+       var reader = new FileReader();
+       reader.readAsText(file, 'utf-8');
+      });
+    };
+    checkIfPrefsExists(); 
+  } catch FileError.NOT_FOUND_ERR {
+    this.prefsEntry.createWriter(function(writer) {
+      writer.truncate(0);
       writer.onwriteend = function() {
+        var blob = new Blob([spark.ActiveProjectName]);
+        var size = spark.ActiveProjectName.length;
+        writer.write(blob);
         console.log('prefs file write complete.');
       };
-    };
-  });
+    });
+  };
 };
 
 Spark.prototype.onSyncFileSystemOpened = function(fs) {
