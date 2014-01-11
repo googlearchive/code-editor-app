@@ -319,6 +319,7 @@ body {
   padding-top: 20px;
   padding-bottom: 10px;
   overflow: scroll;
+  overflow-y: scroll;
 }
 
 .dropdown-menu li {
